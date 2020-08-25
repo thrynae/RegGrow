@@ -1,0 +1,477 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>RegGrow</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-08-25"><meta name="DC.source" content="RegGrow.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>RegGrow</h1><!--introduction--><p>Region growing algorithm (supports 2D, 3D, and ND).</p><p>In each iteration, look at all voxels in the N-neighborhood of the already segmented region. From those voxels, add those that are within maxDiff of the mean of the region. Keep repeating the loop until no more pixels are added.</p><p>The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND) As an alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix with the same number of dimensions as the input image.</p><p>This is slower than a mex implementation would be, but this should be compatible with any release and will return the same result on any release (including GNU Octave). <a href="/html">/html</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Output arguments</a></li><li><a href="#3">Input arguments</a></li><li><a href="#4">Name,Value pairs</a></li><li><a href="#5">Example: Segment the background</a></li><li><a href="#8">Example: Detect segmentation leak</a></li><li><a href="#10">Compatibility, version info, and licence</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">result = RegGrow(I)
+result = RegGrow(I,maxDiff)
+result = RegGrow(I,maxDiff,seed)
+result = RegGrow(___,Name,Value)
+result = RegGrow(___,options)
+[result,OverflowFlag]=RegGrow(___)
+</pre><p>Note: running without inputs runs on an example image.</p><h2 id="2">Output arguments</h2><p>
+<table border=1>
+<tr><td>
+result
+</td><td>
+The result of the region growing. This will be a logical array of the same size as the input image.
+</td></tr>
+<tr><td>
+OverflowFlag
+</td><td>
+A flag in case of overflow. See below for how to enable checking for an overflow. Normally this output should be false.
+</td></tr>
+</table>
+</p><h2 id="3">Input arguments</h2><p>
+<table border=1>
+<tr><td>
+I
+</td><td>
+The image to use, which can be any data type that can be converted to a double.
+</td></tr>
+<tr><td>
+maxDiff
+</td><td>
+The maximum difference between the mean of the currently segmented pixels and candidate pixels that will be added. All candidate pixels are tested at the same time. This value is treated as an absolute value. If omitted, the default value is 2/3*std(I(:)).
+<br>This parameter must be a scalar double, or be convertable to one.
+</td></tr>
+<tr><td>
+seed
+</td><td>
+The initial starting point of the algorithm. If omitted, the default value is the first pixel (linear index 1).
+</td></tr>
+<tr><td>
+Name,Value
+</td><td>
+In addition to the previous parameters, the settings below can be entered with a Name,Value syntax. The parameter names are not case-sensitive.
+</td></tr>
+<tr><td>
+options
+</td><td>
+Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set to the default values. Field names are not case-sensitive.
+</td></tr>
+</table>
+</p><h2 id="4">Name,Value pairs</h2><p>
+<table border=1>
+<tr><td>
+nHood
+</td><td>
+The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for 2D images and 6-neighborhood for 3D images).
+<br>This setting is ignored if the kernel input is provided.
+</td></tr>
+<tr><td>
+kernel
+</td><td>
+The kernel input allows more flexibility in the direction of growth. This parameter must be a logical array or be convertible to one. Each dimension must have an odd length. The center pixel is set to true.
+<br>Note that is parameter describes the direction of growth and is therefore dissimilar to a convolution kernel (i.e. it is flipped along all directions).
+</td></tr>
+<tr><td>
+overflow
+</td><td>
+This parameter allows the detection of a segmentation leak. This allows the process to exit before it is complete if too many pixels are being segmented. A leak can cause the segmentation to take a very long time to complete, especially for 3D images.
+<br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels), the second output is set to true and the function halts. No error or warning is triggered.
+</td></tr>
+<tr><td>
+waitbar
+</td><td>
+Use a waitbar to show the progress of the region growing. The maximum value is either the overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does provide a visual indication of progress. The default is false for 2D input and true for higher dimensional input.
+</td></tr>
+<tr><td>
+silent
+</td><td>
+This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is provided to improve code readability.
+</td></tr>
+</table>
+</p><h2 id="5">Example: Segment the background</h2><p>The default example image is taken from the image generated by the image function. For the full back story, see <a href="https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/">this blog post</a>. In GNU Octave this image is not available and it is replaced by a logo image. The example setup will still work as intended.</p><pre class="codeinput"><span class="comment">% Generate an image.</span>
+<span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>)
+    IM = get(0,<span class="string">'DefaultImageCData'</span>);IM = IM/max(IM(:));
+<span class="keyword">else</span>
+    defimage = pow2(get(0,<span class="string">'DefaultImageCData'</span>),47);
+    IM = bitshift(defimage,-37);IM = fix(IM);
+    IM = bitand(IM,31);IM = IM/max(IM(:));
+<span class="keyword">end</span>
+
+<span class="comment">% Call RegGrow without input to segment the background in the example image.</span>
+mask=RegGrow;
+
+<span class="comment">%fuse image and mask</span>
+r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
+subplot(1,2,1),imshow(IM),title(<span class="string">'original example image'</span>)
+subplot(1,2,2),imshow(fused),title(<span class="string">'segmented background'</span>)
+</pre><p><img vspace="5" hspace="5" src="RegGrow_show_default.png" alt=""> </p><h2 id="8">Example: Detect segmentation leak</h2><pre class="codeinput">opts=struct;
+opts.seed=[24 30];
+opts.maxDiff=0.15;
+
+tic,r{1}=RegGrow(IM,opts);t1=toc;
+
+opts.overflow=100;
+tic,r{2}=RegGrow(IM,opts);t2=toc;
+
+opts.overflow=[];opts.maxDiff=0.1;
+tic,r{3}=RegGrow(IM,opts);t3=toc;
+
+IM_=cell(1,3);
+<span class="keyword">for</span> n=1:3
+    <span class="comment">%fuse image and mask</span>
+    r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
+    IM_{n}=fused;
+<span class="keyword">end</span>
+
+subplot(2,2,1),imshow(IM),title({<span class="string">'original example image'</span>,<span class="string">'( * = seed)'</span>})
+hold <span class="string">on</span>,plot(opts.seed(2),opts.seed(1),<span class="string">'y*'</span>),hold <span class="string">off</span>
+subplot(2,2,2),imshow(IM_{1})
+title({<span class="string">'leaked segmentation'</span>,sprintf(<span class="string">'(t=%.1fms)'</span>,1000*t1)})
+subplot(2,2,3),imshow(IM_{2})
+title({<span class="string">'with leak detection'</span>,sprintf(<span class="string">'(t=%.1fms)'</span>,1000*t2)})
+subplot(2,2,4),imshow(IM_{3})
+title({sprintf(<span class="string">'better maxDiff: %.2f'</span>,opts.maxDiff),sprintf(<span class="string">'(t=%.1fms)'</span>,1000*t3)})
+</pre><p><img vspace="5" hspace="5" src="RegGrow_show_leak_detection.png" alt=""> </p><h2 id="10">Compatibility, version info, and licence</h2><p>
+<table>
+<tr>
+<td> Compatibility </td>
+<td style="border:2px solid black;"> Windows 10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> ML R2020a </td>
+<td> works </td>
+<td> not tested </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> ML R2018a </td>
+<td> works </td>
+<td> works </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> ML R2015a </td>
+<td> works </td>
+<td> works </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> ML R2011a </td>
+<td> works </td>
+<td> works </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> ML 6.5 (R13) </td>
+<td> works </td>
+<td> not tested </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 5.2.0 </td>
+<td> works </td>
+<td> works </td>
+<td> not tested </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 4.4.1 </td>
+<td> works </td>
+<td> not tested </td>
+<td> works </td>
+</tr>
+</table>
+</p><pre>Version: 1.1
+Date:    2020-07-06
+Author:  H.J. Wisselink
+Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
+Email = 'h_j_wisselink*alumnus_utwente_nl';
+Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% RegGrow
+% Region growing algorithm (supports 2D, 3D, and ND).
+%
+% In each iteration, look at all voxels in the N-neighborhood of the already segmented region. From
+% those voxels, add those that are within maxDiff of the mean of the region. Keep repeating the
+% loop until no more pixels are added.
+%
+% The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND)
+% As an alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix
+% with the same number of dimensions as the input image.
+%
+% This is slower than a mex implementation would be, but this should be compatible with any release
+% and will return the same result on any release (including GNU Octave).
+% </html>
+
+%% Syntax
+%
+%   result = RegGrow(I)
+%   result = RegGrow(I,maxDiff)
+%   result = RegGrow(I,maxDiff,seed)
+%   result = RegGrow(___,Name,Value)
+%   result = RegGrow(___,options)
+%   [result,OverflowFlag]=RegGrow(___)
+%
+% Note: running without inputs runs on an example image.
+
+%% Output arguments
+%
+% <html>
+% <table border=1>
+% <tr><td>
+% result
+% </td><td>
+% The result of the region growing. This will be a logical array of the same size as the input image.
+% </td></tr>
+% <tr><td>
+% OverflowFlag
+% </td><td>
+% A flag in case of overflow. See below for how to enable checking for an overflow. Normally this output should be false.
+% </td></tr>
+% </table>
+% </html>
+
+%% Input arguments
+%
+% <html>
+% <table border=1>
+% <tr><td>
+% I
+% </td><td>
+% The image to use, which can be any data type that can be converted to a double.
+% </td></tr>
+% <tr><td>
+% maxDiff
+% </td><td>
+% The maximum difference between the mean of the currently segmented pixels and candidate pixels that will be added. All candidate pixels are tested at the same time. This value is treated as an absolute value. If omitted, the default value is 2/3*std(I(:)).
+% <br>This parameter must be a scalar double, or be convertable to one.
+% </td></tr>
+% <tr><td>
+% seed
+% </td><td>
+% The initial starting point of the algorithm. If omitted, the default value is the first pixel (linear index 1).
+% </td></tr>
+% <tr><td>
+% Name,Value
+% </td><td>
+% In addition to the previous parameters, the settings below can be entered with a Name,Value syntax. The parameter names are not case-sensitive.
+% </td></tr>
+% <tr><td>
+% options
+% </td><td>
+% Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set to the default values. Field names are not case-sensitive.
+% </td></tr>
+% </table>
+% </html>
+
+%% Name,Value pairs
+%
+% <html>
+% <table border=1>
+% <tr><td>
+% nHood
+% </td><td>
+% The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for 2D images and 6-neighborhood for 3D images).
+% <br>This setting is ignored if the kernel input is provided.
+% </td></tr>
+% <tr><td>
+% kernel
+% </td><td>
+% The kernel input allows more flexibility in the direction of growth. This parameter must be a logical array or be convertible to one. Each dimension must have an odd length. The center pixel is set to true.
+% <br>Note that is parameter describes the direction of growth and is therefore dissimilar to a convolution kernel (i.e. it is flipped along all directions).
+% </td></tr>
+% <tr><td>
+% overflow
+% </td><td>
+% This parameter allows the detection of a segmentation leak. This allows the process to exit before it is complete if too many pixels are being segmented. A leak can cause the segmentation to take a very long time to complete, especially for 3D images.
+% <br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels), the second output is set to true and the function halts. No error or warning is triggered.
+% </td></tr>
+% <tr><td>
+% waitbar
+% </td><td>
+% Use a waitbar to show the progress of the region growing. The maximum value is either the overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does provide a visual indication of progress. The default is false for 2D input and true for higher dimensional input.
+% </td></tr>
+% <tr><td>
+% silent
+% </td><td>
+% This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is provided to improve code readability.
+% </td></tr>
+% </table>
+% </html>
+
+%% Example: Segment the background
+%
+% The default example image is taken from the image generated by the image function. For the full back story, see <https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/ this blog post>.
+% In GNU Octave this image is not available and it is replaced by a logo image. The example setup will still work as intended.
+%%
+
+% Generate an image.
+if exist('OCTAVE_VERSION', 'builtin')
+    IM = get(0,'DefaultImageCData');IM = IM/max(IM(:));
+else
+    defimage = pow2(get(0,'DefaultImageCData'),47);
+    IM = bitshift(defimage,-37);IM = fix(IM);
+    IM = bitand(IM,31);IM = IM/max(IM(:));
+end
+
+% Call RegGrow without input to segment the background in the example image.
+mask=RegGrow;
+
+%fuse image and mask
+r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
+subplot(1,2,1),imshow(IM),title('original example image')
+subplot(1,2,2),imshow(fused),title('segmented background')
+%%
+% <<RegGrow_show_default.png>>
+%% Example: Detect segmentation leak
+opts=struct;
+opts.seed=[24 30];
+opts.maxDiff=0.15;
+
+tic,r{1}=RegGrow(IM,opts);t1=toc;
+
+opts.overflow=100;
+tic,r{2}=RegGrow(IM,opts);t2=toc;
+
+opts.overflow=[];opts.maxDiff=0.1;
+tic,r{3}=RegGrow(IM,opts);t3=toc;
+
+IM_=cell(1,3);
+for n=1:3
+    %fuse image and mask    
+    r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
+    IM_{n}=fused;
+end
+
+subplot(2,2,1),imshow(IM),title({'original example image','( * = seed)'})
+hold on,plot(opts.seed(2),opts.seed(1),'y*'),hold off
+subplot(2,2,2),imshow(IM_{1})
+title({'leaked segmentation',sprintf('(t=%.1fms)',1000*t1)})
+subplot(2,2,3),imshow(IM_{2})
+title({'with leak detection',sprintf('(t=%.1fms)',1000*t2)})
+subplot(2,2,4),imshow(IM_{3})
+title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3)})
+%%
+% <<RegGrow_show_leak_detection.png>>
+
+%% Compatibility, version info, and licence
+% <html>
+% <table>
+% <tr>
+% <td> Compatibility </td>
+% <td style="border:2px solid black;"> Windows 10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> ML R2020a </td>
+% <td> works </td>
+% <td> not tested </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> ML R2018a </td>
+% <td> works </td>
+% <td> works </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> ML R2015a </td>
+% <td> works </td>
+% <td> works </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> ML R2011a </td>
+% <td> works </td>
+% <td> works </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> ML 6.5 (R13) </td>
+% <td> works </td>
+% <td> not tested </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 5.2.0 </td>
+% <td> works </td>
+% <td> works </td>
+% <td> not tested </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 4.4.1 </td>
+% <td> works </td>
+% <td> not tested </td>
+% <td> works </td>
+% </tr>
+% </table>
+% </html>
+%
+%  Version: 1.1
+%  Date:    2020-07-06
+%  Author:  H.J. Wisselink
+%  Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
+%  Email = 'h_j_wisselink*alumnus_utwente_nl';
+%  Real_email = regexprep(Email,{'*','_'},{'@','.'})
+##### SOURCE END #####
+--></body></html>

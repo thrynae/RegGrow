@@ -35,7 +35,7 @@ function [result,OverflowFlag] = RegGrow(I,maxDiff,seed,varargin)
 %             candidate pixels that will be added. All candidate pixels are tested at the same
 %             time. This value is treated as an absolute value. If omitted, the default value is
 %             2/3*std(I(:)).
-%             This parameter must be a numeric scalar, as determined by the isnumeric function.
+%             This parameter must be a scalar double, or be convertable to one.
 % seed        The initial starting point of the algorithm. If omitted, the default value is the
 %             first pixel (linear index 1).
 % Name,Value  In addition to the previous parameters, the settings below can be entered with a
@@ -47,7 +47,9 @@ function [result,OverflowFlag] = RegGrow(I,maxDiff,seed,varargin)
 %             This setting is ignored if the kernel input is provided.
 % -kernel     The kernel input allows more flexibility in the direction of growth. This parameter
 %             must be a logical array or be convertible to one. Each dimension must have an odd
-%             length. The center pixel is always set to true if false.
+%             length. The center pixel is set to true.
+%             Note that is parameter describes the direction of growth and is therefore dissimilar
+%             to a convolution kernel (i.e. it is flipped along all directions).
 % -overflow   This parameter allows the detection of a segmentation leak. This allows the process
 %             to exit before it is complete if too many pixels are being segmented. A leak can
 %             cause the segmentation to take a very long time to complete, especially for 3D
@@ -74,11 +76,11 @@ function [result,OverflowFlag] = RegGrow(I,maxDiff,seed,varargin)
 % | Octave 4.4.1  |  works      |  not tested      |  works               |
 % """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 %
-% Version: 1.1
-% Date:    2020-07-06
+% Version: 1.1.1
+% Date:    2020-08-25
 % Author:  H.J. Wisselink
-% Licence: CC by-nc-sa 4.0 ( http://creativecommons.org/licenses/by-nc-sa/4.0 )
-% Email=  'h_j_wisselink*alumnus_utwente_nl';
+% Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
+% Email = 'h_j_wisselink*alumnus_utwente_nl';
 % Real_email = regexprep(Email,{'*','_'},{'@','.'})
 
 % Setting the shift array is also possible, but is undocumented and will not be checked when
@@ -276,12 +278,15 @@ for k=1:numel(fn)
                     disp(item(-1))%trigger error
                 end
                 tmp=item;center=(size(tmp)+1)/2;center=num2cell(center);tmp(center{:})=false;
+                item(center{:})=true;%doesn't really affect calculation
                 if sum(tmp(:))==0
                     warning('HJW:RegGrow:CentroidOnlyKernel',...
                         ['Only the centroid of the kernel is marked as true.\n',...
                         'This will cause the result to only contain the seed position.'])
-                    %This is also true is the center voxel is false as well, but to keep the
-                    %message easy to read that point can be omitted.
+                    %Technically this message will trigger regardless of the actual value of the
+                    %centroid. Because the value of the centroid is always set to true, this is a
+                    %distinction without a difference. To keep the message easy to read that point
+                    %is omitted.
                 end
             catch
                 ME.message=['The kernel input must a logical with ndims(IM) dimensions.',...
@@ -290,8 +295,10 @@ for k=1:numel(fn)
             end
             options.kernel=item;
         case 'maxdiff'
-            if ~isnumeric(item) || numel(item)~=1 || item<0 || isnan(item)
-                ME.message='The maxDiff input must be a non-negative numeric scalar.';
+            try item=double(item);catch,end %an error here will trigger an error on the next line
+            if ~isa(item,'double') || numel(item)~=1 || item<0 || isnan(item)
+                ME.message=['The maxDiff input must be a non-negative numeric scalar.',char(10),...
+                    'It must also be convertable to a double.']; %#ok<CHARTEN>
                 return
             end
             options.maxDiff=item;
