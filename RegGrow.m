@@ -35,7 +35,7 @@ function [result,OverflowFlag] = RegGrow(I,maxDiff,seed,varargin)
 %             candidate pixels that will be added. All candidate pixels are tested at the same
 %             time. This value is treated as an absolute value. If omitted, the default value is
 %             2/3*std(I(:)).
-%             This parameter must be a scalar double, or be convertable to one.
+%             This parameter must be a scalar double, or be convertible to one.
 % seed        The initial starting point of the algorithm. If omitted, the default value is the
 %             first pixel (linear index 1).
 % Name,Value  In addition to the previous parameters, the settings below can be entered with a
@@ -64,24 +64,21 @@ function [result,OverflowFlag] = RegGrow(I,maxDiff,seed,varargin)
 % -silent     This is the inverse of the waitbar switch, but it is ignored if wairbar is specified.
 %             It is provided to improve code readability.
 %
-%  _______________________________________________________________________
-% | Compatibility | Windows 10  | Ubuntu 20.04 LTS | MacOS 10.15 Catalina |
-% |---------------|-------------|------------------|----------------------|
-% | ML R2020a     |  works      |  not tested      |  not tested          |
-% | ML R2018a     |  works      |  works           |  not tested          |
-% | ML R2015a     |  works      |  works           |  not tested          |
-% | ML R2011a     |  works      |  works           |  not tested          |
-% | ML 6.5 (R13)  |  works      |  not tested      |  not tested          |
-% | Octave 5.2.0  |  works      |  works           |  not tested          |
-% | Octave 4.4.1  |  works      |  not tested      |  works               |
-% """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%
+%|                                                                         |%
+%|  Version: 1.1.2                                                         |%
+%|  Date:    2021-05-19                                                    |%
+%|  Author:  H.J. Wisselink                                                |%
+%|  Licence: CC by-nc-sa 4.0 ( creativecommons.org/licenses/by-nc-sa/4.0 ) |%
+%|  Email = 'h_j_wisselink*alumnus_utwente_nl';                            |%
+%|  Real_email = regexprep(Email,{'*','_'},{'@','.'})                      |%
+%|                                                                         |%
+%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%
 %
-% Version: 1.1.1
-% Date:    2020-08-25
-% Author:  H.J. Wisselink
-% Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
-% Email = 'h_j_wisselink*alumnus_utwente_nl';
-% Real_email = regexprep(Email,{'*','_'},{'@','.'})
+% Tested on several versions of Matlab (ML 6.5 and onward) and Octave (4.4.1 and onward), and on
+% multiple operating systems (Windows/Ubuntu/MacOS). For the full test matrix, see the HTML doc.
+% Compatibility considerations:
+% - This is expected to work on all releases.
 
 % Setting the shift array is also possible, but is undocumented and will not be checked when
 % parsing the parameters. The shift array will be converted to a kernel.
@@ -105,14 +102,14 @@ end
 
 if wait.bar
     wait.h=waitbar(0,'processing...');
-    wait.count=0;%initialize
+    wait.count=0;%Initialize.
 	n_extra_dots=0;
 end
 
-OverflowFlag=false;%initialize overflow parameter
+OverflowFlag=false;%Initialize overflow parameter.
 result=logical(zeros(size(I))); %#ok<LOGL>
-seed=num2cell(seed);result(seed{:})=true;%pre-allocate the result
-newpoints=true;%initialize to start loop
+seed=num2cell(seed);result(seed{:})=true;%Pre-allocate the result.
+newpoints=true;%Initialize to start loop.
 while newpoints
     if overflow.check
         if sum(result(:))>overflow.volume
@@ -227,10 +224,10 @@ end
 if numel(varargin)>0
     %Now only the Name,Value pairs or the options struct remain.
     if isa(varargin{1},'struct')
-        %I, maxDiff, and seed might already be loaded
+        %I, maxDiff, and seed might already be loaded.
         opts=options;
         options=varargin{1};
-        %merge the two structs
+        %Merge the two structs.
         fn=fieldnames(opts);
         for n=1:numel(fn)
             options.(fn{n})=opts.(fn{n});
@@ -260,12 +257,12 @@ for k=1:numel(fn)
     ME.identifier=['HJW:RegGrow:incorrect_input_opt_' lower(curr_option)];
     switch lower(curr_option)
         %NB: If a new parameter is alphabetically before the image parameter, it can't rely on IM
-        %already being a double, so special attention is necesarry for user-defined classes.
+        %already being a double, so special attention is necessary for user-defined classes.
         case 'i'
             try
                 item=double(item);
             catch
-                ME.message='The image input must be convertable to a double .';
+                ME.message='The image input must be convertible to a double .';
                 return
             end
             options.I=item;
@@ -275,10 +272,10 @@ for k=1:numel(fn)
                 if isfield(options,'I'),IM=options.I;else,IM=default.I;end
                 item=logical(item);
                 if ndims(item)~=ndims(IM) || ~all(mod(size(item),2)==1)
-                    disp(item(-1))%trigger error
+                    disp(item(-1))%Trigger error.
                 end
                 tmp=item;center=(size(tmp)+1)/2;center=num2cell(center);tmp(center{:})=false;
-                item(center{:})=true;%doesn't really affect calculation
+                item(center{:})=true;%The center doesn't really affect calculation.
                 if sum(tmp(:))==0
                     warning('HJW:RegGrow:CentroidOnlyKernel',...
                         ['Only the centroid of the kernel is marked as true.\n',...
@@ -295,15 +292,15 @@ for k=1:numel(fn)
             end
             options.kernel=item;
         case 'maxdiff'
-            try item=double(item);catch,end %an error here will trigger an error on the next line
+            try item=double(item);catch,end %An error here will trigger an error on the next line.
             if ~isa(item,'double') || numel(item)~=1 || item<0 || isnan(item)
                 ME.message=['The maxDiff input must be a non-negative numeric scalar.',char(10),...
-                    'It must also be convertable to a double.']; %#ok<CHARTEN>
+                    'It must also be convertible to a double.']; %#ok<CHARTEN>
                 return
             end
             options.maxDiff=item;
         case 'nhood'
-            %Skip if kernel or shifts is set
+            %Skip if kernel or shifts is set.
             if any(ismember(lower(fn),{'kernel','shifts'}))
                 continue
             end
@@ -316,7 +313,7 @@ for k=1:numel(fn)
             %These tests will not trigger an error if this parameter is set to an empty array.
             try
                 dims=ndims(IM);
-                if ~ismember(item,[3^dims-1 2*dims])%maximal and minimal
+                if ~ismember(item,[3^dims-1 2*dims])%Maximal and minimal.
                     ME.message=msg;
                     return
                 end
@@ -334,31 +331,33 @@ for k=1:numel(fn)
         case 'seed'
             %If the image provided as an input, it is already loaded to the the options struct.
             if isfield(options,'I'),IM=options.I;else,IM=default.I;end
+            msg='The seed must be a vector with a valid position.';
             try
                 if numel(item)~=ndims(IM)
-                    ME.message='The seed must be a vector with a valid position.';
+                    ME.message=msg;
                     return
                 end
                 seed=item(:)';
                 seed_=num2cell(seed);
                 val=IM(seed_{:});%#ok<NASGU>
-                %if this works, than the seed must be a valid vector
+                %If this worked the seed must be a valid vector.
             catch
+                ME.message=msg;
                 return
             end
             ME.message='';
             options.seed=seed;
-        case {'waitbar','silent'} %same parameter, two names
+        case {'waitbar','silent'} %Same parameter, two names.
             [passed,item]=test_if_scalar_logical(item);
             if ~passed
                 ME.message='waitbar must be a logical scalar.';
                 return
             end
-            %invert if 'silent' was entered
+            %Invert if 'silent' was entered.
             if strcmpi(curr_option,'silent'),item= ~item;end
             options.waitbar=item;
         case 'shifts'
-            options.shifts=item;%undocumented, don't do any checks
+            options.shifts=item;%Undocumented, don't do any checks.
         otherwise
             ME.message=sprintf('Name,Value pair not recognized: %s',curr_option);
             ME.identifier='HJW:RegGrow:incorrect_input_NameValue';
@@ -379,9 +378,9 @@ success=true;
 options=RegGrow_check_dynamic_defaults(options);
 end
 function options=RegGrow_check_dynamic_defaults(options)
-%set the dynamic defaults if the options were not set.
+%Set the dynamic defaults if the options were not set.
 if isempty(options.seed)
-    %create a vector of ones
+    %Create a vector of ones.
     s=ones(ndims(options.I),1);
     options.seed=s;
 end
@@ -389,8 +388,8 @@ if isempty(options.maxDiff)
     options.maxDiff=2/3*std(options.I(:));
 end
 
-if ~isempty(options.shifts)%override both kernel and nHood inputs
-    %construct the kernel from the shifts variable
+if ~isempty(options.shifts)%Override both kernel and nHood inputs.
+    %Construct the kernel from the shifts variable.
     shifts=options.shifts;
     sz=max(abs(shifts(:)));
     SE=zeros( (1+2*sz)*ones(1,size(shifts,2)) );
@@ -402,21 +401,21 @@ if ~isempty(options.shifts)%override both kernel and nHood inputs
 end
 if isempty(options.kernel)
     nHood=options.nHood;
-    %set default if missing (minimal connectivity)
+    %Set default if missing (minimal connectivity).
     if isempty(nHood)
         nHood=2*ndims(options.I);
     end
     dims=ndims(options.I);
-    if nHood==(2*dims) %minimal
-        %create a sphere with r=1
+    if nHood==(2*dims) %Minimal
+        %Create a sphere with r=1.
         XYZ=cell(dims,1);
         [XYZ{:}]=ndgrid(-1:1);
         XYZ=cat(dims+1,XYZ{:});
         XYZ=sqrt(sum(XYZ.^2,dims+1));
         SE=XYZ<=1;
-    elseif nHood==(3^dims-1) %maximal
+    elseif nHood==(3^dims-1) %Maximal
         SE=logical(ones(3*ones(1,dims))); %#ok<LOGL>
-        %the doc for conndef describes this as ones(repmat(3,1,NUM_DIMS))
+        %The doc for conndef describes this as ones(repmat(3,1,NUM_DIMS)).
     end
     options.kernel=SE;
 end
@@ -427,41 +426,50 @@ else
     options.overflow=struct('check',true,'volume',val);
 end
 if isempty(options.waitbar)
-    options.waitbar= ndims(options.I)~=2 ; %#ok<ISMAT>
+    options.waitbar= ndims(options.I)>2 ; %#ok<ISMAT>
 end
 options.waitbar=struct('bar',options.waitbar,'max',min(numel(options.I),options.overflow.volume));
 end
-function [passed,item]=test_if_scalar_logical(item)
-%test if the input is a scalar logical or convertable to it
-%(use isLogical to trigger an input error, use val as the parsed input)
+function [isLogical,val]=test_if_scalar_logical(val)
+%Test if the input is a scalar logical or convertible to it.
+%The char and string test are not case sensitive.
+%(use the first output to trigger an input error, use the second as the parsed input)
 %
 % Allowed values:
 %- true or false
 %- 1 or 0
 %- 'on' or 'off'
+%- matlab.lang.OnOffSwitchState.on or matlab.lang.OnOffSwitchState.off
+%- 'enable' or 'disable'
+%- 'enabled' or 'disabled'
 persistent states
 if isempty(states)
     states={true,false;...
         1,0;...
-        'on','off'};
+        'on','off';...
+        'enable','disable';...
+        'enabled','disabled'};
     try
         states(end+1,:)=eval('{"on","off"}');
     catch
     end
 end
-passed=true;
+isLogical=true;
 try
+    if isa(val,'char') || isa(val,'string')
+        try val=lower(val);catch,end
+    end
     for n=1:size(states,1)
         for m=1:2
-            if isequal(item,states{n,m})
-                item=states{1,m};return
+            if isequal(val,states{n,m})
+                val=states{1,m};return
             end
         end
     end
-    if isa(item,'matlab.lang.OnOffSwitchState')
-        item=logical(item);return
+    if isa(val,'matlab.lang.OnOffSwitchState')
+        val=logical(val);return
     end
 catch
 end
-passed=false;
+isLogical=false;
 end

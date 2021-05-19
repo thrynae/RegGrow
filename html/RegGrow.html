@@ -6,8 +6,8 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>RegGrow</title><meta name="generator" content="MATLAB 9.8"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-08-25"><meta name="DC.source" content="RegGrow.m"><style type="text/css">
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+      --><title>RegGrow</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-05-19"><meta name="DC.source" content="RegGrow.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
 html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
@@ -67,13 +67,29 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>RegGrow</h1><!--introduction--><p>Region growing algorithm (supports 2D, 3D, and ND).</p><p>In each iteration, look at all voxels in the N-neighborhood of the already segmented region. From those voxels, add those that are within maxDiff of the mean of the region. Keep repeating the loop until no more pixels are added.</p><p>The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND) As an alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix with the same number of dimensions as the input image.</p><p>This is slower than a mex implementation would be, but this should be compatible with any release and will return the same result on any release (including GNU Octave). <a href="/html">/html</a></p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Syntax</a></li><li><a href="#2">Output arguments</a></li><li><a href="#3">Input arguments</a></li><li><a href="#4">Name,Value pairs</a></li><li><a href="#5">Example: Segment the background</a></li><li><a href="#8">Example: Detect segmentation leak</a></li><li><a href="#10">Compatibility, version info, and licence</a></li></ul></div><h2 id="1">Syntax</h2><pre class="language-matlab">result = RegGrow(I)
+  </style></head><body><div class="content"><h1>RegGrow</h1><!--introduction--><p><tt style="font-size:0%">Formatted documentation for the RegGrow function.</tt>
+<div style="margin-top:-5em;color:grey">Region growing algorithm (supports 2D, 3D, and ND)
+</div>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Syntax</a></li><li><a href="#3">Output arguments</a></li><li><a href="#4">Input arguments</a></li><li><a href="#5">Name,Value pairs</a></li><li><a href="#6">Example: Segment the background</a></li><li><a href="#9">Example: Detect segmentation leak</a></li><li><a href="#11">Compatibility, version info, and licence</a></li><li><a href="#12">Performance</a></li><li><a href="#13">Test suite</a></li></ul></div><h2 id="1">Description</h2><p>
+This is an implementation of a region growing algorithm written entirely in m-code. By using
+<code>convn</code> it has a reasonable performance and supports 2D, 3D, and ND arrays.
+<br> In each iteration, look at all voxels in the N-neighborhood of the already segmented region.
+From those voxels, add those that are within maxDiff of the mean of the region. Keep repeating
+the loop until no more pixels are added.
+<br><br>
+The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND). As an
+alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix with
+the same number of dimensions as the input image.
+<br><br>
+This is slower than a mex implementation would be, but this should be compatible with any release
+and will return the same result on any release (including GNU Octave).
+</p><h2 id="2">Syntax</h2><pre class="language-matlab">result = RegGrow(I)
 result = RegGrow(I,maxDiff)
 result = RegGrow(I,maxDiff,seed)
 result = RegGrow(___,Name,Value)
 result = RegGrow(___,options)
 [result,OverflowFlag]=RegGrow(___)
-</pre><p>Note: running without inputs runs on an example image.</p><h2 id="2">Output arguments</h2><p>
+</pre><p>Note: running without inputs runs on an example image.</p><h2 id="3">Output arguments</h2><p>
 <table border=1>
 <tr><td>
 result
@@ -86,7 +102,7 @@ OverflowFlag
 A flag in case of overflow. See below for how to enable checking for an overflow. Normally this output should be false.
 </td></tr>
 </table>
-</p><h2 id="3">Input arguments</h2><p>
+</p><h2 id="4">Input arguments</h2><p>
 <table border=1>
 <tr><td>
 I
@@ -96,57 +112,74 @@ The image to use, which can be any data type that can be converted to a double.
 <tr><td>
 maxDiff
 </td><td>
-The maximum difference between the mean of the currently segmented pixels and candidate pixels that will be added. All candidate pixels are tested at the same time. This value is treated as an absolute value. If omitted, the default value is 2/3*std(I(:)).
-<br>This parameter must be a scalar double, or be convertable to one.
+The maximum difference between the mean of the currently segmented pixels and candidate pixels
+that will be added. All candidate pixels are tested at the same time. This value is treated as an
+absolute value. If omitted, the default value is 2/3*std(I(:)).
+<br>This parameter must be a scalar double, or be convertible to one.
 </td></tr>
 <tr><td>
 seed
 </td><td>
-The initial starting point of the algorithm. If omitted, the default value is the first pixel (linear index 1).
+The initial starting point of the algorithm. If omitted, the default value is the first pixel
+(linear index 1).
 </td></tr>
 <tr><td>
 Name,Value
 </td><td>
-In addition to the previous parameters, the settings below can be entered with a Name,Value syntax. The parameter names are not case-sensitive.
+In addition to the previous parameters, the settings below can be entered with a Name,Value
+syntax. The parameter names are not case-sensitive.
 </td></tr>
 <tr><td>
 options
 </td><td>
-Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set to the default values. Field names are not case-sensitive.
+Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set
+to the default values. Field names are not case-sensitive.
 </td></tr>
 </table>
-</p><h2 id="4">Name,Value pairs</h2><p>
+</p><h2 id="5">Name,Value pairs</h2><p>
 <table border=1>
 <tr><td>
 nHood
 </td><td>
-The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for 2D images and 6-neighborhood for 3D images).
+The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
+2D images and 6-neighborhood for 3D images).
 <br>This setting is ignored if the kernel input is provided.
 </td></tr>
 <tr><td>
 kernel
 </td><td>
-The kernel input allows more flexibility in the direction of growth. This parameter must be a logical array or be convertible to one. Each dimension must have an odd length. The center pixel is set to true.
-<br>Note that is parameter describes the direction of growth and is therefore dissimilar to a convolution kernel (i.e. it is flipped along all directions).
+The kernel input allows more flexibility in the direction of growth. This parameter must be a
+logical array or be convertible to one. Each dimension must have an odd length. The center pixel
+is set to true.
+<br>Note that is parameter describes the direction of growth and is therefore dissimilar to a
+convolution kernel (i.e. it is flipped along all directions).
 </td></tr>
 <tr><td>
 overflow
 </td><td>
-This parameter allows the detection of a segmentation leak. This allows the process to exit before it is complete if too many pixels are being segmented. A leak can cause the segmentation to take a very long time to complete, especially for 3D images.
-<br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels), the second output is set to true and the function halts. No error or warning is triggered.
+This parameter allows the detection of a segmentation leak. This allows the process to exit
+before it is complete if too many pixels are being segmented. A leak can cause the segmentation
+to take a very long time to complete, especially for 3D images.
+<br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels),
+the second output is set to true and the function halts. No error or warning is triggered.
+<br><code>default=false;</code>
 </td></tr>
 <tr><td>
 waitbar
 </td><td>
-Use a waitbar to show the progress of the region growing. The maximum value is either the overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does provide a visual indication of progress. The default is false for 2D input and true for higher dimensional input.
+Use a waitbar to show the progress of the region growing. The maximum value is either the
+overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does
+provide a visual indication of progress. The default is false for 2D input and true for higher
+dimensional input.
 </td></tr>
 <tr><td>
 silent
 </td><td>
-This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is provided to improve code readability.
+This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
+provided to improve code readability.
 </td></tr>
 </table>
-</p><h2 id="5">Example: Segment the background</h2><p>The default example image is taken from the image generated by the image function. For the full back story, see <a href="https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/">this blog post</a>. In GNU Octave this image is not available and it is replaced by a logo image. The example setup will still work as intended.</p><pre class="codeinput"><span class="comment">% Generate an image.</span>
+</p><h2 id="6">Example: Segment the background</h2><p>The default example image is taken from the image generated by the image function. For the full back story, see <a href="https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/">this blog post</a>. In GNU Octave this image is not available and it is replaced by a logo image. The example setup will still work as intended.</p><pre class="codeinput"><span class="comment">% Generate an image.</span>
 <span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>)
     IM = get(0,<span class="string">'DefaultImageCData'</span>);IM = IM/max(IM(:));
 <span class="keyword">else</span>
@@ -158,11 +191,11 @@ This is the inverse of the waitbar switch, but it is ignored if wairbar is speci
 <span class="comment">% Call RegGrow without input to segment the background in the example image.</span>
 mask=RegGrow;
 
-<span class="comment">%fuse image and mask</span>
+<span class="comment">%Fuse image and mask.</span>
 r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
 subplot(1,2,1),imshow(IM),title(<span class="string">'original example image'</span>)
 subplot(1,2,2),imshow(fused),title(<span class="string">'segmented background'</span>)
-</pre><p><img vspace="5" hspace="5" src="RegGrow_show_default.png" alt=""> </p><h2 id="8">Example: Detect segmentation leak</h2><pre class="codeinput">opts=struct;
+</pre><p><img vspace="5" hspace="5" src="RegGrow_show_default.png" alt=""> </p><h2 id="9">Example: Detect segmentation leak</h2><pre class="codeinput">opts=struct;
 opts.seed=[24 30];
 opts.maxDiff=0.15;
 
@@ -176,7 +209,7 @@ tic,r{3}=RegGrow(IM,opts);t3=toc;
 
 IM_=cell(1,3);
 <span class="keyword">for</span> n=1:3
-    <span class="comment">%fuse image and mask</span>
+    <span class="comment">%Fuse image and mask.</span>
     r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
     IM_{n}=fused;
 <span class="keyword">end</span>
@@ -189,55 +222,114 @@ subplot(2,2,3),imshow(IM_{2})
 title({<span class="string">'with leak detection'</span>,sprintf(<span class="string">'(t=%.1fms)'</span>,1000*t2)})
 subplot(2,2,4),imshow(IM_{3})
 title({sprintf(<span class="string">'better maxDiff: %.2f'</span>,opts.maxDiff),sprintf(<span class="string">'(t=%.1fms)'</span>,1000*t3)})
-</pre><p><img vspace="5" hspace="5" src="RegGrow_show_leak_detection.png" alt=""> </p><h2 id="10">Compatibility, version info, and licence</h2><p>
+</pre><p><img vspace="5" hspace="5" src="RegGrow_show_leak_detection.png" alt=""> </p><h2 id="11">Compatibility, version info, and licence</h2><p>
+Compatibility considerations:
+<ul>
+   <li> None. This is expected to work on all releases.</li>
+</ul>
+</p><p>
 <table>
 <tr>
-<td> Compatibility </td>
-<td style="border:2px solid black;"> Windows 10 </td>
+<td> Test suite result </td>
+<td style="border:2px solid black;"> Windows XP/7/10 </td>
 <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
 <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
 </tr>
 <tr>
-<td style="border:2px solid black;"> ML R2020a </td>
-<td> works </td>
-<td> not tested </td>
-<td> not tested </td>
+<td style="border:2px solid black;"> Matlab R2021a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
-<td style="border:2px solid black;"> ML R2018a </td>
-<td> works </td>
-<td> works </td>
-<td> not tested </td>
+<td style="border:2px solid black;"> Matlab R2020b </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
-<td style="border:2px solid black;"> ML R2015a </td>
-<td> works </td>
-<td> works </td>
-<td> not tested </td>
+<td style="border:2px solid black;"> Matlab R2020a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
-<td style="border:2px solid black;"> ML R2011a </td>
-<td> works </td>
-<td> works </td>
-<td> not tested </td>
+<td style="border:2px solid black;"> Matlab R2018a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it>Pass</it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
-<td style="border:2px solid black;"> ML 6.5 (R13) </td>
-<td> works </td>
-<td> not tested </td>
-<td> not tested </td>
+<td style="border:2px solid black;"> Matlab R2015a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it>Pass</it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2013b </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2012b </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2011a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it>Pass</it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2010b </td>
+<td> <it></it> </td>
+<td> <it>Pass</it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2010a </td>
+<td> <it>W7 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2007b </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 7.1 (R14SP3) </td>
+<td> <it>XP : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Octave 6.2.0 </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Octave 5.2.0 </td>
-<td> works </td>
-<td> works </td>
-<td> not tested </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it>Pass</it> </td>
+<td> <it></it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Octave 4.4.1 </td>
-<td> works </td>
-<td> not tested </td>
-<td> works </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it>Pass</it> </td>
 </tr>
 </table>
 </p><pre>Version: 1.1
@@ -245,19 +337,592 @@ Date:    2020-07-06
 Author:  H.J. Wisselink
 Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
 Email = 'h_j_wisselink*alumnus_utwente_nl';
-Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020a</a><br></p></div><!--
+Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><h2 id="12">Performance</h2><p>
+The benchmarking function used to generate the results below can be found
+<a href=https://web.archive.org/web/20210519083340/https://cdn-120.anonfiles.com/f0aaV6w6ue/685931c3-1621413817/aaa___RegGrow___performance_test.m>here</a>.
+<br>The test results shown in the tables below are normalized to the results of the newest
+Matlab release on Windows, since the performace is strongly dependent on the specific
+computer running the test. To allow absolute comparisons as well the results in that cell
+are shown in seconds.
+<br>
+<br>Note that every result apart from those under Windows 10 was obtained in a VM, so the
+performance is likely an underestimation of the true performance.
+<br>
+<br>Test 1: 250 by 250 pixel snake
+<br>Test 2: 60 voxel 3D gradient
+<br>
+<table>
+<tr>
+<td> Test suite result </td>
+<td style="border:2px solid black;"> Windows XP/7/10 </td>
+<td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+<td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2021a </td>
+<td> (W10) <br> 0.165&nbsp;s <br> 0.342&nbsp;s </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2020b </td>
+<td> (W10) <br> 82&nbsp;% <br> 89&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2020a </td>
+<td> (W10) <br> 105&nbsp;% <br> 98&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2018a </td>
+<td> (W10) <br> 144&nbsp;% <br> 100&nbsp;% </td>
+<td> 117&nbsp;% <br> 85&nbsp;% </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2015a </td>
+<td> (W10) <br> 162&nbsp;% <br> 183&nbsp;% </td>
+<td> 159&nbsp;% <br> 156&nbsp;% </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2013b </td>
+<td> (W10) <br> 131&nbsp;% <br> 179&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2012b </td>
+<td> (W10) <br> 171&nbsp;% <br> 181&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2011a </td>
+<td> (W10) <br> 199&nbsp;% <br> 206&nbsp;% </td>
+<td> 151&nbsp;% <br> 164&nbsp;% </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2010b </td>
+<td>  </td>
+<td> 171&nbsp;% <br> 162&nbsp;% </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2010a </td>
+<td> (W7) <br> 199&nbsp;% <br> 325&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2007b </td>
+<td> (W10) <br> 813&nbsp;% <br> 1&thinsp;545&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab 7.1 (R14SP3) </td>
+<td> (XP) <br> 1&thinsp;399&nbsp;% <br> 2&thinsp;397&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab 6.5 (R13) </td>
+<td> (W10) <br> 1&thinsp;019&nbsp;% <br> 1&thinsp;941&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Octave 6.2.0 </td>
+<td> (W10) <br> 122&nbsp;% <br> 155&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Octave 5.2.0 </td>
+<td> (W10) <br> 188&nbsp;% <br> 172&nbsp;% </td>
+<td> 134&nbsp;% <br> 95&nbsp;% </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Octave 4.4.1 </td>
+<td> (W10) <br> 155&nbsp;% <br> 145&nbsp;% </td>
+<td>  </td>
+<td> 197&nbsp;% <br> 124&nbsp;% </td>
+</tr>
+</table>
+</p><h2 id="13">Test suite</h2><p>This tester is included so you can test if your own modifications would introduce any bugs. These tests form the basis for the compatibility table above.</p><p>Note that some of the functions in this tester might be different from the functions included in the actual function. Usually this is done to allow triggering of certain errors.</p><p>To save space, the tester function below was minified. The full tester function (including all comments) can be found <a href="https://web.archive.org/web/20210519083536/https://cdn-110.anonfiles.com/ldb1Vcw3u5/1ad23519-1621413933/aaa___RegGrow___test.m">here</a>.</p><pre class="codeinput"><span class="comment">% Run a test suite</span>
+<span class="comment">%</span>
+<span class="comment">% these syntaxes test basic availability of functionalities and test cases</span>
+<span class="comment">% that caused issues after writing the initial version of this function</span>
+<span class="comment">%</span>
+<span class="comment">% Pass:    passes all tests</span>
+<span class="comment">% Partial: [no partial passing condition]</span>
+<span class="comment">% Fail:    fails any test</span>
+<span class="comment">%</span>
+<span class="keyword">function</span> v000=aaa___RegGrow___test(varargin),v000=<span class="string">'pass'</span>;<span class="keyword">if</span> nargin==0,v001=false;<span class="keyword">else</span>,v001=true;
+<span class="keyword">end</span>,<span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>),v002 = get(0,<span class="string">'DefaultImageCData'</span>);v002 = <span class="keyword">...</span>
+v002/max(v002(:));v003=<span class="string">'5053C653355FA8A8B0F97C920CAF9A260F31E3CAAB728A07DC40AEB76C275363'</span>;
+disp(<span class="string">'NOTE: different example image, performance can''t be compared with Matlab'</span>),<span class="keyword">else</span>,v004 = <span class="keyword">...</span>
+pow2(get(0,<span class="string">'DefaultImageCData'</span>),47);v002 = bitshift(v004,-37);v002 = fix(v002);v002 = <span class="keyword">...</span>
+bitand(v002,31);v002 = v002/max(v002(:));v003=<span class="keyword">...</span>
+<span class="string">'EFB571891EFFD822D3049FF72F2299BDCE757D63539D4C740E21DC62F30C6C0B'</span>;<span class="keyword">end</span>,clc,<span class="keyword">try</span> [v005,v006]=<span class="keyword">...</span>
+speedtest;fprintf(<span class="string">'speedtest finished\n\n'</span>),v007=<span class="keyword">...</span>
+{sprintf(<span class="string">'The waitbar for test 07 should close at %.0f%%\n'</span>,v006)};v007{2}=<span class="keyword">...</span>
+sprintf(<span class="string">'No waitbar should appear for test 08\n'</span>);<span class="keyword">if</span> ~v001,<span class="keyword">try</span> uiwait(msgbox(v007)),<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">catch</span>,v005=[50 50];fprintf(<span class="string">'speedtest failed\n\n'</span>),<span class="keyword">end</span>,v008=0;tic,<span class="keyword">try</span> test01(v003);
+fprintf(<span class="string">'test 01: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 01: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
+pause(0.01);tic,<span class="keyword">try</span> test02(v002);fprintf(<span class="string">'test 02: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
+disp(<span class="string">'test 02: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test03(v002);
+fprintf(<span class="string">'test 03: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 03: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
+pause(0.01);tic,<span class="keyword">try</span> test04(v002);fprintf(<span class="string">'test 04: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
+disp(<span class="string">'test 04: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test05(v002);
+fprintf(<span class="string">'test 05: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 05: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
+pause(0.01);tic,<span class="keyword">try</span> test06(v002);fprintf(<span class="string">'test 06: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
+disp(<span class="string">'test 06: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test07(v005),<span class="keyword">...</span>
+fprintf(<span class="string">'test 07: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 07: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
+pause(0.01);tic,<span class="keyword">try</span> test08(v005,v006);fprintf(<span class="string">'test 08: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
+disp(<span class="string">'test 08: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test09(v002);
+fprintf(<span class="string">'test 09: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 09: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
+pause(0.01);tic,<span class="keyword">try</span> test10(v002);fprintf(<span class="string">'test 10: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
+disp(<span class="string">'test 10: fail'</span>),v008=v008+1;<span class="keyword">end</span>,<span class="keyword">if</span> v008&gt;0,<span class="keyword">if</span> nargout&gt;0,v000=<span class="string">'fail'</span>;<span class="keyword">return</span>,<span class="keyword">else</span>,<span class="keyword">...</span>
+error(<span class="string">'There were %d failed tests'</span>,v008),<span class="keyword">end</span>,<span class="keyword">else</span>,disp(<span class="string">'test completed'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> nargout==0,<span class="keyword">...</span>
+clear,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> error_(v001,varargin),<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v000=func2str(@error_);<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v001),v001=struct;<span class="keyword">end</span>,v001=parse_warning_error_redirect_options(v001);[v002,v003,v004,<span class="keyword">...</span>
+v005]=parse_warning_error_redirect_inputs(varargin{:});v006=struct(<span class="string">'identifier'</span>,v002,<span class="string">'message'</span>,<span class="keyword">...</span>
+v003,<span class="string">'stack'</span>,v004);<span class="keyword">if</span> v001.boolean.obj,v007=v003;<span class="keyword">while</span> v007(end)==10,v007(end)=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+any(v007==10),v007=char2cellstr([<span class="string">'Error: '</span> v007]);<span class="keyword">else</span>,v007=[<span class="string">'Error: '</span> v007];<span class="keyword">end</span>,<span class="keyword">for</span> v008=<span class="keyword">...</span>
+v001.obj(:).',<span class="keyword">try</span> set(v008,<span class="string">'String'</span>,v007);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fid,<span class="keyword">for</span> v009=<span class="keyword">...</span>
+v001.fid(:).',<span class="keyword">try</span> fprintf(v009,<span class="string">'Error: %s\n%s'</span>,v003,v005);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fcn,<span class="keyword">...</span>
+<span class="keyword">if</span> ismember(v000,{v004.name}),error(<span class="string">'prevent recursion'</span>),<span class="keyword">end</span>,<span class="keyword">for</span> v010=v001.fcn(:).',<span class="keyword">if</span> <span class="keyword">...</span>
+isfield(v010,<span class="string">'data'</span>),<span class="keyword">try</span> feval(v010.h,<span class="string">'error'</span>,v006,v010.data);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">try</span> feval(v010.h,<span class="keyword">...</span>
+<span class="string">'error'</span>,v006);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,rethrow(v006),<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001]=get_trace(v002,v001),<span class="keyword">if</span> nargin==0,v002=1;<span class="keyword">end</span>,<span class="keyword">if</span> nargin&lt;2, v001=dbstack;<span class="keyword">end</span>,<span class="keyword">...</span>
+v001(1:v002)=[];<span class="keyword">if</span> ~isfield(v001,<span class="string">'file'</span>),<span class="keyword">for</span> v003=1:numel(v001),v004=v001(v003).name;<span class="keyword">if</span> <span class="keyword">...</span>
+strcmp(v004(end),<span class="string">')'</span>),v005=strfind(v004,<span class="string">'('</span>);v006=v004( (v005(end)+1):(end-1) );v007=<span class="keyword">...</span>
+v004(1:(v005(end)-2));<span class="keyword">else</span>,v007=v004;[v008,v006]=fileparts(v004);<span class="keyword">end</span>,[v008,v001(v003).file]=<span class="keyword">...</span>
+fileparts(v007);v001(v003).name=v006;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v009,<span class="keyword">if</span> isempty(v009),v009=<span class="keyword">...</span>
+exist(<span class="string">'OCTAVE_VERSION'</span>,<span class="string">'builtin'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> v009,<span class="keyword">for</span> v003=1:numel(v001),[v008,v001(v003).file]=<span class="keyword">...</span>
+fileparts(v001(v003).file);<span class="keyword">end</span>,<span class="keyword">end</span>,v010=v001;v011=<span class="string">'&gt;'</span>;v000=cell(1,numel(v010)-1);<span class="keyword">for</span> v003=<span class="keyword">...</span>
+1:numel(v010),[v012,v010(v003).file,v013]=fileparts(v010(v003).file);<span class="keyword">if</span> v003==numel(v010),<span class="keyword">...</span>
+v010(v003).file=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> strcmp(v010(v003).file,v010(v003).name),v010(v003).file=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+~isempty(v010(v003).file),v010(v003).file=[v010(v003).file <span class="string">'&gt;'</span>];<span class="keyword">end</span>,v000{v003}=<span class="keyword">...</span>
+sprintf(<span class="string">'%c In %s%s (line %d)\n'</span>,v011,v010(v003).file,v010(v003).name,v010(v003).line);v011=<span class="string">' '</span>;
+<span class="keyword">end</span>,v000=horzcat(v000{:});<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ifversion(v001,v002,v003,v004,v005),<span class="keyword">persistent</span> v006 v007 v008,<span class="keyword">if</span> isempty(v006),<span class="keyword">...</span>
+v008=exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>);v006=version;v009=strfind(v006,<span class="string">'.'</span>);<span class="keyword">if</span> numel(v009)~=1,<span class="keyword">...</span>
+v006(v009(2):end)=<span class="string">''</span>;v009=v009(1);<span class="keyword">end</span>,v006=[str2double(v006(1:(v009-1))) <span class="keyword">...</span>
+str2double(v006((v009+1):end))];v006=v006(1)+v006(2)/100;v006=round(100*v006);v007={ <span class="string">'R13'</span> 605;
+<span class="string">'R13SP1'</span> 605;<span class="string">'R13SP2'</span> 605;<span class="string">'R14'</span> 700;<span class="string">'R14SP1'</span> 700;<span class="string">'R14SP2'</span> 700;<span class="string">'R14SP3'</span> 701;<span class="string">'R2006a'</span> 702;
+<span class="string">'R2006b'</span> 703;<span class="string">'R2007a'</span> 704;<span class="string">'R2007b'</span> 705;<span class="string">'R2008a'</span> 706;<span class="string">'R2008b'</span> 707;<span class="string">'R2009a'</span> 708;<span class="string">'R2009b'</span> 709;
+<span class="string">'R2010a'</span> 710;<span class="string">'R2010b'</span> 711;<span class="string">'R2011a'</span> 712;<span class="string">'R2011b'</span> 713;<span class="string">'R2012a'</span> 714;<span class="string">'R2012b'</span> 800;<span class="string">'R2013a'</span> 801;
+<span class="string">'R2013b'</span> 802;<span class="string">'R2014a'</span> 803;<span class="string">'R2014b'</span> 804;<span class="string">'R2015a'</span> 805;<span class="string">'R2015b'</span> 806;<span class="string">'R2016a'</span> 900;<span class="string">'R2016b'</span> 901;
+<span class="string">'R2017a'</span> 902;<span class="string">'R2017b'</span> 903;<span class="string">'R2018a'</span> 904;<span class="string">'R2018b'</span> 905;<span class="string">'R2019a'</span> 906;<span class="string">'R2019b'</span> 907;<span class="string">'R2020a'</span> 908;
+<span class="string">'R2020b'</span> 909;<span class="string">'R2021a'</span> 910};<span class="keyword">end</span>,<span class="keyword">if</span> v008,<span class="keyword">if</span> nargin==2,warning(<span class="string">'HJW:ifversion:NoOctaveTest'</span>,<span class="keyword">...</span>
+[<span class="string">'No version test for Octave was provided.'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'This function might return an unexpected outcome.'</span>]),<span class="keyword">if</span> isnumeric(v002),v010=<span class="keyword">...</span>
+0.1*v002+0.9*fix(v002);v010=round(100*v010);<span class="keyword">else</span>,v011=ismember(v007(:,1),v002);<span class="keyword">if</span> sum(v011)~=1,<span class="keyword">...</span>
+warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>),v000=<span class="keyword">...</span>
+NaN;<span class="keyword">return</span>,<span class="keyword">else</span>,v010=v007{v011,2};<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> nargin==4,[v001,v010]=deal(v003,v004);v010=<span class="keyword">...</span>
+0.1*v010+0.9*fix(v010);v010=round(100*v010);<span class="keyword">else</span>,[v001,v010]=deal(v004,v005);v010=<span class="keyword">...</span>
+0.1*v010+0.9*fix(v010);v010=round(100*v010);<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> isnumeric(v002),v010=<span class="keyword">...</span>
+0.1*v002+0.9*fix(v002);v010=round(100*v010);<span class="keyword">else</span>,v011=ismember(v007(:,1),v002);<span class="keyword">if</span> sum(v011)~=1,<span class="keyword">...</span>
+warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>),v000=<span class="keyword">...</span>
+NaN;<span class="keyword">return</span>,<span class="keyword">else</span>,v010=v007{v011,2};<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">switch</span> v001,<span class="keyword">case</span> <span class="string">'=='</span>, v000= v006 == v010;<span class="keyword">case</span> <span class="keyword">...</span>
+<span class="string">'&lt;'</span> , v000= v006 &lt; v010;<span class="keyword">case</span> <span class="string">'&lt;='</span>, v000= v006 &lt;= v010;<span class="keyword">case</span> <span class="string">'&gt;'</span> , v000= v006 &gt; v010;<span class="keyword">case</span> <span class="string">'&gt;='</span>, <span class="keyword">...</span>
+v000= v006 &gt;= v010;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002,v003]=parse_warning_error_redirect_inputs(varargin),<span class="keyword">if</span> nargin==1,<span class="keyword">if</span> <span class="keyword">...</span>
+isa(varargin{1},<span class="string">'struct'</span>) || isa(varargin{1},<span class="string">'MException'</span>),v004=varargin{1};<span class="keyword">try</span> v002=v004.stack;
+v003=get_trace(0,v002);<span class="keyword">catch</span>,[v003,v002]=get_trace(3);<span class="keyword">end</span>,v000=v004.identifier;v001=<span class="keyword">...</span>
+v004.message;v005=<span class="keyword">...</span>
+<span class="string">'Error using &lt;a href="matlab:matlab.internal.language.introspective.errorDocCallback('</span>;<span class="keyword">if</span> <span class="keyword">...</span>
+isa(v004,<span class="string">'struct'</span>) &amp;&amp; numel(v001)&gt;numel(v005) &amp;&amp; strcmp(v005,v001(1:numel(v005))),<span class="keyword">...</span>
+v001(1:find(v001==10,1))=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">else</span>,[v003,v002]=get_trace(3);[v000,v001]=deal(<span class="string">''</span>,varargin{1});
+<span class="keyword">end</span>,<span class="keyword">else</span>,[v003,v002]=get_trace(3);<span class="keyword">if</span> ~isempty(strfind(varargin{1},<span class="string">'%'</span>)),v000=<span class="string">''</span>;v006=<span class="keyword">...</span>
+varargin(2:end);v001=sprintf(varargin{1},v006{:});<span class="keyword">else</span>,v000=varargin{1};v001=varargin{2};<span class="keyword">if</span> <span class="keyword">...</span>
+nargin&gt;3,v006=varargin(3:end);v001=sprintf(v001,v006{:});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=parse_warning_error_redirect_options(v000),<span class="keyword">if</span> ~isfield(v000,<span class="string">'boolean'</span>),<span class="keyword">...</span>
+v000.boolean=struct;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'con'</span>) || isempty(v000.boolean.con),<span class="keyword">...</span>
+v000.boolean.con=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'fid'</span>) || isempty(v000.boolean.fid),<span class="keyword">...</span>
+v000.boolean.fid=isfield(v000,<span class="string">'fid'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'obj'</span>) || <span class="keyword">...</span>
+isempty(v000.boolean.obj),v000.boolean.obj=isfield(v000,<span class="string">'obj'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="keyword">...</span>
+<span class="string">'fcn'</span>) || isempty(v000.boolean.fcn),v000.boolean.fcn=isfield(v000,<span class="string">'fcn'</span>);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=PatternReplace(v001,v002,v003),v000=v001(:)';<span class="keyword">if</span> numel(v002)==0,v004=<span class="keyword">...</span>
+false(size(v001));<span class="keyword">elseif</span> numel(v003)&gt;numel(v002),error(<span class="string">'not implemented (padding required)'</span>),<span class="keyword">...</span>
+<span class="keyword">else</span>,v004=true(size(v001));<span class="keyword">for</span> v005=1:numel(v002),v006=find(v001==v002(v005));v006=v006-v005+1;
+v006(v006&lt;1)=[];v007=false(size(v004));v007(v006)=true;v004= v004 &amp; v007;<span class="keyword">if</span> ~any(v004),<span class="keyword">break</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v006=find(v004);<span class="keyword">if</span> ~isempty(v006),<span class="keyword">for</span> v005=1:numel(v003),v000(v006+v005-1)=<span class="keyword">...</span>
+v003(v005);<span class="keyword">end</span>,<span class="keyword">if</span> numel(v003)==0,v005=0;<span class="keyword">end</span>,<span class="keyword">if</span> numel(v002)&gt;v005,v006=v006(:);v008=<span class="keyword">...</span>
+(v005+1):numel(v002);v009=bsxfun_plus(v006,v008-1);v000(v009(:))=[];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001] = RegGrow(v002,v003,v004,varargin),<span class="keyword">if</span> nargout&gt;2,<span class="keyword">...</span>
+error(<span class="string">'HJW:RegGrow:nargout'</span>,<span class="string">'Incorrect number of output arguments.'</span>),<span class="keyword">end</span>,v005=cell(1,nargin);<span class="keyword">if</span> <span class="keyword">...</span>
+nargin&gt;=1,v005{1}=v002;<span class="keyword">end</span>,<span class="keyword">if</span> nargin&gt;=2,v005{2}=v003;<span class="keyword">end</span>,<span class="keyword">if</span> nargin&gt;=3,v005{3}=v004;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+nargin&gt;=4,v005(4:end)=varargin;<span class="keyword">end</span>,[v006,v007,v008]=RegGrow_ParseInputs(v005{:});<span class="keyword">if</span> ~v006,<span class="keyword">...</span>
+rethrow(v008),<span class="keyword">else</span>,[v002,v003,v004,v009,v010,v011]=deal( v007.I,v007.maxDiff,v007.seed,<span class="keyword">...</span>
+v007.kernel,v007.overflow,v007.waitbar);<span class="keyword">end</span>,<span class="keyword">if</span> v011.bar,v011.h=waitbar(0,<span class="string">'processing...'</span>);
+v011.count=0;v012=0;<span class="keyword">end</span>,v001=false;v000=logical(zeros(size(v002)));v004=num2cell(v004);
+v000(v004{:})=true;v013=true;<span class="keyword">while</span> v013,<span class="keyword">if</span> v010.check,<span class="keyword">if</span> sum(v000(:))&gt;v010.volume,v001=true;
+<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v011.bar,v011.count=v011.count+1;<span class="keyword">if</span> mod(v011.count,5)==0,<span class="keyword">try</span> v012=mod(v012+1,<span class="keyword">...</span>
+3);v014=repmat(<span class="string">'.'</span>,1,1+v012);v015=sprintf(<span class="string">'processing%s'</span>,v014);waitbar(sum(v000(:))/v011.max,<span class="keyword">...</span>
+v011.h,v015),drawnow,<span class="keyword">catch</span>,v008=lasterror;<span class="keyword">if</span> strcmp(v008.identifier,<span class="keyword">...</span>
+<span class="string">'MATLAB:waitbar:InvalidSecondInput'</span>),v011.bar=false;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v016= ~v000 &amp; convn(v000,<span class="keyword">...</span>
+v009,<span class="string">'same'</span>)&gt;0.5;v017=abs(v002-mean(v002(v000)))&gt;=v003;v016(v017)=false;<span class="keyword">if</span> any(v016(:)),<span class="keyword">...</span>
+v000(v016)=true;<span class="keyword">else</span>,v013=false;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v011.bar,delete(v011.h),<span class="keyword">end</span>,<span class="keyword">if</span> nargout==0,clear <span class="string">v000</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=RegGrow_ParseInputs(varargin),v000=false;v001=struct;v002=<span class="keyword">...</span>
+struct(<span class="string">'identifier'</span>,<span class="string">''</span>,<span class="string">'message'</span>,<span class="string">''</span>);<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v004=<span class="keyword">...</span>
+exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>);<span class="keyword">if</span> v004,v005 = get(0,<span class="string">'DefaultImageCData'</span>);v005 = <span class="keyword">...</span>
+v005/max(v005(:));<span class="keyword">else</span>,v006 = pow2(get(0,<span class="string">'DefaultImageCData'</span>),47);v005 = bitshift(v006,-37);
+v005 = fix(v005);v005 = bitand(v005,31);v005 = v005/max(v005(:));<span class="keyword">end</span>,v003.I=v005;v003.maxDiff=<span class="keyword">...</span>
+[];v003.seed=[];v003.nHood=[];v003.kernel=[];v003.shifts=[];v003.overflow=[];
+v003.KeepShellVoxelsOnly=false;v003.waitbar=[];<span class="keyword">end</span>,<span class="keyword">if</span> nargin==0,v001=<span class="keyword">...</span>
+RegGrow_check_dynamic_defaults(v003);v001.seed=[2 2];v000=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v007=0;v008={<span class="string">'I'</span>,<span class="keyword">...</span>
+<span class="string">'maxDiff'</span>,<span class="string">'seed'</span>};<span class="keyword">while</span> numel(varargin)&gt;0 &amp;&amp; ~(isa(varargin{1},<span class="string">'char'</span>) || isa(varargin{1},<span class="keyword">...</span>
+<span class="string">'struct'</span>)),v007=v007+1;v001.(v008{v007})=varargin{1};varargin(1)=[];<span class="keyword">end</span>,<span class="keyword">if</span> numel(varargin)&gt;0,<span class="keyword">if</span> <span class="keyword">...</span>
+isa(varargin{1},<span class="string">'struct'</span>),v009=v001;v001=varargin{1};v010=fieldnames(v009);<span class="keyword">for</span> v011=<span class="keyword">...</span>
+1:numel(v010),v001.(v010{v011})=v009.(v010{v011});<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">try</span> <span class="keyword">while</span> numel(varargin)&gt;0,<span class="keyword">...</span>
+v001.(varargin{1})=varargin{2};varargin(1:2)=[];<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.identifier=<span class="keyword">...</span>
+<span class="string">'HJW:RegGrow:ParseError'</span>;v002.message=<span class="string">'Parsing of the inputs failed.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v010=<span class="keyword">...</span>
+fieldnames(v001);[v012,v013]=sort(lower(v010));v010=v010(v013);<span class="keyword">for</span> v014=1:numel(v010),v015=<span class="keyword">...</span>
+v010{v014};v016=v001.(v015);v002.identifier=[<span class="string">'HJW:RegGrow:incorrect_input_opt_'</span> lower(v015)];
+<span class="keyword">switch</span> lower(v015),<span class="keyword">case</span> <span class="string">'i'</span>,<span class="keyword">try</span> v016=double(v016);<span class="keyword">catch</span>,v002.message=<span class="keyword">...</span>
+<span class="string">'The image input must be convertible to a double .'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v001.I=v016;<span class="keyword">case</span> <span class="string">'kernel'</span>,<span class="keyword">try</span> <span class="keyword">if</span> <span class="keyword">...</span>
+isfield(v001,<span class="string">'I'</span>),v005=v001.I;<span class="keyword">else</span>,v005=v003.I;<span class="keyword">end</span>,v016=logical(v016);<span class="keyword">if</span> ndims(v016)~=<span class="keyword">...</span>
+ndims(v005) || ~all(mod(size(v016),2)==1),disp(v016(-1)),<span class="keyword">end</span>,v017=v016;v018=(size(v017)+1)/2;
+v018=num2cell(v018);v017(v018{:})=false;v016(v018{:})=true;<span class="keyword">if</span> sum(v017(:))==0,<span class="keyword">...</span>
+warning(<span class="string">'HJW:RegGrow:CentroidOnlyKernel'</span>,<span class="keyword">...</span>
+[<span class="string">'Only the centroid of the kernel is marked as true.\n'</span>,<span class="keyword">...</span>
+<span class="string">'This will cause the result to only contain the seed position.'</span>]),<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.message=<span class="keyword">...</span>
+[<span class="string">'The kernel input must a logical with ndims(IM) dimensions.'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'Each dimension must be an odd length.'</span>];<span class="keyword">return</span>,<span class="keyword">end</span>,v001.kernel=v016;<span class="keyword">case</span> <span class="string">'maxdiff'</span>,<span class="keyword">try</span> v016=<span class="keyword">...</span>
+double(v016);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~isa(v016,<span class="string">'double'</span>) || numel(v016)~=1 || v016&lt;0 || isnan(v016),<span class="keyword">...</span>
+v002.message=[<span class="string">'The maxDiff input must be a non-negative numeric scalar.'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'It must also be convertible to a double.'</span>];<span class="keyword">return</span>,<span class="keyword">end</span>,v001.maxDiff=v016;<span class="keyword">case</span> <span class="string">'nhood'</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+any(ismember(lower(v010),{<span class="string">'kernel'</span>,<span class="string">'shifts'</span>})),<span class="keyword">continue</span>,<span class="keyword">end</span>,<span class="keyword">if</span> isfield(v001,<span class="string">'I'</span>),v005=v001.I;
+<span class="keyword">else</span>,v005=v003.I;<span class="keyword">end</span>,v019=[<span class="string">'The nHood parameter must be either the maximal or minimal value, '</span>,<span class="keyword">...</span>
+char(10),<span class="string">'so 4 or 8 for 2D images, 6 or 26 for 3D images, etc.'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'This parameter must be set if the kernel parameter is not set.'</span>];<span class="keyword">try</span> v020=ndims(v005);<span class="keyword">if</span> <span class="keyword">...</span>
+~ismember(v016,[3^v020-1 2*v020]),v002.message=v019;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.message=v019;<span class="keyword">return</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,v001.nHood=v016;<span class="keyword">case</span> <span class="string">'overflow'</span>,<span class="keyword">if</span> ~isempty(v016) &amp;&amp; ( ~isnumeric(v016) || numel(v016)&gt;1 || <span class="keyword">...</span>
+abs(v016-round(v016))&gt;eps),v002.message=<span class="keyword">...</span>
+<span class="string">'The overflow volume must be empty, or a numeric scalar integer.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,v001.overflow=v016;
+<span class="keyword">case</span> <span class="string">'seed'</span>,<span class="keyword">if</span> isfield(v001,<span class="string">'I'</span>),v005=v001.I;<span class="keyword">else</span>,v005=v003.I;<span class="keyword">end</span>,v019=<span class="keyword">...</span>
+<span class="string">'The seed must be a vector with a valid position.'</span>;<span class="keyword">try</span> <span class="keyword">if</span> numel(v016)~=ndims(v005),v002.message=<span class="keyword">...</span>
+v019;<span class="keyword">return</span>,<span class="keyword">end</span>,v021=v016(:)';v022=num2cell(v021);v023=v005(v022{:});<span class="keyword">catch</span>,v002.message=v019;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v002.message=<span class="string">''</span>;v001.seed=v021;<span class="keyword">case</span> {<span class="string">'waitbar'</span>,<span class="string">'silent'</span>},[v024,v016]=<span class="keyword">...</span>
+test_if_scalar_logical(v016);<span class="keyword">if</span> ~v024,v002.message=<span class="string">'waitbar must be a logical scalar.'</span>;<span class="keyword">return</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">if</span> strcmpi(v015,<span class="string">'silent'</span>),v016= ~v016;<span class="keyword">end</span>,v001.waitbar=v016;<span class="keyword">case</span> <span class="string">'shifts'</span>,v001.shifts=v016;
+<span class="keyword">otherwise</span>,v002.message=sprintf(<span class="string">'Name,Value pair not recognized: %s'</span>,v015);v002.identifier=<span class="keyword">...</span>
+<span class="string">'HJW:RegGrow:incorrect_input_NameValue'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v010=fieldnames(v003);<span class="keyword">for</span> v014=<span class="keyword">...</span>
+1:numel(v010),<span class="keyword">if</span> ~isfield(v001,v010(v014)),v001.(v010{v014})=v003.(v010{v014});<span class="keyword">end</span>,<span class="keyword">end</span>,v000=<span class="keyword">...</span>
+true;v001=RegGrow_check_dynamic_defaults(v001);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=RegGrow_check_dynamic_defaults(v000),<span class="keyword">if</span> isempty(v000.seed),v001=<span class="keyword">...</span>
+ones(ndims(v000.I),1);v000.seed=v001;<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.maxDiff),v000.maxDiff=<span class="keyword">...</span>
+2/3*std(v000.I(:));<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v000.shifts),v002=v000.shifts;v003=max(abs(v002(:)));v004=<span class="keyword">...</span>
+zeros( (1+2*v003)*ones(1,size(v002,2)) );v002=v002+v003+1;v002=mat2cell(v002,size(v002,1),<span class="keyword">...</span>
+ones(1,size(v002,2)));v005=sub2ind(size(v004),v002{:});v004(v005)=1;v004=logical(v004);
+v000.kernel=v004;<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.kernel),v006=v000.nHood;<span class="keyword">if</span> isempty(v006),v006=<span class="keyword">...</span>
+2*ndims(v000.I);<span class="keyword">end</span>,v007=ndims(v000.I);<span class="keyword">if</span> v006==(2*v007),v008=cell(v007,1);[v008{:}]=<span class="keyword">...</span>
+ndgrid(-1:1);v008=cat(v007+1,v008{:});v008=sqrt(sum(v008.^2,v007+1));v004=v008&lt;=1;<span class="keyword">elseif</span> v006==<span class="keyword">...</span>
+(3^v007-1),v004=logical(ones(3*ones(1,v007)));<span class="keyword">end</span>,v000.kernel=v004;<span class="keyword">end</span>,v009=v000.overflow;<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v009) || isnan(v009) || isinf(v009),v000.overflow=struct(<span class="string">'check'</span>,false,<span class="string">'volume'</span>,inf);
+<span class="keyword">else</span>,v000.overflow=struct(<span class="string">'check'</span>,true,<span class="string">'volume'</span>,v009);<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.waitbar),v000.waitbar=<span class="keyword">...</span>
+ ndims(v000.I)&gt;2 ;<span class="keyword">end</span>,v000.waitbar=struct(<span class="string">'bar'</span>,v000.waitbar,<span class="string">'max'</span>,min(numel(v000.I),<span class="keyword">...</span>
+v000.overflow.volume));<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001]=test_if_scalar_logical(v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002={true,<span class="keyword">...</span>
+false;1,0;<span class="string">'on'</span>,<span class="string">'off'</span>;<span class="string">'enable'</span>,<span class="string">'disable'</span>;<span class="string">'enabled'</span>,<span class="string">'disabled'</span>};<span class="keyword">try</span> v002(end+1,:)=<span class="keyword">...</span>
+eval(<span class="string">'{"on","off"}'</span>);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v000=true;<span class="keyword">try</span> <span class="keyword">if</span> isa(v001,<span class="string">'char'</span>) || isa(v001,<span class="string">'string'</span>),<span class="keyword">try</span> <span class="keyword">...</span>
+v001=lower(v001);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v003=1:size(v002,1),<span class="keyword">for</span> v004=1:2,<span class="keyword">if</span> isequal(v001,v002{v003,<span class="keyword">...</span>
+v004}),v001=v002{1,v004};<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> isa(v001,<span class="string">'matlab.lang.OnOffSwitchState'</span>),v001=<span class="keyword">...</span>
+logical(v001);<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,v000=false;<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001]=typecast_double_uint64(v002),[v003,v004]=log2(v002);v005 =<span class="keyword">...</span>
+-floor(sign(v002)/2-0.5);v006=v004+1022;v007=abs(v003)*2-1;v000=zeros(size(v002));v000=<span class="keyword">...</span>
+v000+(v005*2^63);v000=v000+(v006*2^52);v000=v000+(v007*2^52);v001=mod(v007*2^52,2^16);v008=<span class="keyword">...</span>
+isinf(v002);v000(v002==0)=0;v000(isnan(v002))=18444492273895866368;v000(v008 &amp; v002&gt;0)=<span class="keyword">...</span>
+9218868437227405312;v000(v008 &amp; v002&lt;0)=18442240474082181120;v001(v002==0)=0;v001(isnan(v002))=<span class="keyword">...</span>
+0;v001(v008)=0;<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v010]=speedtest,v000=[100 100];v001=2;v002=0;v003=1.1;<span class="keyword">while</span> true,v002=v002+1;
+fprintf(<span class="string">'running speedtest (pass %d) '</span>,v002),v004=prod(v000);v005=1:prod(v000);v005=<span class="keyword">...</span>
+reshape(v005,v000);v005(:,2:2:end)=v005(end:-1:1,2:2:end);tic,v006=RegGrow(v005,<span class="string">'waitbar'</span>,true);
+v007=toc;<span class="keyword">if</span> abs(v007-v001)/v001&lt;(0.2+(v002-1)/100),fprintf(<span class="string">'(time=%.1f) '</span>,v007),<span class="keyword">break</span>,<span class="keyword">end</span>,v008=<span class="keyword">...</span>
+round(prod(v000)*(v001/v007)^v003);v003=0.8;v000=round(sqrt(v008))*[1 1];v000=2*ceil(v000/2);
+v009=sprintf(<span class="string">'%.1E to %.1E'</span>,v004,prod(v000));v009=strrep(v009,<span class="string">'E+'</span>,<span class="string">' E'</span>);
+fprintf(<span class="string">'(time=%.1f, elem count updated from %s)\n'</span>,v007,v009),<span class="keyword">end</span>,v010=<span class="keyword">...</span>
+100*sum(v006(:))/prod(v000);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__char(v000,v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002 = <span class="keyword">...</span>
+exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> v002 &amp;&amp; v001.re_encode_char,v003 = size(v000,1)==<span class="keyword">...</span>
+numel(v000);<span class="keyword">if</span> v003,v000=v000.';<span class="keyword">end</span>,v000=cellstr(v000);<span class="keyword">for</span> v004=1:numel(v000),v000{v004}=<span class="keyword">...</span>
+unicode_to_char(UTF8_to_unicode(v000{v004},v001.print_to),true);<span class="keyword">end</span>,v005=cellfun(<span class="string">'length'</span>,v000);
+v006=max(v005);<span class="keyword">for</span> v004=find(v005&lt;v006),v000{v004}( (numel(v000{v004})+1) : v006)=uint16(<span class="string">' '</span>);
+<span class="keyword">end</span>,v000=cell2mat(v000);<span class="keyword">if</span> v003,v000=v000.';<span class="keyword">end</span>,<span class="keyword">end</span>,v007=size(v000).';v000=v000(:);v000=<span class="keyword">...</span>
+uint16(v000);v000=[v000;uint16(mod(v007,2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__string(v000,v001),<span class="keyword">if</span> v001.string_to_cellstr,v000=<span class="keyword">...</span>
+cellstr(v000);v000=cast_to_uint16_vector__cell(v000,v001);<span class="keyword">else</span>,v000=char(v000);v000=<span class="keyword">...</span>
+cast_to_uint16_vector__char(v000,v001);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__struct(v000,v001),v002=size(v000).';v000=v000(:);v003=<span class="keyword">...</span>
+fieldnames(v000);v004=cell(2,numel(v003));<span class="keyword">for</span> v005=1:numel(v003),v004{1,v005}=v003{v005};v004{2,<span class="keyword">...</span>
+v005}={v000.(v003{v005})};<span class="keyword">end</span>,v000=cast_to_uint16_vector__cell(v004,v001);v000=[v000;
+uint16(mod(v002,2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash(v001,varargin),<span class="keyword">if</span> nargin&lt;1,<span class="keyword">...</span>
+error(<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>,<span class="string">'At least 1 input required.'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> nargin==2 <span class="keyword">...</span>
+&amp;&amp; isa(varargin{1},<span class="string">'struct'</span>) &amp;&amp; varargin{1}.SkipInputParse,v002=varargin{1};<span class="keyword">else</span>,[v003,v002,<span class="keyword">...</span>
+v004]=ComputeNonCryptHash_parse_inputs(varargin{:});<span class="keyword">if</span> ~v003,rethrow(v004),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+v002.print_to=v002.print_2__options;v005=v002.HashLength;v006=v002.Version;<span class="keyword">try</span> v004=[];v001=<span class="keyword">...</span>
+cast_to_uint16_vector(v001,v002);<span class="keyword">catch</span> v004;<span class="keyword">if</span> isempty(v004),v004=lasterror;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+strcmp(v004.identifier,<span class="string">'MATLAB:nomem'</span>),error_(v002.print_to,v004),<span class="keyword">else</span>,<span class="keyword">if</span> isfield(v002,<span class="string">'debug'</span>) <span class="keyword">...</span>
+&amp;&amp; v002.debug,v007=sprintf(<span class="string">'\n[original error: %s %s]'</span>,v004.identifier,v004.message);<span class="keyword">else</span>,v007=<span class="keyword">...</span>
+<span class="string">''</span>;<span class="keyword">end</span>,error_(v002.print_to,<span class="string">'HJW:ComputeNonCryptHash:UnwindFailed'</span>,<span class="keyword">...</span>
+[<span class="string">'The nested input contains an unsupported data type.'</span> v007]),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> mod(numel(v001),<span class="keyword">...</span>
+v005/16),v008=uint16(1:v005/16).'; v008(1:mod(numel(v001),v005/16))=[];v001=[v001;v008];<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+v006==1,v001=ComputeNonCryptHash_shuffle_uint16(v001);v001=<span class="keyword">...</span>
+ComputeNonCryptHash_uint16_to_logical(v001);v001=xor(v001,reshape(v001,[],16).');<span class="keyword">else</span>,v001=<span class="keyword">...</span>
+ComputeNonCryptHash_shuffle_uint16(v001);v001=ComputeNonCryptHash_uint16_to_logical(v001);v001=<span class="keyword">...</span>
+circshift_by_col(v001);<span class="keyword">end</span>,v001=mod(sum(reshape(v001,v005,[]),2),2);v001=<span class="keyword">...</span>
+ComputeNonCryptHash_logical_to_uint16(v001);<span class="keyword">if</span> v002.isSaltCall,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,v001=<span class="keyword">...</span>
+ComputeNonCryptHash_add_salt(v001,v002);v000=ComputeNonCryptHash_dec2hex(v001);v000=<span class="keyword">...</span>
+reshape(v000.',1,[]);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_add_salt(v000,v001),v002=16*numel(v000);v003=v001;
+v003.Version=1; v003.HashLength=v002;v003.SkipInputParse=1; v003.isSaltCall=1;v004=<span class="keyword">...</span>
+ComputeNonCryptHash(v000,v003);v004=ComputeNonCryptHash_shuffle_uint16_inv(v004);<span class="keyword">if</span> <span class="keyword">...</span>
+v001.Version&gt;1,v004=v004(end:-1:1);<span class="keyword">end</span>,v000=mod(double(v000).*double(v004),1+2^16);v000=<span class="keyword">...</span>
+uint16(v000);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=circshift_by_col(v000),<span class="keyword">persistent</span> v001,v002=size(v000);<span class="keyword">if</span> isempty(v001) || <span class="keyword">...</span>
+any(size(v001)&lt;v002) || isempty(v001{v002(1),v002(2)}),[v003,v004]=meshgrid(1:size(v000,2),<span class="keyword">...</span>
+1:size(v000,1));v005=mod(v003+v004-2,size(v000,1))+1;v006=sub2ind(size(v000),v005,v003);<span class="keyword">if</span> <span class="keyword">...</span>
+prod(v002)&lt;=1000,v001{v002(1),v002(2)}=v006;<span class="keyword">end</span>,<span class="keyword">else</span>,v006=v001{v002(1),v002(2)};<span class="keyword">end</span>,v000=<span class="keyword">...</span>
+v000(v006);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=char2cellstr(v001,v002),v003=isa(v001,<span class="string">'char'</span>);v001=int32(v001);<span class="keyword">if</span> nargin&lt;2,<span class="keyword">if</span> <span class="keyword">...</span>
+any(v001==13),v001=PatternReplace(v001,int32([13 10]),int32(-10));v001(v001==13)=-10;<span class="keyword">end</span>,<span class="keyword">...</span>
+v001(v001==10)=-10;<span class="keyword">else</span>,<span class="keyword">for</span> v004=1:numel(v002),v001=PatternReplace(v001,int32(v002{v004}),<span class="keyword">...</span>
+int32(-10));<span class="keyword">end</span>,<span class="keyword">end</span>,v005=[0 find(v001==-10) numel(v001)+1];v000=cell(numel(v005)-1,1);<span class="keyword">for</span> v004=<span class="keyword">...</span>
+1:numel(v000),v006=(v005(v004 )+1);v007=(v005(v004+1)-1);v000{v004}=v001(v006:v007);<span class="keyword">end</span>,<span class="keyword">if</span> v003,<span class="keyword">...</span>
+<span class="keyword">for</span> v004=1:numel(v000),v000{v004}= char(v000{v004});<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">for</span> v004=1:numel(v000),v000{v004}=<span class="keyword">...</span>
+uint32(v000{v004});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_dec2hex(v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002=<span class="keyword">...</span>
+upper(dec2hex(0:(-1+2^16),4));<span class="keyword">end</span>,v001=double(v001)+1;v000=v002(v001,:);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_logical_to_uint16(v000),<span class="keyword">if</span> mod(numel(v000),16),<span class="keyword">...</span>
+v000(16*ceil(numel(v000)/16))=0;<span class="keyword">end</span>,v001=uint16(2.^(15:-1:0))';v000=uint16(reshape(v000,16,[]));
+<span class="keyword">try</span> v000=v000.*v001;<span class="keyword">catch</span>,v000=double(v000).*repmat(double(v001),[1 size(v000,2)]);v000=<span class="keyword">...</span>
+uint16(v000);<span class="keyword">end</span>,v000=uint16(sum(v000,1)).';<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_shuffle_uint16(v000),v001=65537;v002=479001600;v000 = <span class="keyword">...</span>
+uint16(mod(double(v000) * v002 , v001));<span class="keyword">end</span>
+<span class="keyword">function</span> test01(Hash),<span class="keyword">try</span> <span class="keyword">if</span> ~strcmp(Hash,ComputeNonCryptHash(RegGrow,256,<span class="string">'-v2'</span>)),<span class="keyword">...</span>
+error(<span class="string">'hash doesn''t match (did the default image change?)'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_shuffle_uint16_inv(v000),v001=65537;v002=1919;v000=<span class="keyword">...</span>
+uint16(mod(double(v000) * v002,v001));<span class="keyword">end</span>
+<span class="keyword">function</span> test03(IM),<span class="keyword">try</span> v000=struct(<span class="string">'seed'</span>,[3;2]);RegGrow(IM,v000);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test04(IM),<span class="keyword">try</span> [v000,v001]=RegGrow(IM,0.3,[1 26],<span class="string">'overflow'</span>,1e2);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test05(IM),<span class="keyword">try</span> [v000,v001]=RegGrow(IM,<span class="string">'overflow'</span>,[]);<span class="keyword">if</span> v001~=false,error(<span class="string">'fail'</span>),<span class="keyword">else</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test09(IM),<span class="keyword">try</span> v000=logical(zeros(3,3));v001=warning(<span class="string">'off'</span>,<span class="keyword">...</span>
+<span class="string">'HJW:RegGrow:CentroidOnlyKernel'</span>);v002=RegGrow(IM,<span class="string">'nHood'</span>,5,<span class="string">'kernel'</span>,v000);warning(v001);<span class="keyword">if</span> <span class="keyword">...</span>
+sum(v002(:))~=1,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test10(IM),<span class="keyword">try</span> v000=logical(zeros(3,3));v000(end)=true;v001=RegGrow(IM,<span class="string">'kernel'</span>,v000,<span class="keyword">...</span>
+<span class="string">'maxdiff'</span>,1+max(IM(:))-min(IM(:)));<span class="keyword">if</span> sum(v001(:))~=min(size(IM)),error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">...</span>
+error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=AddMissing(v001,v000),v002=fieldnames(v001);v003=fieldnames(v000);<span class="keyword">for</span> v004=<span class="keyword">...</span>
+find(~ismember(v002,v003)).',v005=v002{v004};v000.(v005)=v001.(v005);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test02(IM),<span class="keyword">try</span> v000=[];v001=struct(<span class="string">'seed'</span>,[6 4 2]);RegGrow(IM,v001);error(<span class="string">'fail'</span>),<span class="keyword">...</span>
+<span class="keyword">catch</span> v000;<span class="keyword">if</span> isempty(v000),v000=lasterror;<span class="keyword">end</span>,<span class="keyword">if</span> strcmp(v000.identifier,<span class="keyword">...</span>
+<span class="string">'HJW:RegGrow:incorrect_input_opt_seed'</span>),<span class="keyword">else</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test06(v000),<span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>),v000=repmat(v000,[1,1,5]);v001=20;
+<span class="keyword">else</span>,v000=repmat(v000,[1,1,40]);v001=10;<span class="keyword">end</span>,v001=1+rand(size(v000))/v001;v000=v000.*v001;<span class="keyword">try</span> <span class="keyword">...</span>
+[v002,v003]=RegGrow(v000,<span class="string">'waitbar'</span>,false);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test08(sz,p),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,<span class="keyword">...</span>
+2:2:end);<span class="keyword">try</span> v001=RegGrow(v000,<span class="string">'silent'</span>,true);v002=round(p*numel(v001)/100);<span class="keyword">if</span> abs( <span class="keyword">...</span>
+sum(v001(:)) - v002 ) &gt; 1,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> test07(sz),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,<span class="keyword">...</span>
+2:2:end);<span class="keyword">try</span> RegGrow(v000,<span class="string">'waitbar'</span>,true);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_uint16_to_logical(v000),<span class="keyword">persistent</span> v001,<span class="keyword">if</span> isempty(v001),v001=<span class="keyword">...</span>
+dec2bin(0:(-1+2^16))==<span class="string">'1'</span>;v001=v001.';<span class="keyword">end</span>,v000=double(v000)+1;v000=v001(:,v000);<span class="keyword">end</span>
+<span class="keyword">function</span> v000=ComputeNonCryptHash_DefaultsByVersion(v000),<span class="keyword">if</span> ~isfield(v000,<span class="keyword">...</span>
+<span class="string">'re_encode_char_on_Octave'</span>),v000.re_encode_char=v000.Version&gt;=2;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000,<span class="keyword">...</span>
+<span class="string">'string_to_cellstr'</span>),v000.string_to_cellstr=v000.Version&gt;=2;<span class="keyword">if</span> ~isfield(v000,<span class="keyword">...</span>
+<span class="string">'cast_int64_double'</span>),v000.cast_int64_double=v000.Version==1;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=ComputeNonCryptHash_parse_inputs(varargin),v000=true;v002=struct;
+<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v003=struct;v003.HashLength=256;v003.Version=2;
+v003.VersionFlag=<span class="string">'-v2'</span>;v003.SkipInputParse=false;v003.isSaltCall=false;v004=struct;
+v003.print_to_con=true;v004.print_to_con=v003.print_to_con;v003.print_to_fid=[];
+v004.print_to_fid=v003.print_to_fid;v003.print_to_obj=[];v004.print_to_obj=v003.print_to_obj;
+v003.print_to_fcn=[];v004.print_to_fcn=v003.print_to_fcn;v003.print_2__default_options=v004;
+v003.print_2__options=validate_print_to__options(v004);<span class="keyword">end</span>,<span class="keyword">if</span> nargin==0,v001=<span class="keyword">...</span>
+ComputeNonCryptHash_DefaultsByVersion(v003);<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> nargin==1,<span class="keyword">switch</span> class(varargin{1}),<span class="keyword">...</span>
+<span class="keyword">case</span> {<span class="string">'char'</span>,<span class="string">'string'</span>},v001=AddMissing(v003,struct(<span class="string">'VersionFlag'</span>,char(varargin{1})));<span class="keyword">case</span> <span class="keyword">...</span>
+<span class="string">'struct'</span>,v001=AddMissing(v003,varargin{1});<span class="keyword">otherwise</span>,v001=AddMissing(v003,struct(<span class="string">'HashLength'</span>,<span class="keyword">...</span>
+varargin{1}));<span class="keyword">end</span>,[v001,v002,v000]=ComputeNonCryptHash_parse_inputs__ValidateInputs(v001);<span class="keyword">if</span> <span class="keyword">...</span>
+v000,v001=ComputeNonCryptHash_DefaultsByVersion(v001);<span class="keyword">end</span>,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">try</span> [v001,v002,v005]=<span class="keyword">...</span>
+ComputeNonCryptHash_parse_inputs__UnwindToStruct( struct,v002,~v000,varargin{:});v000=~v005;
+<span class="keyword">catch</span>,v002.identifier=<span class="string">'HJW:ComputeNonCryptHash:InputFail'</span>;v002.message=<span class="keyword">...</span>
+<span class="string">'Input parsing failed. Maybe a parameter has been entered twice.'</span>;v000=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~v000,<span class="keyword">...</span>
+<span class="keyword">return</span>,<span class="keyword">else</span> ,v001=AddMissing(v003,v001);<span class="keyword">end</span>,[v001,v002,v000]=<span class="keyword">...</span>
+ComputeNonCryptHash_parse_inputs__ValidateInputs(v001);<span class="keyword">if</span> v000,v001=<span class="keyword">...</span>
+ComputeNonCryptHash_DefaultsByVersion(v001);<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__ValidateInputs(v000),v002=true;v001=<span class="keyword">...</span>
+struct;<span class="keyword">try</span> v003=str2double(v000.VersionFlag(3:end));<span class="keyword">if</span> isnan(v003) || round(v003)~=v003 || <span class="keyword">...</span>
+v003&gt;2,error(<span class="string">'trigger'</span>);<span class="keyword">end</span>,v000.Version=v003;<span class="keyword">catch</span>,v001.identifier=<span class="keyword">...</span>
+<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>;v001.message=<span class="keyword">...</span>
+<span class="string">'Version input incorrect. Must be ''-v1'', ''-v2''.'</span>;v002=false;<span class="keyword">return</span>,<span class="keyword">end</span>,v004=v000.HashLength;
+<span class="keyword">if</span> numel(v004)~=1 || ~isnumeric(v004) || mod(v004,16)~=0 || v004&lt;16,v001.identifier=<span class="keyword">...</span>
+<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>;v001.message=<span class="keyword">...</span>
+<span class="string">'Second input (hash length) must be a multiple of 16.'</span>;v002=false;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v005=<span class="keyword">...</span>
+fieldnames(v000.print_2__default_options),<span class="keyword">if</span> ~isequal(v000.(v005{1}),<span class="keyword">...</span>
+v000.print_2__default_options.(v005{1})),[v006,v001]=validate_print_to__options(v000);<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v006),v001.identifier=<span class="string">'HJW:ComputeNonCryptHash:PrintToIncorrect'</span>;v002=false;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+v000.print_2__options=v006;<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__UnwindToStruct(v000,v001,v002,<span class="keyword">...</span>
+varargin),<span class="keyword">if</span> v002 || numel(varargin)==0,<span class="keyword">return</span>,<span class="keyword">end</span>,v003=varargin{1};<span class="keyword">if</span> isa(v003,<span class="string">'struct'</span>),v004=<span class="keyword">...</span>
+fieldnames(v000);v005=fieldnames(v003);v006=unique([v004;v005]);<span class="keyword">if</span> numel(v004)+numel(v005) ~= <span class="keyword">...</span>
+numel(v006),v002=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v000=AddMissing(v000,v003);varargin(1)=[];<span class="keyword">elseif</span> isa(v003,<span class="keyword">...</span>
+<span class="string">'char'</span>) || isa(v003,<span class="string">'string'</span>),<span class="keyword">try</span> <span class="keyword">if</span> isa(v003,<span class="string">'string'</span>),v003=char(v003);<span class="keyword">end</span>,<span class="keyword">if</span> strcmpi(<span class="string">'-v'</span>,<span class="keyword">...</span>
+v003(1:2)),<span class="keyword">if</span> isfield(v000,<span class="string">'VersionFlag'</span>),error(<span class="string">'trigger'</span>),<span class="keyword">end</span>,v000.VersionFlag=v003;
+varargin(1)=[];<span class="keyword">else</span>,<span class="keyword">if</span> isfield(v000,v003),error(<span class="string">'trigger'</span>),<span class="keyword">end</span>,v000.(v003)=varargin{2};
+varargin(1:2)=[];<span class="keyword">end</span>,<span class="keyword">catch</span>,v002=true;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> isfield(v000,<span class="string">'HashLength'</span>),v002=true;
+<span class="keyword">return</span>,<span class="keyword">end</span>,v000.HashLength=v003;varargin(1)=[];<span class="keyword">end</span>,[v000,v001,v002]=<span class="keyword">...</span>
+ComputeNonCryptHash_parse_inputs__UnwindToStruct(v000,v001,v002,varargin{:});<span class="keyword">end</span>
+<span class="keyword">function</span> v000=bsxfun_plus(v001,v002),<span class="keyword">try</span> v000=v001+v002;<span class="keyword">catch</span>,<span class="keyword">try</span> v000=bsxfun(@plus,v001,v002);
+<span class="keyword">catch</span>,v003=size(v001); v004=size(v002);v001=repmat(v001,max(1,v004./v003)); v002=repmat(v002,<span class="keyword">...</span>
+max(1,v003./v004));v000=v001+v002;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector(v000,v001),<span class="keyword">if</span> isa(v000,<span class="string">'uint16'</span>),v002=<span class="string">'uint16'</span>;v003=<span class="keyword">...</span>
+size(v000).';v000=reshape(v000,[],1);v000=[v000;uint16(v002.');uint16(mod(v003,2^16))];<span class="keyword">return</span>,<span class="keyword">...</span>
+<span class="keyword">end</span>,v000=cast_to_uint16_vector__cell({v000},v001);v000([end-1 end])=[];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__cell(v000,v001),v002=size(v000).';v000=v000(:);<span class="keyword">for</span> v003=<span class="keyword">...</span>
+1:numel(v000),<span class="keyword">if</span> numel(v000{v003})==0,v004=double(class(v000{v003})');v000{v003}=uint16([0;v004;
+size(v000{v003})']);<span class="keyword">continue</span>,<span class="keyword">end</span>,<span class="keyword">switch</span> class(v000{v003}),<span class="keyword">case</span> {<span class="string">'double'</span>,<span class="string">'single'</span>},v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__floats(v000{v003});<span class="keyword">case</span> <span class="string">'logical'</span>,v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__logical(v000{v003});<span class="keyword">case</span> {<span class="string">'uint8'</span>,<span class="string">'uint16'</span>,<span class="string">'uint32'</span>,<span class="string">'uint64'</span>,<span class="string">'int8'</span>,<span class="keyword">...</span>
+<span class="string">'int16'</span>,<span class="string">'int32'</span>,<span class="string">'int64'</span>},v000{v003}=cast_to_uint16_vector__integer(v000{v003},v001);<span class="keyword">case</span> <span class="string">'char'</span>,<span class="keyword">...</span>
+v000{v003}=cast_to_uint16_vector__char(v000{v003},v001);<span class="keyword">case</span> <span class="string">'string'</span>,v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__string(v000{v003},v001);<span class="keyword">case</span> <span class="string">'cell'</span>,v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__cell(v000{v003},v001);<span class="keyword">case</span> <span class="string">'struct'</span>,v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__struct(v000{v003},v001);<span class="keyword">case</span> {<span class="string">'gpuArray'</span>,<span class="string">'tall'</span>},v000{v003}=<span class="keyword">...</span>
+cast_to_uint16_vector__cell({gather(v000{v003})},v001);<span class="keyword">otherwise</span>,error_(v001.print_to,<span class="keyword">...</span>
+<span class="string">'HJW:cast_to_uint16_vector:nosupport'</span>,<span class="string">'Unsupported data type in nested variable'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,v000=<span class="keyword">...</span>
+cell2mat(v000);v000=[v000;uint16(mod(v002,2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__floats(v000),v001=size(v000).';v002=class(v000);[v003,<span class="keyword">...</span>
+v004]=typecast_double_uint64(double(v000));v005=mod(v003,2^16);v003=v003-v005;v003=v003/2^16;
+v004=v004.';v006 =mod(v003,2^16);v003=v003-v006; v003=v003/2^16;v006=v006.';v007 =mod(v003,<span class="keyword">...</span>
+2^16);v003=v003-v007; v003=v003/2^16;v007=v007.';v008 =mod(v003,2^16); v008=v008.';v000=[v008;
+v007;v006;v004];v000=uint16(v000(:));v000=[v000;uint16(v002.');uint16(mod(v001,2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=unicode_to_char(v001,v002),<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v003 = <span class="keyword">...</span>
+exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==1,v002=~v003;<span class="keyword">end</span>,<span class="keyword">if</span> v002,<span class="keyword">if</span> <span class="keyword">...</span>
+all(v001&lt;65536),v000=uint16(v001);v000=reshape(v000,1,numel(v000));<span class="keyword">else</span>,[v004,v005,v006]=<span class="keyword">...</span>
+unique(v001);v000=cell(1,numel(v001));<span class="keyword">for</span> v007=1:numel(v004),v008=unicode_to_UTF16(v004(v007));
+v008=uint16(v008);v000(v006==v007)={v008};<span class="keyword">end</span>,v000=cell2mat(v000);<span class="keyword">end</span>,<span class="keyword">if</span> ~v003,v000=char(v000);
+<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> all(v001&lt;128),v000=char(v001);v000=reshape(v000,1,numel(v000));<span class="keyword">else</span>,[v004,v005,<span class="keyword">...</span>
+v006]=unique(v001);v000=cell(1,numel(v001));<span class="keyword">for</span> v007=1:numel(v004),v008=<span class="keyword">...</span>
+unicode_to_UTF8(v004(v007));v008=uint8(v008);v000(v006==v007)={v008};<span class="keyword">end</span>,v000=cell2mat(v000);
+v000=char(v000);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=unicode_to_UTF16(v001),<span class="keyword">if</span> v001&lt;65536,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,v002=double(v001)-65536;
+v002=dec2bin(v002,20);v000=bin2dec([<span class="string">'110110'</span> v002(1:10);<span class="string">'110111'</span> v002(11:20)]).';<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=UTF8_to_unicode_internal(v000,v003),v001=<span class="string">'success'</span>;v002=<span class="keyword">...</span>
+struct(<span class="string">'identifier'</span>,<span class="string">'HJW:UTF8_to_unicode:notUTF8'</span>,<span class="string">'message'</span>,<span class="string">'Input is not UTF-8.'</span>);<span class="keyword">persistent</span> <span class="keyword">...</span>
+v004,<span class="keyword">if</span> isempty(v004),v004 = exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> any(v000&gt;255),v001=<span class="keyword">...</span>
+<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> all(v000&lt;128),<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v005=4:-1:2,v006=<span class="keyword">...</span>
+bin2dec([repmat(<span class="string">'1'</span>,1,v005) repmat(<span class="string">'0'</span>,1,8-v005)]);v007=v000&gt;=v006 &amp; v000&lt;256;<span class="keyword">if</span> any(v007),v007=<span class="keyword">...</span>
+find(v007);v007=v007(:).';<span class="keyword">if</span> numel(v000)&lt;(max(v007)+v005-1),v001=<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+v007( (v007+v005-1)&gt;numel(v000) )=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v007),v008=bsxfun_plus(v007 , <span class="keyword">...</span>
+(0:(v005-1)).' );v008=v008.';v007=v000(v008);<span class="keyword">end</span>,<span class="keyword">else</span>,v007=[];<span class="keyword">end</span>,v009=[repmat(<span class="string">'1'</span>,1,v005-1) <span class="keyword">...</span>
+repmat(<span class="string">'10'</span>,1,v005)];v010=unique([1:(v005+1) 1:8:(8*v005) 2:8:(8*v005)]);<span class="keyword">if</span> numel(v007)&gt;0,v007=<span class="keyword">...</span>
+unique(v007,<span class="string">'rows'</span>);v011=mat2cell(v007,ones(size(v007,1),1),v005);<span class="keyword">for</span> v012=1:numel(v011),v013=<span class="keyword">...</span>
+dec2bin(double(v011{v012}))';<span class="keyword">if</span> ~strcmp(v009,v013(v010)),v001=<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+<span class="keyword">continue</span>,<span class="keyword">end</span>,v013(v010)=<span class="string">''</span>;<span class="keyword">if</span> ~v004,v014=uint32(bin2dec(v013 ));<span class="keyword">else</span>,v014=<span class="keyword">...</span>
+uint32(bin2dec(v013.'));<span class="keyword">end</span>,v000=PatternReplace(v000,v011{v012},v014);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=unicode_to_UTF8(v001),<span class="keyword">if</span> v001&lt;128,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v002,<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v002),v002=struct;v002.limits.lower=hex2dec({<span class="string">'0000'</span>,<span class="string">'0080'</span>,<span class="string">'0800'</span>, <span class="string">'10000'</span>});
+v002.limits.upper=hex2dec({<span class="string">'007F'</span>,<span class="string">'07FF'</span>,<span class="string">'FFFF'</span>,<span class="string">'10FFFF'</span>});v002.scheme{2}=<span class="string">'110xxxxx10xxxxxx'</span>;
+v002.scheme{2}=reshape(v002.scheme{2}.',8,2);v002.scheme{3}=<span class="string">'1110xxxx10xxxxxx10xxxxxx'</span>;
+v002.scheme{3}=reshape(v002.scheme{3}.',8,3);v002.scheme{4}=<span class="string">'11110xxx10xxxxxx10xxxxxx10xxxxxx'</span>;
+v002.scheme{4}=reshape(v002.scheme{4}.',8,4);<span class="keyword">for</span> v003=2:4,v002.scheme_pos{v003}=<span class="keyword">...</span>
+find(v002.scheme{v003}==<span class="string">'x'</span>);v002.bits(v003)=numel(v002.scheme_pos{v003});<span class="keyword">end</span>,<span class="keyword">end</span>,v004=<span class="keyword">...</span>
+find(v002.limits.lower&lt;=v001 &amp; v001&lt;=v002.limits.upper);v000=v002.scheme{v004};v005=<span class="keyword">...</span>
+v002.scheme_pos{v004};v003=dec2bin(v001,v002.bits(v004));v000(v005)=v003;v000=bin2dec(v000.').';
+<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001,v002]=UTF8_to_unicode(v003,v004),<span class="keyword">if</span> nargin&lt;2,v004=[];<span class="keyword">end</span>,v005= nargout==1 ;
+v003=uint32(v003);[v002,v006,v007]=UTF8_to_unicode_internal(v003,v005);<span class="keyword">if</span> strcmp(v006,<span class="keyword">...</span>
+<span class="string">'success'</span>),v001=true;v000=v002;<span class="keyword">elseif</span> strcmp(v006,<span class="string">'error'</span>),v001=false;<span class="keyword">if</span> v005,error_(v004,v007),<span class="keyword">...</span>
+<span class="keyword">end</span>,v000=v003;<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__logical(v000),v001=size(v000).';v000=v000(:);<span class="keyword">if</span> <span class="keyword">...</span>
+mod(numel(v000),16),v000(16*ceil(numel(v000)/16))=0;<span class="keyword">end</span>,v002=uint16(2.^(15:-1:0))';v000=<span class="keyword">...</span>
+uint16(reshape(v000,16,[]));<span class="keyword">try</span> v000=v000.*v002;<span class="keyword">catch</span>,v000=double(v000).*repmat(double(v002),[1 <span class="keyword">...</span>
+size(v000,2)]);v000=uint16(v000);<span class="keyword">end</span>,v000=uint16(sum(v000,1)).';v000=[v000;uint16(mod(v001,<span class="keyword">...</span>
+2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> v000=cast_to_uint16_vector__integer(v000,v001),v002=size(v000).';v000=v000(:);
+<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v003=ifversion(<span class="string">'&gt;='</span>,<span class="string">'R2010b'</span>,<span class="string">'Octave'</span>,<span class="string">'&gt;'</span>,0);<span class="keyword">end</span>,v004=<span class="keyword">...</span>
+class(v000);v005=~v001.cast_int64_double &amp;&amp; v003 &amp;&amp; v004(end)==<span class="string">'4'</span>;<span class="keyword">if</span> ~v005,<span class="keyword">if</span> <span class="keyword">...</span>
+any(abs(double(v000(:)))&gt;2^52),warning_(v001,<span class="string">'HJW:ComputeNonCryptHash:int64rounding'</span>,<span class="keyword">...</span>
+[<span class="string">'int64 and uint64 will be rounded pre-R2010b, resulting in rounding.'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'This will result in a hash that is different from newer releases.'</span>]),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v005,<span class="keyword">if</span> <span class="keyword">...</span>
+v004(1)~=<span class="string">'u'</span>,v006=v000&gt;0;v007=-int64(-inf);v008=uint64(v000+v007+1);v008(v006)=<span class="keyword">...</span>
+uint64(v000(v006))+uint64(v007)+1;v000=v008;<span class="keyword">end</span>,<span class="keyword">elseif</span> v004(1)~=<span class="string">'u'</span>,v000=<span class="keyword">...</span>
+double(v000)-double(eval([v004 <span class="string">'(-inf)'</span>]));<span class="keyword">else</span>,v000=double(v000);<span class="keyword">end</span>,<span class="keyword">switch</span> v004(end),<span class="keyword">case</span> <span class="string">'8'</span>,<span class="keyword">...</span>
+<span class="keyword">if</span> mod(numel(v000),2),v000(end+1)=0;<span class="keyword">end</span>,v000=reshape(v000,[],2);v000=v000(:,1)*255+v000(:,2);
+v000=uint16(v000);<span class="keyword">case</span> <span class="string">'6'</span>,v000=uint16(v000);<span class="keyword">case</span> <span class="string">'2'</span>,v009=floor(v000/2^16);v009=v009.';v010=<span class="keyword">...</span>
+mod(v000,2^16); v010=v010.';v000=[v009;v010];v000=uint16(v000(:));<span class="keyword">case</span> <span class="string">'4'</span>,v011=v000;v012=<span class="keyword">...</span>
+mod(v011,2^16);v011=v011-v012;v011=v011/2^16;v012=v012.';v013=mod(v011,2^16);v011=v011-v013;
+v011=v011/2^16;v013=v013.';v010=mod(v011,2^16);v011=v011-v010;v011=v011/2^16;v010=v010.';v009=<span class="keyword">...</span>
+mod(v011,2^16); v009=v009.';v000=[v009;v010;v013;v012];v000=uint16(v000(:));<span class="keyword">end</span>,v000=[v000;
+uint16(v004.');uint16(mod(v002,2^16))];<span class="keyword">end</span>
+<span class="keyword">function</span> [v000,v001]=validate_print_to__options(v002,v001),<span class="keyword">if</span> nargin&lt;2,v001=struct;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+~isfield(v002,<span class="string">'print_to_con'</span>),v002.print_to_con=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v002,<span class="string">'print_to_fid'</span>),<span class="keyword">...</span>
+v002.print_to_fid=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v002,<span class="string">'print_to_obj'</span>),v002.print_to_obj=[];<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+~isfield(v002,<span class="string">'print_to_fcn'</span>),v002.print_to_fcn=[];<span class="keyword">end</span>,v003=true;v000=struct;v004=<span class="keyword">...</span>
+v002.print_to_fid;<span class="keyword">if</span> isempty(v004),v000.boolean.fid=false;<span class="keyword">else</span>,v003=false;v000.boolean.fid=true;
+v000.fid=v004;<span class="keyword">for</span> v005=1:numel(v004),<span class="keyword">try</span> v006=ftell(v004(v005));<span class="keyword">catch</span>,v006=-1;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+v004(v005)~=1 &amp;&amp; v006==-1,v001.message=[<span class="string">'Invalid print_to_fid parameter:'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'should be a valid file identifier or 1.'</span>];v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v004=v002.print_to_obj;<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v004),v000.boolean.obj=false;<span class="keyword">else</span>,v003=false;v000.boolean.obj=true;v000.obj=v004;<span class="keyword">for</span> <span class="keyword">...</span>
+v005=1:numel(v004),<span class="keyword">try</span> v007=get(v004(v005),<span class="string">'String'</span> );set( v004(v005),<span class="string">'String'</span>,<span class="string">''</span> );set( <span class="keyword">...</span>
+v004(v005),<span class="string">'String'</span>,v007);<span class="keyword">catch</span>,v001.message=[<span class="string">'Invalid print_to_obj parameter:'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'should be a handle to an object with a writeable String property.'</span>];v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
+v004=v002.print_to_fcn;<span class="keyword">if</span> isempty(v004),v000.boolean.fcn=false;<span class="keyword">else</span>,v003=false;<span class="keyword">try</span> <span class="keyword">for</span> v005=<span class="keyword">...</span>
+1:numel(v004),<span class="keyword">if</span> ~ismember(class(v004(v005).h),{<span class="string">'function_handle'</span>,<span class="string">'inline'</span>}) || <span class="keyword">...</span>
+numel(v004(v005).h)~=1,error(<span class="string">'trigger error'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,v001.message=<span class="keyword">...</span>
+[<span class="string">'Invalid print_to_fcn parameter:'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'should be a struct with the h field containing a function handle,'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'anonymous function or inline function.'</span>];v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v004=v002.print_to_con;<span class="keyword">if</span> <span class="keyword">...</span>
+isempty(v004),v000.boolean.con=v003;<span class="keyword">else</span>,[v008,v000.boolean.con]=test_if_scalar_logical(v004);
+<span class="keyword">if</span> ~v008,v001.message=[<span class="string">'Invalid print_to_con parameter:'</span>,char(10),<span class="keyword">...</span>
+<span class="string">'should be a scalar logical.'</span>];v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+<span class="keyword">function</span> warning_(v001,varargin),<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v000=func2str(@warning_);<span class="keyword">end</span>,<span class="keyword">...</span>
+<span class="keyword">if</span> isempty(v001),v001=struct;<span class="keyword">end</span>,v001=parse_warning_error_redirect_options(v001);[v002,v003,<span class="keyword">...</span>
+v004,v005]=parse_warning_error_redirect_inputs(varargin{:});v006=struct(<span class="string">'identifier'</span>,v002,<span class="keyword">...</span>
+<span class="string">'message'</span>,v003,<span class="string">'stack'</span>,v004);<span class="keyword">if</span> v001.boolean.con,<span class="keyword">if</span> ~isempty(v002),warning(v002,<span class="string">'%s'</span>,v003),<span class="keyword">else</span>,<span class="keyword">...</span>
+warning(v003), <span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> ~isempty(v002),lastwarn(v003,v002); <span class="keyword">else</span>,lastwarn(v003),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+v001.boolean.obj,v007=v003;<span class="keyword">while</span> v007(end)==10,v007(end)=[];<span class="keyword">end</span>,<span class="keyword">if</span> any(v007==10),v007=<span class="keyword">...</span>
+char2cellstr([<span class="string">'Warning: '</span> v007]);<span class="keyword">else</span>,v007=[<span class="string">'Warning: '</span> v007];<span class="keyword">end</span>,set(v001.obj,<span class="string">'String'</span>,v007),<span class="keyword">...</span>
+<span class="keyword">for</span> v008=v001.obj(:).',<span class="keyword">try</span> set(v008,<span class="string">'String'</span>,v007);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fid || <span class="keyword">...</span>
+v001.boolean.fcn,v009=2;[v005,v004]=get_trace(v009);<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fid,<span class="keyword">for</span> v010=<span class="keyword">...</span>
+v001.fid(:).',<span class="keyword">try</span> fprintf(v010,<span class="string">'Warning: %s\n%s'</span>,v003,v005);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
+v001.boolean.fcn,<span class="keyword">if</span> ismember(v000,{v004.name}),error(<span class="string">'prevent recursion'</span>),<span class="keyword">end</span>,<span class="keyword">for</span> v011=<span class="keyword">...</span>
+v001.fcn(:).',<span class="keyword">if</span> isfield(v011,<span class="string">'data'</span>),<span class="keyword">try</span> feval(v011.h,<span class="string">'warning'</span>,v006,v011.data);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">...</span>
+<span class="keyword">try</span> feval(v011.h,<span class="string">'warning'</span>,v006);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% RegGrow
-% Region growing algorithm (supports 2D, 3D, and ND).
 %
-% In each iteration, look at all voxels in the N-neighborhood of the already segmented region. From
-% those voxels, add those that are within maxDiff of the mean of the region. Keep repeating the
-% loop until no more pixels are added.
-%
-% The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND)
-% As an alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix
-% with the same number of dimensions as the input image.
-%
+% <html><tt style="font-size:0%">Formatted documentation for the RegGrow function.</tt>
+% <div style="margin-top:-5em;color:grey">Region growing algorithm (supports 2D, 3D, and ND)
+% </div>
+% </html>
+
+%% Description
+% <html>
+% This is an implementation of a region growing algorithm written entirely in m-code. By using
+% <code>convn</code> it has a reasonable performance and supports 2D, 3D, and ND arrays.
+% <br> In each iteration, look at all voxels in the N-neighborhood of the already segmented region.
+% From those voxels, add those that are within maxDiff of the mean of the region. Keep repeating
+% the loop until no more pixels are added.
+% <br><br>
+% The default neighborhood is the minimal neighborhood (4 for 2D, 6 for 3D, 2*dims for ND). As an
+% alternative to entering the neighborhood, a custom kernel can be entered as a binary matrix with
+% the same number of dimensions as the input image.
+% <br><br>
 % This is slower than a mex implementation would be, but this should be compatible with any release
 % and will return the same result on any release (including GNU Octave).
 % </html>
@@ -302,23 +967,28 @@ Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><p class="footer"><br><a 
 % <tr><td>
 % maxDiff
 % </td><td>
-% The maximum difference between the mean of the currently segmented pixels and candidate pixels that will be added. All candidate pixels are tested at the same time. This value is treated as an absolute value. If omitted, the default value is 2/3*std(I(:)).
-% <br>This parameter must be a scalar double, or be convertable to one.
+% The maximum difference between the mean of the currently segmented pixels and candidate pixels
+% that will be added. All candidate pixels are tested at the same time. This value is treated as an
+% absolute value. If omitted, the default value is 2/3*std(I(:)).
+% <br>This parameter must be a scalar double, or be convertible to one.
 % </td></tr>
 % <tr><td>
 % seed
 % </td><td>
-% The initial starting point of the algorithm. If omitted, the default value is the first pixel (linear index 1).
+% The initial starting point of the algorithm. If omitted, the default value is the first pixel
+% (linear index 1).
 % </td></tr>
 % <tr><td>
 % Name,Value
 % </td><td>
-% In addition to the previous parameters, the settings below can be entered with a Name,Value syntax. The parameter names are not case-sensitive.
+% In addition to the previous parameters, the settings below can be entered with a Name,Value
+% syntax. The parameter names are not case-sensitive.
 % </td></tr>
 % <tr><td>
 % options
 % </td><td>
-% Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set to the default values. Field names are not case-sensitive.
+% Instead of the Name,Value, parameters can also be entered in a struct. Missing fields will be set
+% to the default values. Field names are not case-sensitive.
 % </td></tr>
 % </table>
 % </html>
@@ -330,38 +1000,53 @@ Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><p class="footer"><br><a 
 % <tr><td>
 % nHood
 % </td><td>
-% The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for 2D images and 6-neighborhood for 3D images).
+% The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
+% 2D images and 6-neighborhood for 3D images).
 % <br>This setting is ignored if the kernel input is provided.
 % </td></tr>
 % <tr><td>
 % kernel
 % </td><td>
-% The kernel input allows more flexibility in the direction of growth. This parameter must be a logical array or be convertible to one. Each dimension must have an odd length. The center pixel is set to true.
-% <br>Note that is parameter describes the direction of growth and is therefore dissimilar to a convolution kernel (i.e. it is flipped along all directions).
+% The kernel input allows more flexibility in the direction of growth. This parameter must be a
+% logical array or be convertible to one. Each dimension must have an odd length. The center pixel
+% is set to true.
+% <br>Note that is parameter describes the direction of growth and is therefore dissimilar to a
+% convolution kernel (i.e. it is flipped along all directions).
 % </td></tr>
 % <tr><td>
 % overflow
 % </td><td>
-% This parameter allows the detection of a segmentation leak. This allows the process to exit before it is complete if too many pixels are being segmented. A leak can cause the segmentation to take a very long time to complete, especially for 3D images.
-% <br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels), the second output is set to true and the function halts. No error or warning is triggered.
+% This parameter allows the detection of a segmentation leak. This allows the process to exit
+% before it is complete if too many pixels are being segmented. A leak can cause the segmentation
+% to take a very long time to complete, especially for 3D images.
+% <br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels),
+% the second output is set to true and the function halts. No error or warning is triggered.
+% <br><code>default=false;</code>
 % </td></tr>
 % <tr><td>
 % waitbar
 % </td><td>
-% Use a waitbar to show the progress of the region growing. The maximum value is either the overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does provide a visual indication of progress. The default is false for 2D input and true for higher dimensional input.
+% Use a waitbar to show the progress of the region growing. The maximum value is either the
+% overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does
+% provide a visual indication of progress. The default is false for 2D input and true for higher
+% dimensional input.
 % </td></tr>
 % <tr><td>
 % silent
 % </td><td>
-% This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is provided to improve code readability.
+% This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
+% provided to improve code readability.
 % </td></tr>
 % </table>
 % </html>
 
 %% Example: Segment the background
 %
-% The default example image is taken from the image generated by the image function. For the full back story, see <https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/ this blog post>.
-% In GNU Octave this image is not available and it is replaced by a logo image. The example setup will still work as intended.
+% The default example image is taken from the image generated by the image function. For the full
+% back story, see
+% <https://blogs.mathworks.com/steve/2006/10/17/the-story-behind-the-matlab-default-image/ this
+% blog post>. In GNU Octave this image is not available and it is replaced by a logo image. The
+% example setup will still work as intended.
 %%
 
 % Generate an image.
@@ -376,7 +1061,7 @@ end
 % Call RegGrow without input to segment the background in the example image.
 mask=RegGrow;
 
-%fuse image and mask
+%Fuse image and mask.
 r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
 subplot(1,2,1),imshow(IM),title('original example image')
 subplot(1,2,2),imshow(fused),title('segmented background')
@@ -397,7 +1082,7 @@ tic,r{3}=RegGrow(IM,opts);t3=toc;
 
 IM_=cell(1,3);
 for n=1:3
-    %fuse image and mask    
+    %Fuse image and mask.
     r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
     IM_{n}=fused;
 end
@@ -415,54 +1100,115 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 
 %% Compatibility, version info, and licence
 % <html>
+% Compatibility considerations:
+% <ul>
+%    <li> None. This is expected to work on all releases.</li>
+% </ul>
+% </html>
+% 
+% <html>
 % <table>
 % <tr>
-% <td> Compatibility </td>
-% <td style="border:2px solid black;"> Windows 10 </td>
+% <td> Test suite result </td>
+% <td style="border:2px solid black;"> Windows XP/7/10 </td>
 % <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
 % <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
 % </tr>
 % <tr>
-% <td style="border:2px solid black;"> ML R2020a </td>
-% <td> works </td>
-% <td> not tested </td>
-% <td> not tested </td>
+% <td style="border:2px solid black;"> Matlab R2021a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
-% <td style="border:2px solid black;"> ML R2018a </td>
-% <td> works </td>
-% <td> works </td>
-% <td> not tested </td>
+% <td style="border:2px solid black;"> Matlab R2020b </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
-% <td style="border:2px solid black;"> ML R2015a </td>
-% <td> works </td>
-% <td> works </td>
-% <td> not tested </td>
+% <td style="border:2px solid black;"> Matlab R2020a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
-% <td style="border:2px solid black;"> ML R2011a </td>
-% <td> works </td>
-% <td> works </td>
-% <td> not tested </td>
+% <td style="border:2px solid black;"> Matlab R2018a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it>Pass</it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
-% <td style="border:2px solid black;"> ML 6.5 (R13) </td>
-% <td> works </td>
-% <td> not tested </td>
-% <td> not tested </td>
+% <td style="border:2px solid black;"> Matlab R2015a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it>Pass</it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2013b </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2012b </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2011a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it>Pass</it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2010b </td>
+% <td> <it></it> </td>
+% <td> <it>Pass</it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2010a </td>
+% <td> <it>W7 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2007b </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 7.1 (R14SP3) </td>
+% <td> <it>XP : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab 6.5 (R13) </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Octave 6.2.0 </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Octave 5.2.0 </td>
-% <td> works </td>
-% <td> works </td>
-% <td> not tested </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it>Pass</it> </td>
+% <td> <it></it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Octave 4.4.1 </td>
-% <td> works </td>
-% <td> not tested </td>
-% <td> works </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it>Pass</it> </td>
 % </tr>
 % </table>
 % </html>
@@ -473,5 +1219,585 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 %  Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
 %  Email = 'h_j_wisselink*alumnus_utwente_nl';
 %  Real_email = regexprep(Email,{'*','_'},{'@','.'})
+
+%% Performance
+% <html>
+% The benchmarking function used to generate the results below can be found
+% <a href=https://web.archive.org/web/20210519083340/https://cdn-120.anonfiles.com/f0aaV6w6ue/685931c3-1621413817/aaa___RegGrow___performance_test.m>here</a>.
+% <br>The test results shown in the tables below are normalized to the results of the newest
+% Matlab release on Windows, since the performace is strongly dependent on the specific
+% computer running the test. To allow absolute comparisons as well the results in that cell
+% are shown in seconds.
+% <br>
+% <br>Note that every result apart from those under Windows 10 was obtained in a VM, so the
+% performance is likely an underestimation of the true performance.
+% <br>
+% <br>Test 1: 250 by 250 pixel snake
+% <br>Test 2: 60 voxel 3D gradient
+% <br>
+% <table>
+% <tr>
+% <td> Test suite result </td>
+% <td style="border:2px solid black;"> Windows XP/7/10 </td>
+% <td style="border:2px solid black;"> Ubuntu 20.04 LTS </td>
+% <td style="border:2px solid black;"> MacOS 10.15 Catalina </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2021a </td>
+% <td> (W10) <br> 0.165&nbsp;s <br> 0.342&nbsp;s </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2020b </td>
+% <td> (W10) <br> 82&nbsp;% <br> 89&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2020a </td>
+% <td> (W10) <br> 105&nbsp;% <br> 98&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2018a </td>
+% <td> (W10) <br> 144&nbsp;% <br> 100&nbsp;% </td>
+% <td> 117&nbsp;% <br> 85&nbsp;% </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2015a </td>
+% <td> (W10) <br> 162&nbsp;% <br> 183&nbsp;% </td>
+% <td> 159&nbsp;% <br> 156&nbsp;% </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2013b </td>
+% <td> (W10) <br> 131&nbsp;% <br> 179&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2012b </td>
+% <td> (W10) <br> 171&nbsp;% <br> 181&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2011a </td>
+% <td> (W10) <br> 199&nbsp;% <br> 206&nbsp;% </td>
+% <td> 151&nbsp;% <br> 164&nbsp;% </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2010b </td>
+% <td>  </td>
+% <td> 171&nbsp;% <br> 162&nbsp;% </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2010a </td>
+% <td> (W7) <br> 199&nbsp;% <br> 325&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2007b </td>
+% <td> (W10) <br> 813&nbsp;% <br> 1&thinsp;545&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab 7.1 (R14SP3) </td>
+% <td> (XP) <br> 1&thinsp;399&nbsp;% <br> 2&thinsp;397&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab 6.5 (R13) </td>
+% <td> (W10) <br> 1&thinsp;019&nbsp;% <br> 1&thinsp;941&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Octave 6.2.0 </td>
+% <td> (W10) <br> 122&nbsp;% <br> 155&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Octave 5.2.0 </td>
+% <td> (W10) <br> 188&nbsp;% <br> 172&nbsp;% </td>
+% <td> 134&nbsp;% <br> 95&nbsp;% </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Octave 4.4.1 </td>
+% <td> (W10) <br> 155&nbsp;% <br> 145&nbsp;% </td>
+% <td>  </td>
+% <td> 197&nbsp;% <br> 124&nbsp;% </td>
+% </tr>
+% </table>
+% </html>
+
+%% Test suite
+%
+% This tester is included so you can test if your own modifications would introduce any bugs. These
+% tests form the basis for the compatibility table above.
+% 
+% Note that some of the functions in this tester might be different from the functions included in
+% the actual function. Usually this is done to allow triggering of certain errors.
+% 
+% To save space, the tester function below was minified. The full tester function (including all comments) can be found <https://web.archive.org/web/20210519083536/https://cdn-110.anonfiles.com/ldb1Vcw3u5/1ad23519-1621413933/aaa___RegGrow___test.m here>.
+
+% Run a test suite
+% 
+% these syntaxes test basic availability of functionalities and test cases
+% that caused issues after writing the initial version of this function
+% 
+% Pass:    passes all tests
+% Partial: [no partial passing condition]
+% Fail:    fails any test
+%
+function v000=aaa___RegGrow___test(varargin),v000='pass';if nargin==0,v001=false;else,v001=true;
+end,if exist('OCTAVE_VERSION', 'builtin'),v002 = get(0,'DefaultImageCData');v002 = ...
+v002/max(v002(:));v003='5053C653355FA8A8B0F97C920CAF9A260F31E3CAAB728A07DC40AEB76C275363';
+disp('NOTE: different example image, performance can''t be compared with Matlab'),else,v004 = ...
+pow2(get(0,'DefaultImageCData'),47);v002 = bitshift(v004,-37);v002 = fix(v002);v002 = ...
+bitand(v002,31);v002 = v002/max(v002(:));v003=...
+'EFB571891EFFD822D3049FF72F2299BDCE757D63539D4C740E21DC62F30C6C0B';end,clc,try [v005,v006]=...
+speedtest;fprintf('speedtest finished\n\n'),v007=...
+{sprintf('The waitbar for test 07 should close at %.0f%%\n',v006)};v007{2}=...
+sprintf('No waitbar should appear for test 08\n');if ~v001,try uiwait(msgbox(v007)),catch,end,...
+end,catch,v005=[50 50];fprintf('speedtest failed\n\n'),end,v008=0;tic,try test01(v003);
+fprintf('test 01: pass (%.1fs)\n',toc),catch,disp('test 01: fail'),v008=v008+1;end,drawnow;
+pause(0.01);tic,try test02(v002);fprintf('test 02: pass (%.1fs)\n',toc),catch,...
+disp('test 02: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test03(v002);
+fprintf('test 03: pass (%.1fs)\n',toc),catch,disp('test 03: fail'),v008=v008+1;end,drawnow;
+pause(0.01);tic,try test04(v002);fprintf('test 04: pass (%.1fs)\n',toc),catch,...
+disp('test 04: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test05(v002);
+fprintf('test 05: pass (%.1fs)\n',toc),catch,disp('test 05: fail'),v008=v008+1;end,drawnow;
+pause(0.01);tic,try test06(v002);fprintf('test 06: pass (%.1fs)\n',toc),catch,...
+disp('test 06: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test07(v005),...
+fprintf('test 07: pass (%.1fs)\n',toc),catch,disp('test 07: fail'),v008=v008+1;end,drawnow;
+pause(0.01);tic,try test08(v005,v006);fprintf('test 08: pass (%.1fs)\n',toc),catch,...
+disp('test 08: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test09(v002);
+fprintf('test 09: pass (%.1fs)\n',toc),catch,disp('test 09: fail'),v008=v008+1;end,drawnow;
+pause(0.01);tic,try test10(v002);fprintf('test 10: pass (%.1fs)\n',toc),catch,...
+disp('test 10: fail'),v008=v008+1;end,if v008>0,if nargout>0,v000='fail';return,else,...
+error('There were %d failed tests',v008),end,else,disp('test completed'),end,if nargout==0,...
+clear,end,end
+function error_(v001,varargin),persistent v000,if isempty(v000),v000=func2str(@error_);end,if ...
+isempty(v001),v001=struct;end,v001=parse_warning_error_redirect_options(v001);[v002,v003,v004,...
+v005]=parse_warning_error_redirect_inputs(varargin{:});v006=struct('identifier',v002,'message',...
+v003,'stack',v004);if v001.boolean.obj,v007=v003;while v007(end)==10,v007(end)='';end,if ...
+any(v007==10),v007=char2cellstr(['Error: ' v007]);else,v007=['Error: ' v007];end,for v008=...
+v001.obj(:).',try set(v008,'String',v007);catch,end,end,end,if v001.boolean.fid,for v009=...
+v001.fid(:).',try fprintf(v009,'Error: %s\n%s',v003,v005);catch,end,end,end,if v001.boolean.fcn,...
+if ismember(v000,{v004.name}),error('prevent recursion'),end,for v010=v001.fcn(:).',if ...
+isfield(v010,'data'),try feval(v010.h,'error',v006,v010.data);catch,end,else,try feval(v010.h,...
+'error',v006);catch,end,end,end,end,rethrow(v006),end
+function [v000,v001]=get_trace(v002,v001),if nargin==0,v002=1;end,if nargin<2, v001=dbstack;end,...
+v001(1:v002)=[];if ~isfield(v001,'file'),for v003=1:numel(v001),v004=v001(v003).name;if ...
+strcmp(v004(end),')'),v005=strfind(v004,'(');v006=v004( (v005(end)+1):(end-1) );v007=...
+v004(1:(v005(end)-2));else,v007=v004;[v008,v006]=fileparts(v004);end,[v008,v001(v003).file]=...
+fileparts(v007);v001(v003).name=v006;end,end,persistent v009,if isempty(v009),v009=...
+exist('OCTAVE_VERSION','builtin');end,if v009,for v003=1:numel(v001),[v008,v001(v003).file]=...
+fileparts(v001(v003).file);end,end,v010=v001;v011='>';v000=cell(1,numel(v010)-1);for v003=...
+1:numel(v010),[v012,v010(v003).file,v013]=fileparts(v010(v003).file);if v003==numel(v010),...
+v010(v003).file='';end,if strcmp(v010(v003).file,v010(v003).name),v010(v003).file='';end,if ...
+~isempty(v010(v003).file),v010(v003).file=[v010(v003).file '>'];end,v000{v003}=...
+sprintf('%c In %s%s (line %d)\n',v011,v010(v003).file,v010(v003).name,v010(v003).line);v011=' ';
+end,v000=horzcat(v000{:});end
+function v000=ifversion(v001,v002,v003,v004,v005),persistent v006 v007 v008,if isempty(v006),...
+v008=exist('OCTAVE_VERSION', 'builtin');v006=version;v009=strfind(v006,'.');if numel(v009)~=1,...
+v006(v009(2):end)='';v009=v009(1);end,v006=[str2double(v006(1:(v009-1))) ...
+str2double(v006((v009+1):end))];v006=v006(1)+v006(2)/100;v006=round(100*v006);v007={ 'R13' 605;
+'R13SP1' 605;'R13SP2' 605;'R14' 700;'R14SP1' 700;'R14SP2' 700;'R14SP3' 701;'R2006a' 702;
+'R2006b' 703;'R2007a' 704;'R2007b' 705;'R2008a' 706;'R2008b' 707;'R2009a' 708;'R2009b' 709;
+'R2010a' 710;'R2010b' 711;'R2011a' 712;'R2011b' 713;'R2012a' 714;'R2012b' 800;'R2013a' 801;
+'R2013b' 802;'R2014a' 803;'R2014b' 804;'R2015a' 805;'R2015b' 806;'R2016a' 900;'R2016b' 901;
+'R2017a' 902;'R2017b' 903;'R2018a' 904;'R2018b' 905;'R2019a' 906;'R2019b' 907;'R2020a' 908;
+'R2020b' 909;'R2021a' 910};end,if v008,if nargin==2,warning('HJW:ifversion:NoOctaveTest',...
+['No version test for Octave was provided.',char(10),...
+'This function might return an unexpected outcome.']),if isnumeric(v002),v010=...
+0.1*v002+0.9*fix(v002);v010=round(100*v010);else,v011=ismember(v007(:,1),v002);if sum(v011)~=1,...
+warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.'),v000=...
+NaN;return,else,v010=v007{v011,2};end,end,elseif nargin==4,[v001,v010]=deal(v003,v004);v010=...
+0.1*v010+0.9*fix(v010);v010=round(100*v010);else,[v001,v010]=deal(v004,v005);v010=...
+0.1*v010+0.9*fix(v010);v010=round(100*v010);end,else,if isnumeric(v002),v010=...
+0.1*v002+0.9*fix(v002);v010=round(100*v010);else,v011=ismember(v007(:,1),v002);if sum(v011)~=1,...
+warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.'),v000=...
+NaN;return,else,v010=v007{v011,2};end,end,end,switch v001,case '==', v000= v006 == v010;case ...
+'<' , v000= v006 < v010;case '<=', v000= v006 <= v010;case '>' , v000= v006 > v010;case '>=', ...
+v000= v006 >= v010;end,end
+function [v000,v001,v002,v003]=parse_warning_error_redirect_inputs(varargin),if nargin==1,if ...
+isa(varargin{1},'struct') || isa(varargin{1},'MException'),v004=varargin{1};try v002=v004.stack;
+v003=get_trace(0,v002);catch,[v003,v002]=get_trace(3);end,v000=v004.identifier;v001=...
+v004.message;v005=...
+'Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback(';if ...
+isa(v004,'struct') && numel(v001)>numel(v005) && strcmp(v005,v001(1:numel(v005))),...
+v001(1:find(v001==10,1))='';end,else,[v003,v002]=get_trace(3);[v000,v001]=deal('',varargin{1});
+end,else,[v003,v002]=get_trace(3);if ~isempty(strfind(varargin{1},'%')),v000='';v006=...
+varargin(2:end);v001=sprintf(varargin{1},v006{:});else,v000=varargin{1};v001=varargin{2};if ...
+nargin>3,v006=varargin(3:end);v001=sprintf(v001,v006{:});end,end,end,end
+function v000=parse_warning_error_redirect_options(v000),if ~isfield(v000,'boolean'),...
+v000.boolean=struct;end,if ~isfield(v000.boolean,'con') || isempty(v000.boolean.con),...
+v000.boolean.con=false;end,if ~isfield(v000.boolean,'fid') || isempty(v000.boolean.fid),...
+v000.boolean.fid=isfield(v000,'fid');end,if ~isfield(v000.boolean,'obj') || ...
+isempty(v000.boolean.obj),v000.boolean.obj=isfield(v000,'obj');end,if ~isfield(v000.boolean,...
+'fcn') || isempty(v000.boolean.fcn),v000.boolean.fcn=isfield(v000,'fcn');end,end
+function v000=PatternReplace(v001,v002,v003),v000=v001(:)';if numel(v002)==0,v004=...
+false(size(v001));elseif numel(v003)>numel(v002),error('not implemented (padding required)'),...
+else,v004=true(size(v001));for v005=1:numel(v002),v006=find(v001==v002(v005));v006=v006-v005+1;
+v006(v006<1)=[];v007=false(size(v004));v007(v006)=true;v004= v004 & v007;if ~any(v004),break,...
+end,end,end,v006=find(v004);if ~isempty(v006),for v005=1:numel(v003),v000(v006+v005-1)=...
+v003(v005);end,if numel(v003)==0,v005=0;end,if numel(v002)>v005,v006=v006(:);v008=...
+(v005+1):numel(v002);v009=bsxfun_plus(v006,v008-1);v000(v009(:))=[];end,end,end
+function [v000,v001] = RegGrow(v002,v003,v004,varargin),if nargout>2,...
+error('HJW:RegGrow:nargout','Incorrect number of output arguments.'),end,v005=cell(1,nargin);if ...
+nargin>=1,v005{1}=v002;end,if nargin>=2,v005{2}=v003;end,if nargin>=3,v005{3}=v004;end,if ...
+nargin>=4,v005(4:end)=varargin;end,[v006,v007,v008]=RegGrow_ParseInputs(v005{:});if ~v006,...
+rethrow(v008),else,[v002,v003,v004,v009,v010,v011]=deal( v007.I,v007.maxDiff,v007.seed,...
+v007.kernel,v007.overflow,v007.waitbar);end,if v011.bar,v011.h=waitbar(0,'processing...');
+v011.count=0;v012=0;end,v001=false;v000=logical(zeros(size(v002)));v004=num2cell(v004);
+v000(v004{:})=true;v013=true;while v013,if v010.check,if sum(v000(:))>v010.volume,v001=true;
+break,end,end,if v011.bar,v011.count=v011.count+1;if mod(v011.count,5)==0,try v012=mod(v012+1,...
+3);v014=repmat('.',1,1+v012);v015=sprintf('processing%s',v014);waitbar(sum(v000(:))/v011.max,...
+v011.h,v015),drawnow,catch,v008=lasterror;if strcmp(v008.identifier,...
+'MATLAB:waitbar:InvalidSecondInput'),v011.bar=false;end,end,end,end,v016= ~v000 & convn(v000,...
+v009,'same')>0.5;v017=abs(v002-mean(v002(v000)))>=v003;v016(v017)=false;if any(v016(:)),...
+v000(v016)=true;else,v013=false;end,end,if v011.bar,delete(v011.h),end,if nargout==0,clear v000,...
+end,end
+function [v000,v001,v002]=RegGrow_ParseInputs(varargin),v000=false;v001=struct;v002=...
+struct('identifier','','message','');persistent v003,if isempty(v003),v004=...
+exist('OCTAVE_VERSION', 'builtin');if v004,v005 = get(0,'DefaultImageCData');v005 = ...
+v005/max(v005(:));else,v006 = pow2(get(0,'DefaultImageCData'),47);v005 = bitshift(v006,-37);
+v005 = fix(v005);v005 = bitand(v005,31);v005 = v005/max(v005(:));end,v003.I=v005;v003.maxDiff=...
+[];v003.seed=[];v003.nHood=[];v003.kernel=[];v003.shifts=[];v003.overflow=[];
+v003.KeepShellVoxelsOnly=false;v003.waitbar=[];end,if nargin==0,v001=...
+RegGrow_check_dynamic_defaults(v003);v001.seed=[2 2];v000=true;return,end,v007=0;v008={'I',...
+'maxDiff','seed'};while numel(varargin)>0 && ~(isa(varargin{1},'char') || isa(varargin{1},...
+'struct')),v007=v007+1;v001.(v008{v007})=varargin{1};varargin(1)=[];end,if numel(varargin)>0,if ...
+isa(varargin{1},'struct'),v009=v001;v001=varargin{1};v010=fieldnames(v009);for v011=...
+1:numel(v010),v001.(v010{v011})=v009.(v010{v011});end,else,try while numel(varargin)>0,...
+v001.(varargin{1})=varargin{2};varargin(1:2)=[];end,catch,v002.identifier=...
+'HJW:RegGrow:ParseError';v002.message='Parsing of the inputs failed.';return,end,end,end,v010=...
+fieldnames(v001);[v012,v013]=sort(lower(v010));v010=v010(v013);for v014=1:numel(v010),v015=...
+v010{v014};v016=v001.(v015);v002.identifier=['HJW:RegGrow:incorrect_input_opt_' lower(v015)];
+switch lower(v015),case 'i',try v016=double(v016);catch,v002.message=...
+'The image input must be convertible to a double .';return,end,v001.I=v016;case 'kernel',try if ...
+isfield(v001,'I'),v005=v001.I;else,v005=v003.I;end,v016=logical(v016);if ndims(v016)~=...
+ndims(v005) || ~all(mod(size(v016),2)==1),disp(v016(-1)),end,v017=v016;v018=(size(v017)+1)/2;
+v018=num2cell(v018);v017(v018{:})=false;v016(v018{:})=true;if sum(v017(:))==0,...
+warning('HJW:RegGrow:CentroidOnlyKernel',...
+['Only the centroid of the kernel is marked as true.\n',...
+'This will cause the result to only contain the seed position.']),end,catch,v002.message=...
+['The kernel input must a logical with ndims(IM) dimensions.',char(10),...
+'Each dimension must be an odd length.'];return,end,v001.kernel=v016;case 'maxdiff',try v016=...
+double(v016);catch,end,if ~isa(v016,'double') || numel(v016)~=1 || v016<0 || isnan(v016),...
+v002.message=['The maxDiff input must be a non-negative numeric scalar.',char(10),...
+'It must also be convertible to a double.'];return,end,v001.maxDiff=v016;case 'nhood',if ...
+any(ismember(lower(v010),{'kernel','shifts'})),continue,end,if isfield(v001,'I'),v005=v001.I;
+else,v005=v003.I;end,v019=['The nHood parameter must be either the maximal or minimal value, ',...
+char(10),'so 4 or 8 for 2D images, 6 or 26 for 3D images, etc.',char(10),...
+'This parameter must be set if the kernel parameter is not set.'];try v020=ndims(v005);if ...
+~ismember(v016,[3^v020-1 2*v020]),v002.message=v019;return,end,catch,v002.message=v019;return,...
+end,v001.nHood=v016;case 'overflow',if ~isempty(v016) && ( ~isnumeric(v016) || numel(v016)>1 || ...
+abs(v016-round(v016))>eps),v002.message=...
+'The overflow volume must be empty, or a numeric scalar integer.';return,end,v001.overflow=v016;
+case 'seed',if isfield(v001,'I'),v005=v001.I;else,v005=v003.I;end,v019=...
+'The seed must be a vector with a valid position.';try if numel(v016)~=ndims(v005),v002.message=...
+v019;return,end,v021=v016(:)';v022=num2cell(v021);v023=v005(v022{:});catch,v002.message=v019;
+return,end,v002.message='';v001.seed=v021;case {'waitbar','silent'},[v024,v016]=...
+test_if_scalar_logical(v016);if ~v024,v002.message='waitbar must be a logical scalar.';return,...
+end,if strcmpi(v015,'silent'),v016= ~v016;end,v001.waitbar=v016;case 'shifts',v001.shifts=v016;
+otherwise,v002.message=sprintf('Name,Value pair not recognized: %s',v015);v002.identifier=...
+'HJW:RegGrow:incorrect_input_NameValue';return,end,end,v010=fieldnames(v003);for v014=...
+1:numel(v010),if ~isfield(v001,v010(v014)),v001.(v010{v014})=v003.(v010{v014});end,end,v000=...
+true;v001=RegGrow_check_dynamic_defaults(v001);end
+function v000=RegGrow_check_dynamic_defaults(v000),if isempty(v000.seed),v001=...
+ones(ndims(v000.I),1);v000.seed=v001;end,if isempty(v000.maxDiff),v000.maxDiff=...
+2/3*std(v000.I(:));end,if ~isempty(v000.shifts),v002=v000.shifts;v003=max(abs(v002(:)));v004=...
+zeros( (1+2*v003)*ones(1,size(v002,2)) );v002=v002+v003+1;v002=mat2cell(v002,size(v002,1),...
+ones(1,size(v002,2)));v005=sub2ind(size(v004),v002{:});v004(v005)=1;v004=logical(v004);
+v000.kernel=v004;end,if isempty(v000.kernel),v006=v000.nHood;if isempty(v006),v006=...
+2*ndims(v000.I);end,v007=ndims(v000.I);if v006==(2*v007),v008=cell(v007,1);[v008{:}]=...
+ndgrid(-1:1);v008=cat(v007+1,v008{:});v008=sqrt(sum(v008.^2,v007+1));v004=v008<=1;elseif v006==...
+(3^v007-1),v004=logical(ones(3*ones(1,v007)));end,v000.kernel=v004;end,v009=v000.overflow;if ...
+isempty(v009) || isnan(v009) || isinf(v009),v000.overflow=struct('check',false,'volume',inf);
+else,v000.overflow=struct('check',true,'volume',v009);end,if isempty(v000.waitbar),v000.waitbar=...
+ ndims(v000.I)>2 ;end,v000.waitbar=struct('bar',v000.waitbar,'max',min(numel(v000.I),...
+v000.overflow.volume));end
+function [v000,v001]=test_if_scalar_logical(v001),persistent v002,if isempty(v002),v002={true,...
+false;1,0;'on','off';'enable','disable';'enabled','disabled'};try v002(end+1,:)=...
+eval('{"on","off"}');catch,end,end,v000=true;try if isa(v001,'char') || isa(v001,'string'),try ...
+v001=lower(v001);catch,end,end,for v003=1:size(v002,1),for v004=1:2,if isequal(v001,v002{v003,...
+v004}),v001=v002{1,v004};return,end,end,end,if isa(v001,'matlab.lang.OnOffSwitchState'),v001=...
+logical(v001);return,end,catch,end,v000=false;end
+function [v000,v001]=typecast_double_uint64(v002),[v003,v004]=log2(v002);v005 =...
+-floor(sign(v002)/2-0.5);v006=v004+1022;v007=abs(v003)*2-1;v000=zeros(size(v002));v000=...
+v000+(v005*2^63);v000=v000+(v006*2^52);v000=v000+(v007*2^52);v001=mod(v007*2^52,2^16);v008=...
+isinf(v002);v000(v002==0)=0;v000(isnan(v002))=18444492273895866368;v000(v008 & v002>0)=...
+9218868437227405312;v000(v008 & v002<0)=18442240474082181120;v001(v002==0)=0;v001(isnan(v002))=...
+0;v001(v008)=0;end
+function [v000,v010]=speedtest,v000=[100 100];v001=2;v002=0;v003=1.1;while true,v002=v002+1;
+fprintf('running speedtest (pass %d) ',v002),v004=prod(v000);v005=1:prod(v000);v005=...
+reshape(v005,v000);v005(:,2:2:end)=v005(end:-1:1,2:2:end);tic,v006=RegGrow(v005,'waitbar',true);
+v007=toc;if abs(v007-v001)/v001<(0.2+(v002-1)/100),fprintf('(time=%.1f) ',v007),break,end,v008=...
+round(prod(v000)*(v001/v007)^v003);v003=0.8;v000=round(sqrt(v008))*[1 1];v000=2*ceil(v000/2);
+v009=sprintf('%.1E to %.1E',v004,prod(v000));v009=strrep(v009,'E+',' E');
+fprintf('(time=%.1f, elem count updated from %s)\n',v007,v009),end,v010=...
+100*sum(v006(:))/prod(v000);end
+function v000=cast_to_uint16_vector__char(v000,v001),persistent v002,if isempty(v002),v002 = ...
+exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if v002 && v001.re_encode_char,v003 = size(v000,1)==...
+numel(v000);if v003,v000=v000.';end,v000=cellstr(v000);for v004=1:numel(v000),v000{v004}=...
+unicode_to_char(UTF8_to_unicode(v000{v004},v001.print_to),true);end,v005=cellfun('length',v000);
+v006=max(v005);for v004=find(v005<v006),v000{v004}( (numel(v000{v004})+1) : v006)=uint16(' ');
+end,v000=cell2mat(v000);if v003,v000=v000.';end,end,v007=size(v000).';v000=v000(:);v000=...
+uint16(v000);v000=[v000;uint16(mod(v007,2^16))];end
+function v000=cast_to_uint16_vector__string(v000,v001),if v001.string_to_cellstr,v000=...
+cellstr(v000);v000=cast_to_uint16_vector__cell(v000,v001);else,v000=char(v000);v000=...
+cast_to_uint16_vector__char(v000,v001);end,end
+function v000=cast_to_uint16_vector__struct(v000,v001),v002=size(v000).';v000=v000(:);v003=...
+fieldnames(v000);v004=cell(2,numel(v003));for v005=1:numel(v003),v004{1,v005}=v003{v005};v004{2,...
+v005}={v000.(v003{v005})};end,v000=cast_to_uint16_vector__cell(v004,v001);v000=[v000;
+uint16(mod(v002,2^16))];end
+function v000=ComputeNonCryptHash(v001,varargin),if nargin<1,...
+error('HJW:ComputeNonCryptHash:InputIncorrect','At least 1 input required.'),end,if nargin==2 ...
+&& isa(varargin{1},'struct') && varargin{1}.SkipInputParse,v002=varargin{1};else,[v003,v002,...
+v004]=ComputeNonCryptHash_parse_inputs(varargin{:});if ~v003,rethrow(v004),end,end,...
+v002.print_to=v002.print_2__options;v005=v002.HashLength;v006=v002.Version;try v004=[];v001=...
+cast_to_uint16_vector(v001,v002);catch v004;if isempty(v004),v004=lasterror;end,if ...
+strcmp(v004.identifier,'MATLAB:nomem'),error_(v002.print_to,v004),else,if isfield(v002,'debug') ...
+&& v002.debug,v007=sprintf('\n[original error: %s %s]',v004.identifier,v004.message);else,v007=...
+'';end,error_(v002.print_to,'HJW:ComputeNonCryptHash:UnwindFailed',...
+['The nested input contains an unsupported data type.' v007]),end,end,if mod(numel(v001),...
+v005/16),v008=uint16(1:v005/16).'; v008(1:mod(numel(v001),v005/16))=[];v001=[v001;v008];end,if ...
+v006==1,v001=ComputeNonCryptHash_shuffle_uint16(v001);v001=...
+ComputeNonCryptHash_uint16_to_logical(v001);v001=xor(v001,reshape(v001,[],16).');else,v001=...
+ComputeNonCryptHash_shuffle_uint16(v001);v001=ComputeNonCryptHash_uint16_to_logical(v001);v001=...
+circshift_by_col(v001);end,v001=mod(sum(reshape(v001,v005,[]),2),2);v001=...
+ComputeNonCryptHash_logical_to_uint16(v001);if v002.isSaltCall,v000=v001;return,end,v001=...
+ComputeNonCryptHash_add_salt(v001,v002);v000=ComputeNonCryptHash_dec2hex(v001);v000=...
+reshape(v000.',1,[]);end
+function v000=ComputeNonCryptHash_add_salt(v000,v001),v002=16*numel(v000);v003=v001;
+v003.Version=1; v003.HashLength=v002;v003.SkipInputParse=1; v003.isSaltCall=1;v004=...
+ComputeNonCryptHash(v000,v003);v004=ComputeNonCryptHash_shuffle_uint16_inv(v004);if ...
+v001.Version>1,v004=v004(end:-1:1);end,v000=mod(double(v000).*double(v004),1+2^16);v000=...
+uint16(v000);end
+function v000=circshift_by_col(v000),persistent v001,v002=size(v000);if isempty(v001) || ...
+any(size(v001)<v002) || isempty(v001{v002(1),v002(2)}),[v003,v004]=meshgrid(1:size(v000,2),...
+1:size(v000,1));v005=mod(v003+v004-2,size(v000,1))+1;v006=sub2ind(size(v000),v005,v003);if ...
+prod(v002)<=1000,v001{v002(1),v002(2)}=v006;end,else,v006=v001{v002(1),v002(2)};end,v000=...
+v000(v006);end
+function v000=char2cellstr(v001,v002),v003=isa(v001,'char');v001=int32(v001);if nargin<2,if ...
+any(v001==13),v001=PatternReplace(v001,int32([13 10]),int32(-10));v001(v001==13)=-10;end,...
+v001(v001==10)=-10;else,for v004=1:numel(v002),v001=PatternReplace(v001,int32(v002{v004}),...
+int32(-10));end,end,v005=[0 find(v001==-10) numel(v001)+1];v000=cell(numel(v005)-1,1);for v004=...
+1:numel(v000),v006=(v005(v004 )+1);v007=(v005(v004+1)-1);v000{v004}=v001(v006:v007);end,if v003,...
+for v004=1:numel(v000),v000{v004}= char(v000{v004});end,else,for v004=1:numel(v000),v000{v004}=...
+uint32(v000{v004});end,end,end
+function v000=ComputeNonCryptHash_dec2hex(v001),persistent v002,if isempty(v002),v002=...
+upper(dec2hex(0:(-1+2^16),4));end,v001=double(v001)+1;v000=v002(v001,:);end
+function v000=ComputeNonCryptHash_logical_to_uint16(v000),if mod(numel(v000),16),...
+v000(16*ceil(numel(v000)/16))=0;end,v001=uint16(2.^(15:-1:0))';v000=uint16(reshape(v000,16,[]));
+try v000=v000.*v001;catch,v000=double(v000).*repmat(double(v001),[1 size(v000,2)]);v000=...
+uint16(v000);end,v000=uint16(sum(v000,1)).';end
+function v000=ComputeNonCryptHash_shuffle_uint16(v000),v001=65537;v002=479001600;v000 = ...
+uint16(mod(double(v000) * v002 , v001));end
+function test01(Hash),try if ~strcmp(Hash,ComputeNonCryptHash(RegGrow,256,'-v2')),...
+error('hash doesn''t match (did the default image change?)'),end,catch,error('fail'),end,end
+function v000=ComputeNonCryptHash_shuffle_uint16_inv(v000),v001=65537;v002=1919;v000=...
+uint16(mod(double(v000) * v002,v001));end
+function test03(IM),try v000=struct('seed',[3;2]);RegGrow(IM,v000);catch,error('fail'),end,end
+function test04(IM),try [v000,v001]=RegGrow(IM,0.3,[1 26],'overflow',1e2);catch,error('fail'),...
+end,end
+function test05(IM),try [v000,v001]=RegGrow(IM,'overflow',[]);if v001~=false,error('fail'),else,...
+end,catch,error('fail'),end,end
+function test09(IM),try v000=logical(zeros(3,3));v001=warning('off',...
+'HJW:RegGrow:CentroidOnlyKernel');v002=RegGrow(IM,'nHood',5,'kernel',v000);warning(v001);if ...
+sum(v002(:))~=1,error('fail'),end,catch,error('fail'),end,end
+function test10(IM),try v000=logical(zeros(3,3));v000(end)=true;v001=RegGrow(IM,'kernel',v000,...
+'maxdiff',1+max(IM(:))-min(IM(:)));if sum(v001(:))~=min(size(IM)),error('fail'),end,catch,...
+error('fail'),end,end
+function v000=AddMissing(v001,v000),v002=fieldnames(v001);v003=fieldnames(v000);for v004=...
+find(~ismember(v002,v003)).',v005=v002{v004};v000.(v005)=v001.(v005);end,end
+function test02(IM),try v000=[];v001=struct('seed',[6 4 2]);RegGrow(IM,v001);error('fail'),...
+catch v000;if isempty(v000),v000=lasterror;end,if strcmp(v000.identifier,...
+'HJW:RegGrow:incorrect_input_opt_seed'),else,error('fail'),end,end,end
+function test06(v000),if exist('OCTAVE_VERSION', 'builtin'),v000=repmat(v000,[1,1,5]);v001=20;
+else,v000=repmat(v000,[1,1,40]);v001=10;end,v001=1+rand(size(v000))/v001;v000=v000.*v001;try ...
+[v002,v003]=RegGrow(v000,'waitbar',false);catch,error('fail'),end,end
+function test08(sz,p),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,...
+2:2:end);try v001=RegGrow(v000,'silent',true);v002=round(p*numel(v001)/100);if abs( ...
+sum(v001(:)) - v002 ) > 1,error('fail'),end,catch,error('fail'),end,end
+function test07(sz),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,...
+2:2:end);try RegGrow(v000,'waitbar',true);catch,error('fail'),end,end
+function v000=ComputeNonCryptHash_uint16_to_logical(v000),persistent v001,if isempty(v001),v001=...
+dec2bin(0:(-1+2^16))=='1';v001=v001.';end,v000=double(v000)+1;v000=v001(:,v000);end
+function v000=ComputeNonCryptHash_DefaultsByVersion(v000),if ~isfield(v000,...
+'re_encode_char_on_Octave'),v000.re_encode_char=v000.Version>=2;end,if ~isfield(v000,...
+'string_to_cellstr'),v000.string_to_cellstr=v000.Version>=2;if ~isfield(v000,...
+'cast_int64_double'),v000.cast_int64_double=v000.Version==1;end,end,end
+function [v000,v001,v002]=ComputeNonCryptHash_parse_inputs(varargin),v000=true;v002=struct;
+persistent v003,if isempty(v003),v003=struct;v003.HashLength=256;v003.Version=2;
+v003.VersionFlag='-v2';v003.SkipInputParse=false;v003.isSaltCall=false;v004=struct;
+v003.print_to_con=true;v004.print_to_con=v003.print_to_con;v003.print_to_fid=[];
+v004.print_to_fid=v003.print_to_fid;v003.print_to_obj=[];v004.print_to_obj=v003.print_to_obj;
+v003.print_to_fcn=[];v004.print_to_fcn=v003.print_to_fcn;v003.print_2__default_options=v004;
+v003.print_2__options=validate_print_to__options(v004);end,if nargin==0,v001=...
+ComputeNonCryptHash_DefaultsByVersion(v003);return,end,if nargin==1,switch class(varargin{1}),...
+case {'char','string'},v001=AddMissing(v003,struct('VersionFlag',char(varargin{1})));case ...
+'struct',v001=AddMissing(v003,varargin{1});otherwise,v001=AddMissing(v003,struct('HashLength',...
+varargin{1}));end,[v001,v002,v000]=ComputeNonCryptHash_parse_inputs__ValidateInputs(v001);if ...
+v000,v001=ComputeNonCryptHash_DefaultsByVersion(v001);end,return,end,try [v001,v002,v005]=...
+ComputeNonCryptHash_parse_inputs__UnwindToStruct( struct,v002,~v000,varargin{:});v000=~v005;
+catch,v002.identifier='HJW:ComputeNonCryptHash:InputFail';v002.message=...
+'Input parsing failed. Maybe a parameter has been entered twice.';v000=false;end,if ~v000,...
+return,else ,v001=AddMissing(v003,v001);end,[v001,v002,v000]=...
+ComputeNonCryptHash_parse_inputs__ValidateInputs(v001);if v000,v001=...
+ComputeNonCryptHash_DefaultsByVersion(v001);end,end
+function [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__ValidateInputs(v000),v002=true;v001=...
+struct;try v003=str2double(v000.VersionFlag(3:end));if isnan(v003) || round(v003)~=v003 || ...
+v003>2,error('trigger');end,v000.Version=v003;catch,v001.identifier=...
+'HJW:ComputeNonCryptHash:InputIncorrect';v001.message=...
+'Version input incorrect. Must be ''-v1'', ''-v2''.';v002=false;return,end,v004=v000.HashLength;
+if numel(v004)~=1 || ~isnumeric(v004) || mod(v004,16)~=0 || v004<16,v001.identifier=...
+'HJW:ComputeNonCryptHash:InputIncorrect';v001.message=...
+'Second input (hash length) must be a multiple of 16.';v002=false;return,end,for v005=...
+fieldnames(v000.print_2__default_options),if ~isequal(v000.(v005{1}),...
+v000.print_2__default_options.(v005{1})),[v006,v001]=validate_print_to__options(v000);if ...
+isempty(v006),v001.identifier='HJW:ComputeNonCryptHash:PrintToIncorrect';v002=false;return,end,...
+v000.print_2__options=v006;break,end,end,end
+function [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__UnwindToStruct(v000,v001,v002,...
+varargin),if v002 || numel(varargin)==0,return,end,v003=varargin{1};if isa(v003,'struct'),v004=...
+fieldnames(v000);v005=fieldnames(v003);v006=unique([v004;v005]);if numel(v004)+numel(v005) ~= ...
+numel(v006),v002=true;return,end,v000=AddMissing(v000,v003);varargin(1)=[];elseif isa(v003,...
+'char') || isa(v003,'string'),try if isa(v003,'string'),v003=char(v003);end,if strcmpi('-v',...
+v003(1:2)),if isfield(v000,'VersionFlag'),error('trigger'),end,v000.VersionFlag=v003;
+varargin(1)=[];else,if isfield(v000,v003),error('trigger'),end,v000.(v003)=varargin{2};
+varargin(1:2)=[];end,catch,v002=true;return,end,else,if isfield(v000,'HashLength'),v002=true;
+return,end,v000.HashLength=v003;varargin(1)=[];end,[v000,v001,v002]=...
+ComputeNonCryptHash_parse_inputs__UnwindToStruct(v000,v001,v002,varargin{:});end
+function v000=bsxfun_plus(v001,v002),try v000=v001+v002;catch,try v000=bsxfun(@plus,v001,v002);
+catch,v003=size(v001); v004=size(v002);v001=repmat(v001,max(1,v004./v003)); v002=repmat(v002,...
+max(1,v003./v004));v000=v001+v002;end,end,end
+function v000=cast_to_uint16_vector(v000,v001),if isa(v000,'uint16'),v002='uint16';v003=...
+size(v000).';v000=reshape(v000,[],1);v000=[v000;uint16(v002.');uint16(mod(v003,2^16))];return,...
+end,v000=cast_to_uint16_vector__cell({v000},v001);v000([end-1 end])=[];end
+function v000=cast_to_uint16_vector__cell(v000,v001),v002=size(v000).';v000=v000(:);for v003=...
+1:numel(v000),if numel(v000{v003})==0,v004=double(class(v000{v003})');v000{v003}=uint16([0;v004;
+size(v000{v003})']);continue,end,switch class(v000{v003}),case {'double','single'},v000{v003}=...
+cast_to_uint16_vector__floats(v000{v003});case 'logical',v000{v003}=...
+cast_to_uint16_vector__logical(v000{v003});case {'uint8','uint16','uint32','uint64','int8',...
+'int16','int32','int64'},v000{v003}=cast_to_uint16_vector__integer(v000{v003},v001);case 'char',...
+v000{v003}=cast_to_uint16_vector__char(v000{v003},v001);case 'string',v000{v003}=...
+cast_to_uint16_vector__string(v000{v003},v001);case 'cell',v000{v003}=...
+cast_to_uint16_vector__cell(v000{v003},v001);case 'struct',v000{v003}=...
+cast_to_uint16_vector__struct(v000{v003},v001);case {'gpuArray','tall'},v000{v003}=...
+cast_to_uint16_vector__cell({gather(v000{v003})},v001);otherwise,error_(v001.print_to,...
+'HJW:cast_to_uint16_vector:nosupport','Unsupported data type in nested variable'),end,end,v000=...
+cell2mat(v000);v000=[v000;uint16(mod(v002,2^16))];end
+function v000=cast_to_uint16_vector__floats(v000),v001=size(v000).';v002=class(v000);[v003,...
+v004]=typecast_double_uint64(double(v000));v005=mod(v003,2^16);v003=v003-v005;v003=v003/2^16;
+v004=v004.';v006 =mod(v003,2^16);v003=v003-v006; v003=v003/2^16;v006=v006.';v007 =mod(v003,...
+2^16);v003=v003-v007; v003=v003/2^16;v007=v007.';v008 =mod(v003,2^16); v008=v008.';v000=[v008;
+v007;v006;v004];v000=uint16(v000(:));v000=[v000;uint16(v002.');uint16(mod(v001,2^16))];end
+function v000=unicode_to_char(v001,v002),persistent v003,if isempty(v003),v003 = ...
+exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if nargin==1,v002=~v003;end,if v002,if ...
+all(v001<65536),v000=uint16(v001);v000=reshape(v000,1,numel(v000));else,[v004,v005,v006]=...
+unique(v001);v000=cell(1,numel(v001));for v007=1:numel(v004),v008=unicode_to_UTF16(v004(v007));
+v008=uint16(v008);v000(v006==v007)={v008};end,v000=cell2mat(v000);end,if ~v003,v000=char(v000);
+end,else,if all(v001<128),v000=char(v001);v000=reshape(v000,1,numel(v000));else,[v004,v005,...
+v006]=unique(v001);v000=cell(1,numel(v001));for v007=1:numel(v004),v008=...
+unicode_to_UTF8(v004(v007));v008=uint8(v008);v000(v006==v007)={v008};end,v000=cell2mat(v000);
+v000=char(v000);end,end,end
+function v000=unicode_to_UTF16(v001),if v001<65536,v000=v001;return,end,v002=double(v001)-65536;
+v002=dec2bin(v002,20);v000=bin2dec(['110110' v002(1:10);'110111' v002(11:20)]).';end
+function [v000,v001,v002]=UTF8_to_unicode_internal(v000,v003),v001='success';v002=...
+struct('identifier','HJW:UTF8_to_unicode:notUTF8','message','Input is not UTF-8.');persistent ...
+v004,if isempty(v004),v004 = exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if any(v000>255),v001=...
+'error';if v003,return,end,elseif all(v000<128),return,end,for v005=4:-1:2,v006=...
+bin2dec([repmat('1',1,v005) repmat('0',1,8-v005)]);v007=v000>=v006 & v000<256;if any(v007),v007=...
+find(v007);v007=v007(:).';if numel(v000)<(max(v007)+v005-1),v001='error';if v003,return,end,...
+v007( (v007+v005-1)>numel(v000) )=[];end,if ~isempty(v007),v008=bsxfun_plus(v007 , ...
+(0:(v005-1)).' );v008=v008.';v007=v000(v008);end,else,v007=[];end,v009=[repmat('1',1,v005-1) ...
+repmat('10',1,v005)];v010=unique([1:(v005+1) 1:8:(8*v005) 2:8:(8*v005)]);if numel(v007)>0,v007=...
+unique(v007,'rows');v011=mat2cell(v007,ones(size(v007,1),1),v005);for v012=1:numel(v011),v013=...
+dec2bin(double(v011{v012}))';if ~strcmp(v009,v013(v010)),v001='error';if v003,return,end,...
+continue,end,v013(v010)='';if ~v004,v014=uint32(bin2dec(v013 ));else,v014=...
+uint32(bin2dec(v013.'));end,v000=PatternReplace(v000,v011{v012},v014);end,end,end,end
+function v000=unicode_to_UTF8(v001),if v001<128,v000=v001;return,end,persistent v002,if ...
+isempty(v002),v002=struct;v002.limits.lower=hex2dec({'0000','0080','0800', '10000'});
+v002.limits.upper=hex2dec({'007F','07FF','FFFF','10FFFF'});v002.scheme{2}='110xxxxx10xxxxxx';
+v002.scheme{2}=reshape(v002.scheme{2}.',8,2);v002.scheme{3}='1110xxxx10xxxxxx10xxxxxx';
+v002.scheme{3}=reshape(v002.scheme{3}.',8,3);v002.scheme{4}='11110xxx10xxxxxx10xxxxxx10xxxxxx';
+v002.scheme{4}=reshape(v002.scheme{4}.',8,4);for v003=2:4,v002.scheme_pos{v003}=...
+find(v002.scheme{v003}=='x');v002.bits(v003)=numel(v002.scheme_pos{v003});end,end,v004=...
+find(v002.limits.lower<=v001 & v001<=v002.limits.upper);v000=v002.scheme{v004};v005=...
+v002.scheme_pos{v004};v003=dec2bin(v001,v002.bits(v004));v000(v005)=v003;v000=bin2dec(v000.').';
+end
+function [v000,v001,v002]=UTF8_to_unicode(v003,v004),if nargin<2,v004=[];end,v005= nargout==1 ;
+v003=uint32(v003);[v002,v006,v007]=UTF8_to_unicode_internal(v003,v005);if strcmp(v006,...
+'success'),v001=true;v000=v002;elseif strcmp(v006,'error'),v001=false;if v005,error_(v004,v007),...
+end,v000=v003;end,end
+function v000=cast_to_uint16_vector__logical(v000),v001=size(v000).';v000=v000(:);if ...
+mod(numel(v000),16),v000(16*ceil(numel(v000)/16))=0;end,v002=uint16(2.^(15:-1:0))';v000=...
+uint16(reshape(v000,16,[]));try v000=v000.*v002;catch,v000=double(v000).*repmat(double(v002),[1 ...
+size(v000,2)]);v000=uint16(v000);end,v000=uint16(sum(v000,1)).';v000=[v000;uint16(mod(v001,...
+2^16))];end
+function v000=cast_to_uint16_vector__integer(v000,v001),v002=size(v000).';v000=v000(:);
+persistent v003,if isempty(v003),v003=ifversion('>=','R2010b','Octave','>',0);end,v004=...
+class(v000);v005=~v001.cast_int64_double && v003 && v004(end)=='4';if ~v005,if ...
+any(abs(double(v000(:)))>2^52),warning_(v001,'HJW:ComputeNonCryptHash:int64rounding',...
+['int64 and uint64 will be rounded pre-R2010b, resulting in rounding.',char(10),...
+'This will result in a hash that is different from newer releases.']),end,end,if v005,if ...
+v004(1)~='u',v006=v000>0;v007=-int64(-inf);v008=uint64(v000+v007+1);v008(v006)=...
+uint64(v000(v006))+uint64(v007)+1;v000=v008;end,elseif v004(1)~='u',v000=...
+double(v000)-double(eval([v004 '(-inf)']));else,v000=double(v000);end,switch v004(end),case '8',...
+if mod(numel(v000),2),v000(end+1)=0;end,v000=reshape(v000,[],2);v000=v000(:,1)*255+v000(:,2);
+v000=uint16(v000);case '6',v000=uint16(v000);case '2',v009=floor(v000/2^16);v009=v009.';v010=...
+mod(v000,2^16); v010=v010.';v000=[v009;v010];v000=uint16(v000(:));case '4',v011=v000;v012=...
+mod(v011,2^16);v011=v011-v012;v011=v011/2^16;v012=v012.';v013=mod(v011,2^16);v011=v011-v013;
+v011=v011/2^16;v013=v013.';v010=mod(v011,2^16);v011=v011-v010;v011=v011/2^16;v010=v010.';v009=...
+mod(v011,2^16); v009=v009.';v000=[v009;v010;v013;v012];v000=uint16(v000(:));end,v000=[v000;
+uint16(v004.');uint16(mod(v002,2^16))];end
+function [v000,v001]=validate_print_to__options(v002,v001),if nargin<2,v001=struct;end,if ...
+~isfield(v002,'print_to_con'),v002.print_to_con=[];end,if ~isfield(v002,'print_to_fid'),...
+v002.print_to_fid=[];end,if ~isfield(v002,'print_to_obj'),v002.print_to_obj=[];end,if ...
+~isfield(v002,'print_to_fcn'),v002.print_to_fcn=[];end,v003=true;v000=struct;v004=...
+v002.print_to_fid;if isempty(v004),v000.boolean.fid=false;else,v003=false;v000.boolean.fid=true;
+v000.fid=v004;for v005=1:numel(v004),try v006=ftell(v004(v005));catch,v006=-1;end,if ...
+v004(v005)~=1 && v006==-1,v001.message=['Invalid print_to_fid parameter:',char(10),...
+'should be a valid file identifier or 1.'];v000=[];return,end,end,end,v004=v002.print_to_obj;if ...
+isempty(v004),v000.boolean.obj=false;else,v003=false;v000.boolean.obj=true;v000.obj=v004;for ...
+v005=1:numel(v004),try v007=get(v004(v005),'String' );set( v004(v005),'String','' );set( ...
+v004(v005),'String',v007);catch,v001.message=['Invalid print_to_obj parameter:',char(10),...
+'should be a handle to an object with a writeable String property.'];v000=[];return,end,end,end,...
+v004=v002.print_to_fcn;if isempty(v004),v000.boolean.fcn=false;else,v003=false;try for v005=...
+1:numel(v004),if ~ismember(class(v004(v005).h),{'function_handle','inline'}) || ...
+numel(v004(v005).h)~=1,error('trigger error'),end,end,catch,v001.message=...
+['Invalid print_to_fcn parameter:',char(10),...
+'should be a struct with the h field containing a function handle,',char(10),...
+'anonymous function or inline function.'];v000=[];return,end,end,v004=v002.print_to_con;if ...
+isempty(v004),v000.boolean.con=v003;else,[v008,v000.boolean.con]=test_if_scalar_logical(v004);
+if ~v008,v001.message=['Invalid print_to_con parameter:',char(10),...
+'should be a scalar logical.'];v000=[];return,end,end,end
+function warning_(v001,varargin),persistent v000,if isempty(v000),v000=func2str(@warning_);end,...
+if isempty(v001),v001=struct;end,v001=parse_warning_error_redirect_options(v001);[v002,v003,...
+v004,v005]=parse_warning_error_redirect_inputs(varargin{:});v006=struct('identifier',v002,...
+'message',v003,'stack',v004);if v001.boolean.con,if ~isempty(v002),warning(v002,'%s',v003),else,...
+warning(v003), end,else,if ~isempty(v002),lastwarn(v003,v002); else,lastwarn(v003),end,end,if ...
+v001.boolean.obj,v007=v003;while v007(end)==10,v007(end)=[];end,if any(v007==10),v007=...
+char2cellstr(['Warning: ' v007]);else,v007=['Warning: ' v007];end,set(v001.obj,'String',v007),...
+for v008=v001.obj(:).',try set(v008,'String',v007);catch,end,end,end,if v001.boolean.fid || ...
+v001.boolean.fcn,v009=2;[v005,v004]=get_trace(v009);end,if v001.boolean.fid,for v010=...
+v001.fid(:).',try fprintf(v010,'Warning: %s\n%s',v003,v005);catch,end,end,end,if ...
+v001.boolean.fcn,if ismember(v000,{v004.name}),error('prevent recursion'),end,for v011=...
+v001.fcn(:).',if isfield(v011,'data'),try feval(v011.h,'warning',v006,v011.data);catch,end,else,...
+try feval(v011.h,'warning',v006);catch,end,end,end,end,end
+
 ##### SOURCE END #####
 --></body></html>
