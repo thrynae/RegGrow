@@ -1,0 +1,45 @@
+{
+    "_schemaVersion": "1.0.0",
+    "_v_RegGrow":"1.2.0",
+    "RegGrow":
+    {
+        "inputs":
+        [
+            {"name":"I", "kind":"positional", "type":["numeric"],
+             "purpose":"Image/data array"},
+            {"name":"maxDiff", "kind":"positional", "type":["numeric","scalar"],
+             "purpose":"Minimum value difference for added pixels"},
+            {"name":"seed", "kind":"positional", "type":["numeric"],
+             "purpose":"Initial starting pixel (index or sub)"},
+            {"mutuallyExclusiveGroup":
+             [
+                 [
+                     {"name":"OptionStruct", "kind":"positional", "type":["struct"],
+                      "purpose":"Struct containing the options"}
+                 ],
+                 [
+                     {"name":"I", "kind":"positional", "type":["numeric"],
+                      "purpose":"Image/data array"},
+                     {"name":"maxDiff", "kind":"positional", "type":["numeric","scalar"],
+                      "purpose":"Minimum value difference for added pixels"},
+                     {"name":"seed", "kind":"positional", "type":["numeric"],
+                      "purpose":"Initial starting pixel (index or sub)"},
+
+                     {"name":"nHood","kind":"namevalue", "type":["double","scalar"],
+                      "purpose":"Neighborhood being checked every iteration"},
+                     {"name":"kernel","kind":"namevalue", "type":["logical"],
+                      "purpose":"The flipped convolution kernel"},
+                     {"name":"overflow","kind":"namevalue", "type":["numeric","scalar","positive"],
+                      "purpose":"Maximum number of pixels before abort"},
+                     {"name":"waitbar","kind":"namevalue", "type":["logical","scalar","choices={true,false}"],
+                      "purpose":"Show the progress in a waitbar"},
+                     {"name":"silent","kind":"namevalue", "type":["logical","scalar","choices={true,false}"],
+                      "purpose":"Do not show the progress in a waitbar"},
+                     {"name":"WaitbarClosingBehavior","kind":"namevalue", "type":["char","vector","choices={'warning','error','return','ignore'}"],
+                      "purpose":"Determine behavior on closing waitbar"}
+                 ]
+             ]
+            }
+        ]
+    }
+}
