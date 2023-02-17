@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>RegGrow</title><meta name="generator" content="MATLAB 9.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-03-18"><meta name="DC.source" content="RegGrow.m"><style type="text/css">
+      --><title>RegGrow</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-02-17"><meta name="DC.source" content="RegGrow.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -94,12 +94,14 @@ result = RegGrow(___,options)
 <tr><td>
 result
 </td><td>
-The result of the region growing. This will be a logical array of the same size as the input image.
+The result of the region growing. This will be a logical array of the same size as the input
+image.
 </td></tr>
 <tr><td>
 OverflowFlag
 </td><td>
-A flag in case of overflow. See below for how to enable checking for an overflow. Normally this output should be false.
+A flag in case of overflow. See below for how to enable checking for an overflow. Normally this
+output should be false.
 </td></tr>
 </table>
 </p><h2 id="4">Input arguments</h2><p>
@@ -121,7 +123,8 @@ absolute value. If omitted, the default value is 2/3*std(I(:)).
 seed
 </td><td>
 The initial starting point of the algorithm. If omitted, the default value is the first pixel
-(linear index 1).
+(linear index 1). If you want to use multiple seeds, you can use the ResumeSegmentation
+parameter. If the ResumeSegmentation is provided, this parameter is ignored.
 </td></tr>
 <tr><td>
 Name,Value
@@ -139,13 +142,6 @@ to the default values. Field names are not case-sensitive.
 </p><h2 id="5">Name,Value pairs</h2><p>
 <table border=1>
 <tr><td>
-nHood
-</td><td>
-The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
-2D images and 6-neighborhood for 3D images).
-<br>This setting is ignored if the kernel input is provided.
-</td></tr>
-<tr><td>
 kernel
 </td><td>
 The kernel input allows more flexibility in the direction of growth. This parameter must be a
@@ -155,14 +151,37 @@ is set to true.
 convolution kernel (i.e. it is flipped along all directions).
 </td></tr>
 <tr><td>
+nHood
+</td><td>
+The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
+2D images and 6-neighborhood for 3D images).
+<br>This setting is ignored if the kernel input is provided.
+</td></tr>
+<tr><td>
 overflow
 </td><td>
-This parameter allows the detection of a segmentation leak. This allows the process to exit
-before it is complete if too many pixels are being segmented. A leak can cause the segmentation
-to take a very long time to complete, especially for 3D images.
-<br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels),
-the second output is set to true and the function halts. No error or warning is triggered.
-<br><code>default=false;</code>
+This parameter is the maximum number of voxels/pixels included in the region. This allows the
+process to exit before it is complete if too many pixels are being segmented, indicating a
+segmentation leak. A leak can cause the segmentation to take a very long time to complete,
+especially for 3D images. If the segmented area or volume exceeds this value (counted as number
+of pixels or voxels), the second output is set to true and the function halts. No error or
+warning is triggered. This value must be either false, or a positive integer, or a value between
+0 and 1, in which case it is treated as a fraction of the total number of elements.
+</td></tr>
+<tr><td>
+ResumeSegmentation
+</td><td>
+This parameter allows resuming the region growing from a previous aborted result (e.g. closing
+the waitbar or exceeding the overflow parameter). This also allows growing from multiple seed
+points. If this parameter is provided the seed parameter is ignored.
+<code>ResumeSegmentation</code> needs to be a logical of the same size as the image with at least
+1&nbsp;element set to <code>true</code>.
+</td></tr>
+<tr><td>
+silent
+</td><td>
+This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
+provided to improve code readability.
 </td></tr>
 <tr><td>
 waitbar
@@ -171,12 +190,6 @@ Use a waitbar to show the progress of the region growing. The maximum value is e
 overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does
 provide a visual indication of progress. The default is false for 2D input and true for higher
 dimensional input.
-</td></tr>
-<tr><td>
-silent
-</td><td>
-This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
-provided to improve code readability.
 </td></tr>
 <tr><td>
 WaitbarClosingBehavior
@@ -199,7 +212,7 @@ the function to return the incomplete result.
 <span class="comment">% Call RegGrow without input to segment the background in the example image.</span>
 mask=RegGrow;
 
-<span class="comment">%Fuse image and mask.</span>
+<span class="comment">% Fuse image and mask.</span>
 r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
 subplot(1,2,1),imshow(IM),title(<span class="string">'original example image'</span>)
 subplot(1,2,2),imshow(fused),title(<span class="string">'segmented background'</span>)
@@ -217,7 +230,7 @@ tic,r{3}=RegGrow(IM,opts);t3=toc;
 
 IM_=cell(1,3);
 <span class="keyword">for</span> n=1:3
-    <span class="comment">%Fuse image and mask.</span>
+    <span class="comment">% Fuse image and mask.</span>
     r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
     IM_{n}=fused;
 <span class="keyword">end</span>
@@ -244,9 +257,21 @@ Compatibility considerations:
 <td style="border:2px solid black;"> MacOS </td>
 </tr>
 <tr>
+<td style="border:2px solid black;"> Matlab R2022b </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
+<td> <it>Monterey : Pass</it> </td>
+</tr>
+<tr>
+<td style="border:2px solid black;"> Matlab R2022a </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
 <td style="border:2px solid black;"> Matlab R2021b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it>Monterey : Pass</it> </td>
 </tr>
 <tr>
@@ -258,7 +283,7 @@ Compatibility considerations:
 <tr>
 <td style="border:2px solid black;"> Matlab R2020b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it>Monterey : Pass</it> </td>
 </tr>
 <tr>
@@ -270,7 +295,7 @@ Compatibility considerations:
 <tr>
 <td style="border:2px solid black;"> Matlab R2019b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it>Monterey : Pass</it> </td>
 </tr>
 <tr>
@@ -282,54 +307,30 @@ Compatibility considerations:
 <tr>
 <td style="border:2px solid black;"> Matlab R2018a </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it></it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Matlab R2017b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it>Monterey : Pass</it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Matlab R2016b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it>Monterey : Pass</it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Matlab R2015a </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it>ubuntu_22.04 : Pass</it> </td>
 <td> <it></it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Matlab R2013b </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it></it> </td>
-<td> <it></it> </td>
-</tr>
-<tr>
-<td style="border:2px solid black;"> Matlab R2012a </td>
-<td> <it></it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
-<td> <it></it> </td>
-</tr>
-<tr>
-<td style="border:2px solid black;"> Matlab R2011a </td>
-<td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
-<td> <it></it> </td>
-</tr>
-<tr>
-<td style="border:2px solid black;"> Matlab R2010b </td>
-<td> <it></it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
-<td> <it></it> </td>
-</tr>
-<tr>
-<td style="border:2px solid black;"> Matlab R2010a </td>
-<td> <it>W7 : Pass</it> </td>
 <td> <it></it> </td>
 <td> <it></it> </td>
 </tr>
@@ -352,32 +353,38 @@ Compatibility considerations:
 <td> <it></it> </td>
 </tr>
 <tr>
+<td style="border:2px solid black;"> Octave 7.2.0 </td>
+<td> <it>W10 : Pass</it> </td>
+<td> <it></it> </td>
+<td> <it></it> </td>
+</tr>
+<tr>
 <td style="border:2px solid black;"> Octave 6.2.0 </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>raspbian_11 : Pass</it> </td>
-<td> <it>Catalina : Pass</it> </td>
+<td> <it>raspbian_11 : Partial</it> </td>
+<td> <it>Catalina : Partial</it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Octave 5.2.0 </td>
 <td> <it>W10 : Pass</it> </td>
-<td> <it>ubuntu_20.04 : Pass</it> </td>
+<td> <it></it> </td>
 <td> <it></it> </td>
 </tr>
 <tr>
 <td style="border:2px solid black;"> Octave 4.4.1 </td>
 <td> <it>W10 : Pass</it> </td>
 <td> <it></it> </td>
-<td> <it>Catalina : Pass</it> </td>
+<td> <it>Catalina : Partial</it> </td>
 </tr>
 </table>
-</p><pre>Version: 1.2.0
-Date:    2022-03-18
+</p><pre>Version: 1.3.0
+Date:    2023-02-17
 Author:  H.J. Wisselink
 Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
 Email = 'h_j_wisselink*alumnus_utwente_nl';
 Real_email = regexprep(Email,{'*','_'},{'@','.'})</pre><h2 id="12">Performance</h2><p>
 The benchmarking function used to generate the results below can be found
-<a href=https://web.archive.org/web/20220318112126/https://cdn-102.anonfiles.com/v9F2c1P9x1/6aae3e41-1647603036/aaa___RegGrow___performance_test.m>here</a>.
+<a href=https://web.archive.org/web/20230217154437/https://cdn-141.anonfiles.com/z1B1B5Y8y6/51828150-1676649273/aaa___RegGrow___performance_test.m>here</a>.
 <br>The test results shown in the tables below are normalized to the results of the newest
 Matlab release, since the performace is strongly dependent on the specific
 computer running the test. To allow absolute comparisons as well the results in that cell
@@ -398,617 +405,127 @@ should compensate for most of this effect.
 <td style="border:2px solid black;"> MacOS </td>
 </tr>
 <tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2022b </td>
+<td> (W10) <br> 0.086&nbsp;s <br> 0.204&nbsp;s </td>
+<td> (ubuntu_22.04) <br> 0.122&nbsp;s <br> 0.216&nbsp;s </td>
+<td> (Monterey) <br> 0.365&nbsp;s <br> 0.766&nbsp;s </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Matlab R2022a </td>
+<td> (W10) <br> 116&nbsp;% <br> 105&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2021b </td>
-<td> (W10) <br> 0.137&nbsp;s <br> 0.304&nbsp;s </td>
-<td> (ubuntu_20.04) <br> 0.168&nbsp;s <br> 0.366&nbsp;s </td>
-<td> (Monterey) <br> 0.270&nbsp;s <br> 0.594&nbsp;s </td>
+<td> (W10) <br> 99&nbsp;% <br> 107&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 109&nbsp;% <br> 110&nbsp;% </td>
+<td> (Monterey) <br> 100&nbsp;% <br> 101&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2021a </td>
-<td> (W10) <br> 96&nbsp;% <br> 98&nbsp;% </td>
+<td> (W10) <br> 101&nbsp;% <br> 102&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2020b </td>
-<td> (W10) <br> 98&nbsp;% <br> 102&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 100&nbsp;% <br> 102&nbsp;% </td>
-<td> (Monterey) <br> 155&nbsp;% <br> 131&nbsp;% </td>
+<td> (W10) <br> 102&nbsp;% <br> 104&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 95&nbsp;% <br> 110&nbsp;% </td>
+<td> (Monterey) <br> 120&nbsp;% <br> 99&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2020a </td>
-<td> (W10) <br> 136&nbsp;% <br> 102&nbsp;% </td>
+<td> (W10) <br> 144&nbsp;% <br> 118&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2019b </td>
-<td> (W10) <br> 136&nbsp;% <br> 100&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 117&nbsp;% <br> 96&nbsp;% </td>
-<td> (Monterey) <br> 117&nbsp;% <br> 104&nbsp;% </td>
+<td> (W10) <br> 141&nbsp;% <br> 116&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 119&nbsp;% <br> 113&nbsp;% </td>
+<td> (Monterey) <br> 120&nbsp;% <br> 102&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2019a </td>
-<td> (W10) <br> 155&nbsp;% <br> 114&nbsp;% </td>
+<td> (W10) <br> 170&nbsp;% <br> 125&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2018a </td>
-<td> (W10) <br> 165&nbsp;% <br> 113&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 125&nbsp;% <br> 81&nbsp;% </td>
+<td> (W10) <br> 219&nbsp;% <br> 132&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 128&nbsp;% <br> 98&nbsp;% </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2017b </td>
-<td> (W10) <br> 182&nbsp;% <br> 110&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 108&nbsp;% <br> 77&nbsp;% </td>
-<td> (Monterey) <br> 123&nbsp;% <br> 93&nbsp;% </td>
+<td> (W10) <br> 219&nbsp;% <br> 152&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 121&nbsp;% <br> 121&nbsp;% </td>
+<td> (Monterey) <br> 117&nbsp;% <br> 90&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2016b </td>
-<td> (W10) <br> 207&nbsp;% <br> 201&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 117&nbsp;% <br> 118&nbsp;% </td>
-<td> (Monterey) <br> 132&nbsp;% <br> 154&nbsp;% </td>
+<td> (W10) <br> 242&nbsp;% <br> 324&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 113&nbsp;% <br> 189&nbsp;% </td>
+<td> (Monterey) <br> 124&nbsp;% <br> 145&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2015a </td>
-<td> (W10) <br> 201&nbsp;% <br> 208&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 127&nbsp;% <br> 136&nbsp;% </td>
+<td> (W10) <br> 248&nbsp;% <br> 328&nbsp;% </td>
+<td> (ubuntu_22.04) <br> 168&nbsp;% <br> 227&nbsp;% </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2013b </td>
-<td> (W10) <br> 156&nbsp;% <br> 194&nbsp;% </td>
-<td>  </td>
-<td>  </td>
-</tr>
-<tr>
-<td style="border:2px solid black;vertical-align:middle"> Matlab R2012a </td>
-<td>  </td>
-<td> (ubuntu_20.04) <br> 142&nbsp;% <br> 165&nbsp;% </td>
-<td>  </td>
-</tr>
-<tr>
-<td style="border:2px solid black;vertical-align:middle"> Matlab R2011a </td>
-<td> (W10) <br> 205&nbsp;% <br> 216&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 136&nbsp;% <br> 133&nbsp;% </td>
-<td>  </td>
-</tr>
-<tr>
-<td style="border:2px solid black;vertical-align:middle"> Matlab R2010b </td>
-<td>  </td>
-<td> (ubuntu_20.04) <br> 150&nbsp;% <br> 140&nbsp;% </td>
-<td>  </td>
-</tr>
-<tr>
-<td style="border:2px solid black;vertical-align:middle"> Matlab R2010a </td>
-<td> (W7) <br> 217&nbsp;% <br> 350&nbsp;% </td>
+<td> (W10) <br> 237&nbsp;% <br> 349&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab R2007b </td>
-<td> (W10) <br> 844&nbsp;% <br> 1&thinsp;505&nbsp;% </td>
+<td> (W10) <br> 1&thinsp;281&nbsp;% <br> 2&thinsp;588&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab 7.1 (R14SP3) </td>
-<td> (XP) <br> 1&thinsp;096&nbsp;% <br> 1&thinsp;911&nbsp;% </td>
+<td> (XP) <br> 1&thinsp;957&nbsp;% <br> 2&thinsp;838&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Matlab 6.5 (R13) </td>
-<td> (W10) <br> 1&thinsp;318&nbsp;% <br> 1&thinsp;918&nbsp;% </td>
+<td> (W10) <br> 2&thinsp;242&nbsp;% <br> 2&thinsp;743&nbsp;% </td>
+<td>  </td>
+<td>  </td>
+</tr>
+<tr>
+<td style="border:2px solid black;vertical-align:middle"> Octave 7.2.0 </td>
+<td> (W10) <br> 214&nbsp;% <br> 213&nbsp;% </td>
 <td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Octave 6.2.0 </td>
-<td> (W10) <br> 141&nbsp;% <br> 148&nbsp;% </td>
-<td> (raspbian_11) <br> 1&thinsp;090&nbsp;% <br> 1&thinsp;401&nbsp;% </td>
-<td> (Catalina) <br> 100&nbsp;% <br> 70&nbsp;% </td>
+<td> (W10) <br> 185&nbsp;% <br> 190&nbsp;% </td>
+<td> (raspbian_11) <br> 1&thinsp;413&nbsp;% <br> 2&thinsp;465&nbsp;% </td>
+<td> (Catalina) <br> 66&nbsp;% <br> 47&nbsp;% </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Octave 5.2.0 </td>
-<td> (W10) <br> 285&nbsp;% <br> 175&nbsp;% </td>
-<td> (ubuntu_20.04) <br> 118&nbsp;% <br> 80&nbsp;% </td>
+<td> (W10) <br> 310&nbsp;% <br> 253&nbsp;% </td>
+<td>  </td>
 <td>  </td>
 </tr>
 <tr>
 <td style="border:2px solid black;vertical-align:middle"> Octave 4.4.1 </td>
-<td> (W10) <br> 166&nbsp;% <br> 150&nbsp;% </td>
+<td> (W10) <br> 234&nbsp;% <br> 207&nbsp;% </td>
 <td>  </td>
-<td> (Catalina) <br> 124&nbsp;% <br> 76&nbsp;% </td>
+<td> (Catalina) <br> 75&nbsp;% <br> 47&nbsp;% </td>
 </tr>
 </table>
-</p><h2 id="13">Test suite</h2><p>This tester is included so you can test if your own modifications would introduce any bugs. These tests form the basis for the compatibility table above.</p><p>Note that some of the functions in this tester might be different from the functions included in the actual function. Usually this is done to allow triggering of certain errors.</p><p>To save space, the tester function below was minified. The full tester function (including all comments) can be found <a href="https://web.archive.org/web/20220318112344/https://cdn-127.anonfiles.com/b5H4ceP7x6/a6f9599e-1647603195/aaa___RegGrow___test.m">here</a>.</p><pre class="codeinput"><span class="comment">% Run a test suite</span>
-<span class="comment">%</span>
-<span class="comment">% these syntaxes test basic availability of functionalities and test cases</span>
-<span class="comment">% that caused issues after writing the initial version of this function</span>
-<span class="comment">%</span>
-<span class="comment">% Pass:    passes all tests</span>
-<span class="comment">% Partial: [no partial passing condition]</span>
-<span class="comment">% Fail:    fails any test</span>
-<span class="comment">%</span>
-<span class="keyword">function</span> v000=aaa___RegGrow___test(varargin),v000=<span class="string">'pass'</span>;<span class="keyword">if</span> nargin==0,v001=false;<span class="keyword">else</span>,v001=true;
-<span class="keyword">end</span>,<span class="keyword">if</span> ifversion(<span class="string">'&lt;'</span>,0,<span class="string">'Octave'</span>,<span class="string">'&gt;'</span>,0),v002 = get(0,<span class="string">'DefaultImageCData'</span>);v002 = <span class="keyword">...</span>
-v002/max(v002(:));v003=<span class="string">'5053C653355FA8A8B0F97C920CAF9A260F31E3CAAB728A07DC40AEB76C275363'</span>;
-disp(<span class="string">'NOTE: different example image, performance can''t be compared with Matlab'</span>),<span class="keyword">else</span>,v004 = <span class="keyword">...</span>
-pow2(get(0,<span class="string">'DefaultImageCData'</span>),47);v002 = bitshift(v004,-37);v002 = fix(v002);v002 = <span class="keyword">...</span>
-bitand(v002,31);v002 = v002/max(v002(:));v003=<span class="keyword">...</span>
-<span class="string">'EFB571891EFFD822D3049FF72F2299BDCE757D63539D4C740E21DC62F30C6C0B'</span>;<span class="keyword">end</span>,clc,<span class="keyword">try</span> [v005,v006]=<span class="keyword">...</span>
-speedtest;fprintf(<span class="string">'speedtest finished\n\n'</span>),v007=<span class="keyword">...</span>
-{sprintf(<span class="string">'The waitbar for test 07 should close at %.0f%%\n'</span>,v006)};v007{2}=<span class="keyword">...</span>
-sprintf(<span class="string">'No waitbar should appear for test 08\n'</span>);<span class="keyword">if</span> ~v001,<span class="keyword">try</span> uiwait(msgbox(v007)),<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">catch</span>,v005=[50 50];fprintf(<span class="string">'speedtest failed\n\n'</span>),<span class="keyword">end</span>,v008=0;tic,<span class="keyword">try</span> test01(v003);
-fprintf(<span class="string">'test 01: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 01: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
-pause(0.01);tic,<span class="keyword">try</span> test02(v002);fprintf(<span class="string">'test 02: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span> ME,<span class="keyword">...</span>
-disp(<span class="string">'test 02: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test03(v002);
-fprintf(<span class="string">'test 03: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 03: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
-pause(0.01);tic,<span class="keyword">try</span> test04(v002);fprintf(<span class="string">'test 04: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
-disp(<span class="string">'test 04: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test05(v002);
-fprintf(<span class="string">'test 05: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 05: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
-pause(0.01);tic,<span class="keyword">try</span> test06(v002);fprintf(<span class="string">'test 06: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
-disp(<span class="string">'test 06: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test07(v005),<span class="keyword">...</span>
-fprintf(<span class="string">'test 07: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 07: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
-pause(0.01);tic,<span class="keyword">try</span> test08(v005,v006);fprintf(<span class="string">'test 08: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
-disp(<span class="string">'test 08: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;pause(0.01);tic,<span class="keyword">try</span> test09(v002);
-fprintf(<span class="string">'test 09: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,disp(<span class="string">'test 09: fail'</span>),v008=v008+1;<span class="keyword">end</span>,drawnow;
-pause(0.01);tic,<span class="keyword">try</span> test10(v002);fprintf(<span class="string">'test 10: pass (%.1fs)\n'</span>,toc),<span class="keyword">catch</span>,<span class="keyword">...</span>
-disp(<span class="string">'test 10: fail'</span>),v008=v008+1;<span class="keyword">end</span>,<span class="keyword">if</span> v008&gt;0,<span class="keyword">if</span> nargout&gt;0,v000=<span class="string">'fail'</span>;<span class="keyword">else</span>,<span class="keyword">...</span>
-error(<span class="string">'There were %d failed tests'</span>,v008),<span class="keyword">end</span>,<span class="keyword">end</span>,disp([<span class="string">'tester function '</span> mfilename <span class="keyword">...</span>
-<span class="string">' finished '</span>]),<span class="keyword">if</span> nargout==0,clear,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v002=test_figure_available,<span class="keyword">try</span> [v000,v001]=lastwarn(<span class="string">'BLANK'</span>,<span class="string">'BLANK:BLANK'</span>);
-delete(figure);[v000,v001]=lastwarn(v000,v001);<span class="keyword">if</span> strcmp(v001,<span class="string">'BLANK:BLANK'</span>) &amp;&amp; strcmp(v000,<span class="keyword">...</span>
-<span class="string">'BLANK'</span>),v002=true;<span class="keyword">else</span>,clc,error(<span class="string">'trigger'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,v002=false;<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=test_waitbar_available,<span class="keyword">try</span> delete(waitbar(0,<span class="string">'test if GUI is available'</span>));v000=<span class="keyword">...</span>
-true;<span class="keyword">catch</span>,v000=false;<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=parse_NameValue(v002,varargin),<span class="keyword">switch</span> numel(v002),<span class="keyword">case</span> 0,<span class="keyword">...</span>
-error(<span class="string">'parse_NameValue:MixedOrBadSyntax'</span>,<span class="keyword">...</span>
-<span class="string">'Optional inputs must be entered as Name,Value pairs or as a scalar struct.'</span>),<span class="keyword">case</span> 1,<span class="keyword">otherwise</span>,<span class="keyword">...</span>
-v002=v002(1);<span class="keyword">end</span>,v000=v002;v001={};<span class="keyword">if</span> nargin==1,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">try</span> v003=numel(varargin)==1 &amp;&amp; <span class="keyword">...</span>
-isa(varargin{1},<span class="string">'struct'</span>);v004=mod(numel(varargin),2)==0 &amp;&amp; all( cellfun(<span class="string">'isclass'</span>,<span class="keyword">...</span>
-varargin(1:2:end),<span class="string">'char'</span> ) | cellfun(<span class="string">'isclass'</span>,varargin(1:2:end),<span class="string">'string'</span>) );<span class="keyword">if</span> ~( v003 || v004 <span class="keyword">...</span>
-),error(<span class="string">'trigger'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> nargin==2,v005=fieldnames(varargin{1});v006=struct2cell(varargin{1});
-<span class="keyword">else</span>,v005=cellstr(varargin(1:2:end));v006=varargin(2:2:end);<span class="keyword">end</span>,<span class="keyword">if</span> ~iscellstr(v005),<span class="keyword">...</span>
-error(<span class="string">'trigger'</span>);<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'parse_NameValue:MixedOrBadSyntax'</span>,<span class="keyword">...</span>
-<span class="string">'Optional inputs must be entered as Name,Value pairs or as a scalar struct.'</span>),<span class="keyword">end</span>,v007=<span class="keyword">...</span>
-fieldnames(v002);v008=cell(1,3);v009{1}=v007;v009{2}=lower(v009{1});v009{3}=strrep(v009{2},<span class="string">'_'</span>,<span class="keyword">...</span>
-<span class="string">''</span>);v001=false(size(v007));<span class="keyword">for</span> v010=1:numel(v005),v011=v005{v010};[v012,v008{1}]=<span class="keyword">...</span>
-parse_NameValue__find_match(v008{1},v009{1},v011);<span class="keyword">if</span> numel(v012)~=1,v011=lower(v011);[v012,<span class="keyword">...</span>
-v008{2}]=parse_NameValue__find_match(v008{2},v009{2},v011);<span class="keyword">end</span>,<span class="keyword">if</span> numel(v012)~=1,v011=<span class="keyword">...</span>
-strrep(v011,<span class="string">'_'</span>,<span class="string">''</span>);[v012,v008{3}]=parse_NameValue__find_match(v008{3},v009{3},v011);<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-numel(v012)~=1,error(<span class="string">'parse_NameValue:NonUniqueMatch'</span>,v005{v010}),<span class="keyword">end</span>,v000.(v007{v012})=<span class="keyword">...</span>
-v006{v010};v001(v012)=true;<span class="keyword">end</span>,v001=v007(v001);<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=parse_NameValue__find_match(v001,v002,v003),v000=find(ismember(v002,v003));
-<span class="keyword">if</span> numel(v000)==1,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v001),v001=parse_NameValue__name2char(v002);<span class="keyword">end</span>,v004=<span class="keyword">...</span>
-v001(:,1:min(end,numel(v003)));v005=numel(v003)-sum(cumprod(double(v004==repmat(v003,size(v004,<span class="keyword">...</span>
-1),1)),2),2);v000=find(v005==0);<span class="keyword">end</span>
-<span class="keyword">function</span> v000=parse_NameValue__name2char(v000),v001=cellfun(<span class="string">'prodofsize'</span>,v000);v002=max(v001);
-<span class="keyword">for</span> v003=find(v001&lt;v002).',v000{v003}((end+1):v002)=<span class="string">' '</span>;<span class="keyword">end</span>,v000=vertcat(v000{:});<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002,v003,v004]=parse_warning_error_redirect_inputs(varargin),v004=false;<span class="keyword">if</span> <span class="keyword">...</span>
-nargin==1,<span class="keyword">if</span> isa(varargin{1},<span class="string">'struct'</span>) || isa(varargin{1},<span class="string">'MException'</span>),v005=varargin{1};<span class="keyword">if</span> <span class="keyword">...</span>
-numel(v005)==0,v004=true;[v000,v001,v002,v003]=deal(<span class="string">''</span>);<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">try</span> v002=v005.stack;v003=<span class="keyword">...</span>
-get_trace(0,v002);<span class="keyword">catch</span>,[v003,v002]=get_trace(3);<span class="keyword">end</span>,v000=v005.identifier;v001=v005.message;
-v006=<span class="string">'Error using &lt;a href="matlab:matlab.internal.language.introspective.errorDocCallback('</span>;<span class="keyword">if</span> <span class="keyword">...</span>
-isa(v005,<span class="string">'struct'</span>) &amp;&amp; numel(v001)&gt;numel(v006) &amp;&amp; strcmp(v006,v001(1:numel(v006))),<span class="keyword">...</span>
-v001(1:find(v001==10,1))=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">else</span>,[v003,v002]=get_trace(3);[v000,v001]=deal(<span class="string">''</span>,varargin{1});
-<span class="keyword">end</span>,<span class="keyword">else</span>,[v003,v002]=get_trace(3);<span class="keyword">if</span> ~isempty(strfind(varargin{1},<span class="string">'%'</span>)),v000=<span class="string">''</span>;v007=<span class="keyword">...</span>
-varargin(2:end);v001=sprintf(varargin{1},v007{:});<span class="keyword">else</span>,v000=varargin{1};v001=varargin{2};<span class="keyword">if</span> <span class="keyword">...</span>
-nargin&gt;2,v007=varargin(3:end);v001=sprintf(v001,v007{:});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=parse_warning_error_redirect_options(v000),<span class="keyword">if</span> ~isfield(v000,<span class="string">'boolean'</span>),<span class="keyword">...</span>
-v000.boolean=struct;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'con'</span>) || isempty(v000.boolean.con),<span class="keyword">...</span>
-v000.boolean.con=false;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'fid'</span>) || isempty(v000.boolean.fid),<span class="keyword">...</span>
-v000.boolean.fid=isfield(v000,<span class="string">'fid'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="string">'obj'</span>) || <span class="keyword">...</span>
-isempty(v000.boolean.obj),v000.boolean.obj=isfield(v000,<span class="string">'obj'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000.boolean,<span class="keyword">...</span>
-<span class="string">'fcn'</span>) || isempty(v000.boolean.fcn),v000.boolean.fcn=isfield(v000,<span class="string">'fcn'</span>);<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=PatternReplace(v001,v002,v003),v000=v001(:)';<span class="keyword">if</span> numel(v002)==0,v004=<span class="keyword">...</span>
-false(size(v001));<span class="keyword">elseif</span> numel(v003)&gt;numel(v002),error(<span class="string">'not implemented (padding required)'</span>),<span class="keyword">...</span>
-<span class="keyword">else</span>,v004=true(size(v001));<span class="keyword">for</span> v005=1:numel(v002),v006=find(v001==v002(v005));v006=v006-v005+1;
-v006(v006&lt;1)=[];v007=false(size(v004));v007(v006)=true;v004= v004 &amp; v007;<span class="keyword">if</span> ~any(v004),<span class="keyword">break</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v006=find(v004);<span class="keyword">if</span> ~isempty(v006),<span class="keyword">for</span> v005=1:numel(v003),v000(v006+v005-1)=<span class="keyword">...</span>
-v003(v005);<span class="keyword">end</span>,<span class="keyword">if</span> numel(v003)==0,v005=0;<span class="keyword">end</span>,<span class="keyword">if</span> numel(v002)&gt;v005,v006=v006(:);v008=<span class="keyword">...</span>
-(v005+1):numel(v002);v009=bsxfun_plus(v006,v008-1);v000(v009(:))=[];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001] = RegGrow(varargin),<span class="keyword">if</span> nargout&gt;2,error(<span class="string">'HJW:RegGrow:nargout'</span>,<span class="keyword">...</span>
-<span class="string">'Incorrect number of output arguments.'</span>),<span class="keyword">end</span>,[v002,v003,v004]=RegGrow_ParseInputs(varargin{:});
-<span class="keyword">if</span> ~v002,rethrow(v004),<span class="keyword">else</span>,[v005,v006,v007,v008,v009,v010]=deal( v003.I,v003.maxDiff,v003.seed,<span class="keyword">...</span>
-v003.kernel,v003.overflow,v003.waitbar);<span class="keyword">end</span>,<span class="keyword">if</span> v010.bar,v010.h=waitbar(0,<span class="string">'processing...'</span>);
-v010.count=0;v011=0;<span class="keyword">end</span>,v001=false;v000=logical(zeros(size(v005)));v007=num2cell(v007);
-v000(v007{:})=true;v012=true;<span class="keyword">while</span> v012,<span class="keyword">if</span> v009.check,<span class="keyword">if</span> sum(v000(:))&gt;v009.volume,v001=true;
-<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v010.bar,v010.count=v010.count+1;<span class="keyword">if</span> mod(v010.count,5)==0,<span class="keyword">try</span> v011=mod(v011+1,<span class="keyword">...</span>
-3);v013=repmat(<span class="string">'.'</span>,1,1+v011);v014=sprintf(<span class="string">'processing%s'</span>,v013);waitbar(sum(v000(:))/v010.max,<span class="keyword">...</span>
-v010.h,v014),drawnow,<span class="keyword">catch</span>,v004=lasterror;<span class="keyword">if</span> strcmp(v004.identifier,<span class="keyword">...</span>
-<span class="string">'MATLAB:waitbar:InvalidSecondInput'</span>),<span class="keyword">switch</span> v003.WaitbarClosingBehavior,<span class="keyword">case</span> <span class="string">'warning'</span>,<span class="keyword">...</span>
-warning(<span class="string">'HJW:RegGrow:WaitbarClosedWarning'</span>,<span class="string">'The waitbar was closed, continuing...'</span>),v010.bar=<span class="keyword">...</span>
-false;<span class="keyword">case</span> <span class="string">'error'</span>,error(<span class="string">'HJW:RegGrow:WaitbarClosedError'</span>,<span class="string">'The waitbar was closed.'</span>),<span class="keyword">case</span> <span class="keyword">...</span>
-<span class="string">'return'</span>,<span class="keyword">if</span> nargout==0,clear(var2str(v000)),<span class="keyword">end</span>,<span class="keyword">return</span>,<span class="keyword">case</span> <span class="string">'ignore'</span>,v010.bar=false;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">end</span>,v015= ~v000 &amp; convn(v000,v008,<span class="string">'same'</span>)&gt;0.5;v016=abs(v005-mean(v005(v000)))&gt;=v006;
-v015(v016)=false;<span class="keyword">if</span> any(v015(:)),v000(v015)=true;<span class="keyword">else</span>,v012=false;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v010.bar,<span class="keyword">...</span>
-delete(v010.h),<span class="keyword">end</span>,<span class="keyword">if</span> nargout==0,clear(var2str(v000)),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002]=RegGrow_ParseInputs(varargin),v000=false;v001=struct;v002=<span class="keyword">...</span>
-struct(<span class="string">'identifier'</span>,<span class="string">''</span>,<span class="string">'message'</span>,<span class="string">''</span>);<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),<span class="keyword">if</span> ifversion(<span class="string">'&lt;'</span>,0,<span class="keyword">...</span>
-<span class="string">'Octave'</span>,<span class="string">'&gt;'</span>,0),v004 = get(0,<span class="string">'DefaultImageCData'</span>);v004 = v004/max(v004(:));<span class="keyword">else</span>,v005 = <span class="keyword">...</span>
-pow2(get(0,<span class="string">'DefaultImageCData'</span>),47);v004 = bitshift(v005,-37);v004 = fix(v004);v004 = <span class="keyword">...</span>
-bitand(v004,31);v004 = v004/max(v004(:));<span class="keyword">end</span>,v003.I=v004;v003.maxDiff=[];v003.seed=[];
-v003.nHood=[];v003.kernel=[];v003.shifts=[];v003.overflow=[];v003.KeepShellVoxelsOnly=false;
-v003.waitbar=[];v003.silent=[];v003.ErrorOnWaitbarClosing=false;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==0,v001=<span class="keyword">...</span>
-RegGrow_check_dynamic_defaults(v003);v001.seed=[2 2];v000=true;<span class="keyword">return</span>,<span class="keyword">end</span>,v006=0;v007={<span class="string">'I'</span>,<span class="keyword">...</span>
-<span class="string">'maxDiff'</span>,<span class="string">'seed'</span>};<span class="keyword">while</span> numel(varargin)&gt;0 &amp;&amp; ~(isa(varargin{1},<span class="string">'char'</span>) || isa(varargin{1},<span class="keyword">...</span>
-<span class="string">'struct'</span>)),v006=v006+1;v001.(v007{v006})=varargin{1};varargin(1)=[];<span class="keyword">end</span>,<span class="keyword">try</span> v008=[];[v001,v009]=<span class="keyword">...</span>
-parse_NameValue(v003,v001);<span class="keyword">catch</span> v008;<span class="keyword">if</span> isempty(v008),v008=lasterror;<span class="keyword">end</span>,v002=v008;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-<span class="keyword">if</span> numel(varargin)&gt;0,<span class="keyword">try</span> v008=[];[v001,v010]=parse_NameValue(v001,varargin{:});<span class="keyword">catch</span> v008;<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v008),v008=lasterror;<span class="keyword">end</span>,v002=v008;<span class="keyword">return</span>,<span class="keyword">end</span>,v009=unique([v009;v010]);<span class="keyword">end</span>,[v011,v012]=<span class="keyword">...</span>
-sort(lower(v009));v009=v009(v012);<span class="keyword">for</span> v013=1:numel(v009),v014=v009{v013};v015=v001.(v014);
-v002.identifier=[<span class="string">'HJW:RegGrow:incorrect_input_opt_'</span> lower(v014)];<span class="keyword">switch</span> lower(v014),<span class="keyword">case</span> <span class="string">'i'</span>,<span class="keyword">...</span>
-<span class="keyword">try</span> v015=double(v015);<span class="keyword">catch</span>,v002.message=<span class="string">'The image input must be convertible to a double.'</span>;
-<span class="keyword">return</span>,<span class="keyword">end</span>,v001.I=v015;<span class="keyword">case</span> <span class="string">'kernel'</span>,<span class="keyword">try</span> v004=v001.I;v015=logical(v015);<span class="keyword">if</span> ndims(v015)~=<span class="keyword">...</span>
-ndims(v004) || ~all(mod(size(v015),2)==1),disp(v015(-1)),<span class="keyword">end</span>,v016=v015;v017=(size(v016)+1)/2;
-v017=num2cell(v017);v016(v017{:})=false;v015(v017{:})=true;<span class="keyword">if</span> sum(v016(:))==0,<span class="keyword">...</span>
-warning(<span class="string">'HJW:RegGrow:CentroidOnlyKernel'</span>,<span class="keyword">...</span>
-[<span class="string">'Only the centroid of the kernel is marked as true.\n'</span>,<span class="keyword">...</span>
-<span class="string">'This will cause the result to only contain the seed position.'</span>]),<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.message=<span class="keyword">...</span>
-[<span class="string">'The kernel input must a logical with ndims(IM) dimensions.'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'Each dimension must be an odd length.'</span>];<span class="keyword">return</span>,<span class="keyword">end</span>,v001.kernel=v015;<span class="keyword">case</span> <span class="string">'maxdiff'</span>,<span class="keyword">try</span> v015=<span class="keyword">...</span>
-double(v015);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">if</span> ~isa(v015,<span class="string">'double'</span>) || numel(v015)~=1 || v015&lt;0 || isnan(v015),<span class="keyword">...</span>
-v002.message=[<span class="string">'The maxDiff input must be a non-negative numeric scalar.'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'It must also be convertible to a double.'</span>];<span class="keyword">return</span>,<span class="keyword">end</span>,v001.maxDiff=v015;<span class="keyword">case</span> <span class="string">'nhood'</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-any(ismember(lower(v009),{<span class="string">'kernel'</span>,<span class="string">'shifts'</span>})),<span class="keyword">continue</span>,<span class="keyword">end</span>,v004=v001.I;v018=<span class="keyword">...</span>
-[<span class="string">'The nHood parameter must be either the maximal or minimal value, '</span>,char(10),<span class="keyword">...</span>
-<span class="string">'so 4 or 8 for 2D images, 6 or 26 for 3D images, etc.'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'This parameter must be set if the kernel parameter is not set.'</span>];<span class="keyword">try</span> v019=ndims(v004);<span class="keyword">if</span> <span class="keyword">...</span>
-numel(v015)&gt;1,v015=0;<span class="keyword">end</span>,v015=double(v015);<span class="keyword">if</span> ~ismember(v015,[3^v019-1 2*v019]),v002.message=<span class="keyword">...</span>
-v018;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.message=v018;<span class="keyword">return</span>,<span class="keyword">end</span>,v001.nHood=v015;<span class="keyword">case</span> <span class="string">'overflow'</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-~isempty(v015) &amp;&amp; ( ~isnumeric(v015) || numel(v015)&gt;1 || abs(v015-round(v015))&gt;eps),<span class="keyword">...</span>
-v002.message=<span class="string">'The overflow volume must be empty, or a numeric scalar integer.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-v001.overflow=v015;<span class="keyword">case</span> <span class="string">'seed'</span>,v004=v001.I;v018=<span class="keyword">...</span>
-<span class="string">'The seed must be a vector with a valid position.'</span>;<span class="keyword">try</span> <span class="keyword">if</span> numel(v015)~=ndims(v004),v002.message=<span class="keyword">...</span>
-v018;<span class="keyword">return</span>,<span class="keyword">end</span>,v020=v015(:)';v021=num2cell(v020);v022=v004(v021{:});<span class="keyword">catch</span>,v002.message=v018;
-<span class="keyword">return</span>,<span class="keyword">end</span>,v002.message=<span class="string">''</span>;v001.seed=v020;<span class="keyword">case</span> {<span class="string">'waitbar'</span>,<span class="string">'silent'</span>},[v023,v015]=<span class="keyword">...</span>
-test_if_scalar_logical(v015);<span class="keyword">if</span> ~v023,v002.message=<span class="string">'waitbar must be a logical scalar.'</span>;<span class="keyword">return</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">if</span> strcmpi(v014,<span class="string">'silent'</span>),v015= ~v015;<span class="keyword">end</span>,v001.waitbar=v015;<span class="keyword">case</span> <span class="string">'shifts'</span>,v001.shifts=v015;
-<span class="keyword">case</span> <span class="string">'waitbarclosingbehavior'</span>,v024=struct(<span class="string">'warning'</span>,0,<span class="string">'error'</span>,0,<span class="string">'return'</span>,0,<span class="string">'ignore'</span>,0);[v011,<span class="keyword">...</span>
-v015]=parse_NameValue(v024,{v015,true});<span class="keyword">if</span> ~v023,v002.message=<span class="keyword">...</span>
-[<span class="string">'WaitbarClosingBehavior must be one of these:'</span> char(10),<span class="keyword">...</span>
-<span class="string">'''warning'', ''error'', ''return'', or ''ignore''.'</span>];<span class="keyword">return</span>,<span class="keyword">end</span>,v001.WaitbarClosingBehavior=<span class="keyword">...</span>
-v015;<span class="keyword">end</span>,<span class="keyword">end</span>,v000=true;v001=RegGrow_check_dynamic_defaults(v001);<span class="keyword">end</span>
-<span class="keyword">function</span> v000=RegGrow_check_dynamic_defaults(v000),<span class="keyword">if</span> isempty(v000.seed),v001=<span class="keyword">...</span>
-ones(ndims(v000.I),1);v000.seed=v001;<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.maxDiff),v000.maxDiff=<span class="keyword">...</span>
-2/3*std(v000.I(:));<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v000.shifts),v002=v000.shifts;v003=max(abs(v002(:)));v004=<span class="keyword">...</span>
-zeros( (1+2*v003)*ones(1,size(v002,2)) );v002=v002+v003+1;v002=mat2cell(v002,size(v002,1),<span class="keyword">...</span>
-ones(1,size(v002,2)));v005=sub2ind(size(v004),v002{:});v004(v005)=1;v004=logical(v004);
-v000.kernel=v004;<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.kernel),v006=v000.nHood;<span class="keyword">if</span> isempty(v006),v006=<span class="keyword">...</span>
-2*ndims(v000.I);<span class="keyword">end</span>,v007=ndims(v000.I);<span class="keyword">if</span> v006==(2*v007),v008=cell(v007,1);[v008{:}]=<span class="keyword">...</span>
-ndgrid(-1:1);v008=cat(v007+1,v008{:});v008=sqrt(sum(v008.^2,v007+1));v004=v008&lt;=1;<span class="keyword">elseif</span> v006==<span class="keyword">...</span>
-(3^v007-1),v004=logical(ones(3*ones(1,v007)));<span class="keyword">end</span>,v000.kernel=v004;<span class="keyword">end</span>,v009=v000.overflow;<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v009) || isnan(v009) || isinf(v009),v000.overflow=struct(<span class="string">'check'</span>,false,<span class="string">'volume'</span>,inf);
-<span class="keyword">else</span>,v000.overflow=struct(<span class="string">'check'</span>,true,<span class="string">'volume'</span>,v009);<span class="keyword">end</span>,<span class="keyword">if</span> isempty(v000.waitbar),v000.waitbar=<span class="keyword">...</span>
- ndims(v000.I)&gt;2 ;<span class="keyword">end</span>,v000.waitbar=struct(<span class="string">'bar'</span>,v000.waitbar,<span class="string">'max'</span>,min(numel(v000.I),<span class="keyword">...</span>
-v000.overflow.volume));<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__struct(v000,v001),v002=size(v000).';v000=v000(:);v003=<span class="keyword">...</span>
-fieldnames(v000);v004=cell(2,numel(v003));<span class="keyword">for</span> v005=1:numel(v003),v004{1,v005}=v003{v005};v004{2,<span class="keyword">...</span>
-v005}={v000.(v003{v005})};<span class="keyword">end</span>,v000=cast_to_uint16_vector__cell(v004,v001);v000=[v000;
-uint16(mod(v002,2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> v000=char2cellstr(v001,v002),v003=isa(v001,<span class="string">'char'</span>);v001=int32(v001);<span class="keyword">if</span> nargin&lt;2,<span class="keyword">if</span> <span class="keyword">...</span>
-any(v001==13),v001=PatternReplace(v001,int32([13 10]),int32(-10));v001(v001==13)=-10;<span class="keyword">end</span>,<span class="keyword">...</span>
-v001(v001==10)=-10;<span class="keyword">else</span>,<span class="keyword">for</span> v004=1:numel(v002),v001=PatternReplace(v001,int32(v002{v004}),<span class="keyword">...</span>
-int32(-10));<span class="keyword">end</span>,<span class="keyword">end</span>,v005=[0 find(v001==-10) numel(v001)+1];v000=cell(numel(v005)-1,1);<span class="keyword">for</span> v004=<span class="keyword">...</span>
-1:numel(v000),v006=(v005(v004 )+1);v007=(v005(v004+1)-1);v000{v004}=v001(v006:v007);<span class="keyword">end</span>,<span class="keyword">if</span> v003,<span class="keyword">...</span>
-<span class="keyword">for</span> v004=1:numel(v000),v000{v004}= char(v000{v004});<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">for</span> v004=1:numel(v000),v000{v004}=<span class="keyword">...</span>
-uint32(v000{v004});<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=CharIsUTF8,<span class="keyword">persistent</span> v001,<span class="keyword">if</span> isempty(v001),<span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>,<span class="string">'builtin'</span>)~=<span class="keyword">...</span>
-0,v002=struct(<span class="string">'w'</span>,warning(<span class="string">'off'</span>,<span class="string">'all'</span>));[v002.msg,v002.ID]=lastwarn;v001=~isequal(8364,<span class="keyword">...</span>
-double(char(8364)));warning(v002.w);lastwarn(v002.msg,v002.ID);<span class="keyword">else</span>,v001=false;<span class="keyword">end</span>,<span class="keyword">end</span>,v000=<span class="keyword">...</span>
-v001;<span class="keyword">end</span>
-<span class="keyword">function</span> v000=circshift_by_col(v000),<span class="keyword">persistent</span> v001,v002=size(v000);<span class="keyword">if</span> isempty(v001) || <span class="keyword">...</span>
-any(size(v001)&lt;v002) || isempty(v001{v002(1),v002(2)}),[v003,v004]=meshgrid(1:size(v000,2),<span class="keyword">...</span>
-1:size(v000,1));v005=mod(v003+v004-2,size(v000,1))+1;v006=sub2ind(size(v000),v005,v003);<span class="keyword">if</span> <span class="keyword">...</span>
-prod(v002)&lt;=1000,v001{v002(1),v002(2)}=v006;<span class="keyword">end</span>,<span class="keyword">else</span>,v006=v001{v002(1),v002(2)};<span class="keyword">end</span>,v000=<span class="keyword">...</span>
-v000(v006);<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_dec2hex(v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002=<span class="keyword">...</span>
-upper(dec2hex(0:(-1+2^16),4));<span class="keyword">end</span>,v001=double(v001)+1;v000=v002(v001,:);<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_add_salt(v000,v001),v002=16*numel(v000);v003=v001;
-v003.Version=1; v003.HashLength=v002;v003.SkipInputParse=1; v003.isSaltCall=1;v004=<span class="keyword">...</span>
-ComputeNonCryptHash(v000,v003);v004=ComputeNonCryptHash_shuffle_uint16_inv(v004);<span class="keyword">if</span> <span class="keyword">...</span>
-v001.Version&gt;1,v004=v004(end:-1:1);<span class="keyword">end</span>,v000=mod(double(v000).*double(v004),1+2^16);v000=<span class="keyword">...</span>
-uint16(v000);<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,varargout]=ComputeNonCryptHash(v001,varargin),<span class="keyword">if</span> nargin&lt;1,<span class="keyword">...</span>
-error(<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>,<span class="string">'At least 1 input required.'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> nargout&gt;=2,<span class="keyword">...</span>
-varargout=cell(nargout-1,1);<span class="keyword">end</span>,<span class="keyword">if</span> nargin==2 &amp;&amp; isa(varargin{1},<span class="string">'struct'</span>) &amp;&amp; <span class="keyword">...</span>
-varargin{1}.SkipInputParse,v002=varargin{1};<span class="keyword">else</span>,[v003,v002,v004]=<span class="keyword">...</span>
-ComputeNonCryptHash_parse_inputs(varargin{:});<span class="keyword">if</span> v003,v002=<span class="keyword">...</span>
-ComputeNonCryptHash_DefaultsByVersion(v002);<span class="keyword">if</span> nargout&gt;=2,v000=<span class="string">''</span>;v002.SkipInputParse=true;
-varargout{1}=v002;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,error_(v002.print_to,v004),<span class="keyword">end</span>,<span class="keyword">end</span>,v005=v002.HashLength;v006=<span class="keyword">...</span>
-v002.Version;<span class="keyword">try</span> v004=[];v001=cast_to_uint16_vector(v001,v002);<span class="keyword">catch</span> v004;<span class="keyword">if</span> isempty(v004),v004=<span class="keyword">...</span>
-lasterror;<span class="keyword">end</span>,<span class="keyword">if</span> strcmp(v004.identifier,<span class="string">'MATLAB:nomem'</span>),error_(v002.print_to,v004),<span class="keyword">else</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-isfield(v002,<span class="string">'debug'</span>) &amp;&amp; v002.debug,v007=sprintf(<span class="string">'\n[original error: %s %s]'</span>,v004.identifier,<span class="keyword">...</span>
-v004.message);<span class="keyword">else</span>,v007=<span class="string">''</span>;<span class="keyword">end</span>,error_(v002.print_to,<span class="string">'HJW:ComputeNonCryptHash:UnwindFailed'</span>,<span class="keyword">...</span>
-[<span class="string">'The nested input contains an unsupported data type.'</span> v007]),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> mod(numel(v001),<span class="keyword">...</span>
-v005/16),v008=uint16(1:v005/16).'; v008(1:mod(numel(v001),v005/16))=[];v001=[v001;v008];<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-v006==1,v001=ComputeNonCryptHash_shuffle_uint16(v001);v001=<span class="keyword">...</span>
-ComputeNonCryptHash_uint16_to_logical(v001);v001=xor(v001,reshape(v001,[],16).');<span class="keyword">else</span>,v001=<span class="keyword">...</span>
-ComputeNonCryptHash_shuffle_uint16(v001);v001=ComputeNonCryptHash_uint16_to_logical(v001);v001=<span class="keyword">...</span>
-circshift_by_col(v001);<span class="keyword">end</span>,v001=mod(sum(reshape(v001,v005,[]),2),2);v001=<span class="keyword">...</span>
-ComputeNonCryptHash_logical_to_uint16(v001);<span class="keyword">if</span> v002.isSaltCall,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,v001=<span class="keyword">...</span>
-ComputeNonCryptHash_add_salt(v001,v002);v000=ComputeNonCryptHash_dec2hex(v001);v000=<span class="keyword">...</span>
-reshape(v000.',1,[]);<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_logical_to_uint16(v000),<span class="keyword">if</span> mod(numel(v000),16),<span class="keyword">...</span>
-v000(16*ceil(numel(v000)/16))=0;<span class="keyword">end</span>,v001=uint16(2.^(15:-1:0))';v000=uint16(reshape(v000,16,[]));
-<span class="keyword">try</span> v000=v000.*v001;<span class="keyword">catch</span>,v000=double(v000).*repmat(double(v001),[1 size(v000,2)]);v000=<span class="keyword">...</span>
-uint16(v000);<span class="keyword">end</span>,v000=uint16(sum(v000,1)).';<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_shuffle_uint16(v000),v001=65537;v002=479001600;v000 = <span class="keyword">...</span>
-uint16(mod(double(v000) * v002 , v001));<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_shuffle_uint16_inv(v000),v001=65537;v002=1919;v000=<span class="keyword">...</span>
-uint16(mod(double(v000) * v002,v001));<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v010]=speedtest,v000=[300 300];v001=2;v002=0;v003=1.1;<span class="keyword">while</span> true,v002=v002+1;
-fprintf(<span class="string">'running speedtest (pass %d) '</span>,v002),v004=prod(v000);v005=1:prod(v000);v005=<span class="keyword">...</span>
-reshape(v005,v000);v005(:,2:2:end)=v005(end:-1:1,2:2:end);tic,v006=RegGrow(v005,<span class="string">'waitbar'</span>,<span class="keyword">...</span>
-~ifversion___skip_test);v007=toc;<span class="keyword">if</span> abs(v007-v001)/v001&lt;(0.2+(v002-1)/100),<span class="keyword">...</span>
-fprintf(<span class="string">'(time=%.1f) '</span>,v007),<span class="keyword">break</span>,<span class="keyword">end</span>,v008=round(prod(v000)*(v001/v007)^v003);v008=min(25*v004,<span class="keyword">...</span>
-v008);v003=0.8;v000=round(sqrt(v008))*[1 1];v000=2*ceil(v000/2);v009=sprintf(<span class="string">'%.1E to %.1E'</span>,<span class="keyword">...</span>
-v004,prod(v000));v009=strrep(v009,<span class="string">'E+'</span>,<span class="string">' E'</span>);
-fprintf(<span class="string">'(time=%.1f, elem count updated from %s)\n'</span>,v007,v009),<span class="keyword">end</span>,v010=<span class="keyword">...</span>
-100*sum(v006(:))/prod(v000);<span class="keyword">end</span>
-<span class="keyword">function</span> test01(Hash),<span class="keyword">try</span> <span class="keyword">if</span> ~strcmp(Hash,ComputeNonCryptHash(RegGrow,256,<span class="string">'-v2'</span>)),<span class="keyword">...</span>
-error(<span class="string">'hash doesn''t match (did the default image change?)'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_uint16_to_logical(v000),<span class="keyword">persistent</span> v001,<span class="keyword">if</span> isempty(v001),v001=<span class="keyword">...</span>
-dec2bin(0:(-1+2^16))==<span class="string">'1'</span>;v001=v001.';<span class="keyword">end</span>,v000=double(v000)+1;v000=v001(:,v000);<span class="keyword">end</span>
-<span class="keyword">function</span> test03(IM),<span class="keyword">try</span> v000=struct(<span class="string">'seed'</span>,[3;2]);RegGrow(IM,v000);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test04(IM),<span class="keyword">try</span> [v000,v001]=RegGrow(IM,0.3,[1 26],<span class="string">'overflow'</span>,1e2);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test05(IM),<span class="keyword">try</span> [v000,v001]=RegGrow(IM,<span class="string">'overflow'</span>,[]);<span class="keyword">if</span> v001~=false,error(<span class="string">'fail'</span>),<span class="keyword">else</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test09(IM),<span class="keyword">try</span> v000=logical(zeros(3,3));v001=warning(<span class="string">'off'</span>,<span class="keyword">...</span>
-<span class="string">'HJW:RegGrow:CentroidOnlyKernel'</span>);v002=RegGrow(IM,<span class="string">'nHood'</span>,5,<span class="string">'kernel'</span>,v000);warning(v001);<span class="keyword">if</span> <span class="keyword">...</span>
-sum(v002(:))~=1,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test10(IM),<span class="keyword">try</span> v000=logical(zeros(3,3));v000(end)=true;v001=RegGrow(IM,<span class="string">'kernel'</span>,v000,<span class="keyword">...</span>
-<span class="string">'maxdiff'</span>,1+max(IM(:))-min(IM(:)));<span class="keyword">if</span> sum(v001(:))~=min(size(IM)),error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">...</span>
-error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=bsxfun_plus(v001,v002),<span class="keyword">try</span> v000=v001+v002;<span class="keyword">catch</span>,<span class="keyword">try</span> v000=bsxfun(@plus,v001,v002);
-<span class="keyword">catch</span>,v003=size(v001); v004=size(v002);v001=repmat(v001,max(1,v004./v003)); v002=repmat(v002,<span class="keyword">...</span>
-max(1,v003./v004));v000=v001+v002;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test02(IM),<span class="keyword">try</span> v000=[];v001=struct(<span class="string">'seed'</span>,[6 4 2]);RegGrow(IM,v001);error(<span class="string">'fail'</span>),<span class="keyword">...</span>
-<span class="keyword">catch</span> v000;<span class="keyword">if</span> isempty(v000),v000=lasterror;<span class="keyword">end</span>,<span class="keyword">if</span> strcmp(v000.identifier,<span class="keyword">...</span>
-<span class="string">'HJW:RegGrow:incorrect_input_opt_seed'</span>),<span class="keyword">else</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test06(v000),<span class="keyword">if</span> exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>),v000=repmat(v000,[1,1,5]);v001=20;
-<span class="keyword">else</span>,v000=repmat(v000,[1,1,40]);v001=10;<span class="keyword">end</span>,v001=1+rand(size(v000))/v001;v000=v000.*v001;<span class="keyword">try</span> <span class="keyword">...</span>
-[v002,v003]=RegGrow(v000,<span class="string">'waitbar'</span>,false);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector(v000,v001),<span class="keyword">if</span> isa(v000,<span class="string">'uint16'</span>),v002=<span class="string">'uint16'</span>;v003=<span class="keyword">...</span>
-size(v000).';v000=reshape(v000,[],1);v000=[v000;uint16(v002.');uint16(mod(v003,2^16))];<span class="keyword">return</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,v000=cast_to_uint16_vector__cell({v000},v001);v000([end-1 end])=[];<span class="keyword">end</span>
-<span class="keyword">function</span> test07(sz),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,<span class="keyword">...</span>
-2:2:end);<span class="keyword">try</span> RegGrow(v000,<span class="string">'waitbar'</span>,~ifversion___skip_test);<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> test08(sz,p),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,<span class="keyword">...</span>
-2:2:end);<span class="keyword">try</span> v001=RegGrow(v000,<span class="string">'silent'</span>,ifversion___skip_test);v002=round(p*numel(v001)/100);<span class="keyword">if</span> <span class="keyword">...</span>
-abs( sum(v001(:)) - v002 ) &gt; 1,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">catch</span>,error(<span class="string">'fail'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ComputeNonCryptHash_DefaultsByVersion(v000),v000.Version=<span class="keyword">...</span>
-str2double(v000.VersionFlag(3:end));<span class="keyword">if</span> ~isfield(v000,<span class="string">'re_encode_char_on_Octave'</span>),<span class="keyword">...</span>
-v000.re_encode_char=v000.Version&gt;=2;<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v000,<span class="string">'string_to_cellstr'</span>),<span class="keyword">...</span>
-v000.string_to_cellstr=v000.Version&gt;=2;<span class="keyword">if</span> ~isfield(v000,<span class="string">'cast_int64_double'</span>),<span class="keyword">...</span>
-v000.cast_int64_double=v000.Version==1;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002]=ComputeNonCryptHash_parse_inputs(varargin),v000=false;v001=<span class="keyword">...</span>
-ComputeNonCryptHash_parse_inputs_default;[v003,v002]=ParseArgs(varargin{:});<span class="keyword">if</span> ~isempty(v002),<span class="keyword">...</span>
-v001=default;<span class="keyword">return</span>;<span class="keyword">end</span>,<span class="keyword">try</span> v004=[];[v001,v005]=parse_NameValue(v001,v003{:});<span class="keyword">catch</span> v004;<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v004),v004=lasterror;<span class="keyword">end</span>,v002=v004;<span class="keyword">return</span>,<span class="keyword">end</span>,[v001.print_to,v002]=<span class="keyword">...</span>
-validate_print_to__options(v001,v002);<span class="keyword">if</span> isempty(v001.print_to),<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">if</span> numel(v005)==0,<span class="keyword">...</span>
-v000=true;v002=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v006=1:numel(v005),<span class="keyword">if</span> strcmp(v005{v006},<span class="string">'VersionFlag'</span>),<span class="keyword">try</span> <span class="keyword">...</span>
-v007=str2double(v001.VersionFlag(3:end));<span class="keyword">if</span> isnan(v007) || round(v007)~=v007 || v007&gt;2,<span class="keyword">...</span>
-error(<span class="string">'trigger'</span>);<span class="keyword">end</span>,<span class="keyword">catch</span>,v002.identifier=<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>;
-v002.message=<span class="string">'VersionFlag input incorrect. Must be ''-v1'', ''-v2''.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> <span class="keyword">...</span>
-strcmp(v005{v006},<span class="string">'HashLength'</span>),v008=v001.HashLength;<span class="keyword">if</span> numel(v008)~=1 || ~isnumeric(v008) || <span class="keyword">...</span>
-mod(v008,16)~=0 || v008&lt;16,v002.identifier=<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>;
-v002.message=<span class="string">'HashLength input must be a multiple of 16.'</span>;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v000=true;v002=[];
-<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=ParseArgs(varargin),v001=[];v000=varargin;v002=[false false];<span class="keyword">for</span> v003=<span class="keyword">...</span>
-1:nargin,[v004,v005,v000]=ComputeNonCryptHash_parse_inputs__pop_queue(v000);<span class="keyword">switch</span> v004,<span class="keyword">case</span> 0,<span class="keyword">...</span>
-<span class="keyword">break</span>,<span class="keyword">case</span> 1,v006=v005; v002(1)=true;<span class="keyword">case</span> 2,v007=v005; v002(2)=true;<span class="keyword">case</span> 3,v001.identifier=<span class="keyword">...</span>
-<span class="string">'HJW:ComputeNonCryptHash:InputIncorrect'</span>;v001.message=<span class="string">'Unable to determine a valid syntax.'</span>;
-<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> nargin==sum(v002),v008=struct;<span class="keyword">if</span> v002(1),v008.VersionFlag=v006;<span class="keyword">end</span>,<span class="keyword">if</span> v002(2),<span class="keyword">...</span>
-v008.HashLength =v007 ;<span class="keyword">end</span>,v000={v008};<span class="keyword">else</span>,<span class="keyword">if</span> isa(v000{1},<span class="string">'stuct'</span>),v008=v000{1};<span class="keyword">if</span> v002(1),<span class="keyword">...</span>
-v008.VersionFlag=v006;<span class="keyword">end</span>,<span class="keyword">if</span> v002(2),v008.HashLength =v007 ;<span class="keyword">end</span>,v000{1}=v008;<span class="keyword">else</span>,v009=cell(1,<span class="keyword">...</span>
-0);<span class="keyword">if</span> v002(1),v009=[v009 {<span class="string">'VersionFlag'</span>,v006}];<span class="keyword">end</span>,<span class="keyword">if</span> v002(2),v009=[v009 {<span class="string">'HashLength'</span> ,v007 }];
-<span class="keyword">end</span>,v000=[v009 v000];<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__pop_queue(v003),v001=v003{1};<span class="keyword">if</span> <span class="keyword">...</span>
-ismember(class(v001),{<span class="string">'char'</span>,<span class="string">'string'</span>}),<span class="keyword">if</span> isa(v001,<span class="string">'char'</span>)&amp;&amp;numel(v001)&gt;=1 &amp;&amp; strcmp(<span class="string">'-'</span>,<span class="keyword">...</span>
-v001(1)),v000=1;<span class="keyword">else</span>,v000=0;<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> isa(v001,<span class="string">'struct'</span>),v000=0;<span class="keyword">else</span>,v000=2;<span class="keyword">end</span>,<span class="keyword">end</span>,v002=v003;
-<span class="keyword">if</span> v000~=0,v002(1)=[];<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=test_if_scalar_logical(v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002={true,<span class="keyword">...</span>
-false;1,0;<span class="string">'on'</span>,<span class="string">'off'</span>;<span class="string">'enable'</span>,<span class="string">'disable'</span>;<span class="string">'enabled'</span>,<span class="string">'disabled'</span>};<span class="keyword">if</span> ifversion(<span class="string">'&gt;='</span>,<span class="string">'R2016b'</span>,<span class="string">'&lt;'</span>,0),<span class="keyword">...</span>
-v002(end+1,:)={string(<span class="string">'on'</span>),string(<span class="string">'off'</span>)};<span class="keyword">end</span>,<span class="keyword">end</span>,v000=true;<span class="keyword">try</span> <span class="keyword">if</span> isa(v001,<span class="string">'char'</span>) || <span class="keyword">...</span>
-isa(v001,<span class="string">'string'</span>),<span class="keyword">try</span> v001=lower(v001);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v003=1:size(v002,1),<span class="keyword">for</span> v004=1:2,<span class="keyword">if</span> <span class="keyword">...</span>
-isequal(v001,v002{v003,v004}),v001=v002{1,v004};<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> isa(v001,<span class="keyword">...</span>
-<span class="string">'matlab.lang.OnOffSwitchState'</span>),v001=logical(v001);<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,<span class="keyword">end</span>,v000=false;<span class="keyword">end</span>
-<span class="keyword">function</span> v000=unicode_to_char(v001,v002),<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v003 = <span class="keyword">...</span>
-exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> nargin==1,v002=~CharIsUTF8;<span class="keyword">end</span>,<span class="keyword">if</span> v002,<span class="keyword">if</span> <span class="keyword">...</span>
-all(v001&lt;65536),v000=uint16(v001);v000=reshape(v000,1,numel(v000));<span class="keyword">else</span>,[v004,v005,v006]=<span class="keyword">...</span>
-unique(v001);v000=cell(1,numel(v001));<span class="keyword">for</span> v007=1:numel(v004),v008=unicode_to_UTF16(v004(v007));
-v008=uint16(v008);v000(v006==v007)={v008};<span class="keyword">end</span>,v000=cell2mat(v000);<span class="keyword">end</span>,<span class="keyword">if</span> ~v003,v000=char(v000);
-<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> all(v001&lt;128),v000=char(v001);v000=reshape(v000,1,numel(v000));<span class="keyword">else</span>,[v004,v005,<span class="keyword">...</span>
-v006]=unique(v001);v000=cell(1,numel(v001));<span class="keyword">for</span> v007=1:numel(v004),v008=<span class="keyword">...</span>
-unicode_to_UTF8(v004(v007));v008=uint8(v008);v000(v006==v007)={v008};<span class="keyword">end</span>,v000=cell2mat(v000);
-v000=char(v000);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v001=ComputeNonCryptHash_parse_inputs_default,<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v000=<span class="keyword">...</span>
-struct;v000.HashLength=256;v000.VersionFlag=<span class="string">'-v2'</span>;v000.SkipInputParse=false;v000.isSaltCall=<span class="keyword">...</span>
-false;v000.print_to_con=[];v000.print_to_fid=[];v000.print_to_obj=[];v000.print_to_fcn=[];
-v000.print_to=validate_print_to__options(v000);<span class="keyword">end</span>,v001=v000;<span class="keyword">end</span>
-<span class="keyword">function</span> error_(v001,varargin),<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v000=func2str(@error_);<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v001),v001=validate_print_to__options(struct);<span class="keyword">end</span>,v001 =<span class="keyword">...</span>
-parse_warning_error_redirect_options( v001 );[v002,v003,v004,v005,v006]=<span class="keyword">...</span>
-parse_warning_error_redirect_inputs( varargin{:});<span class="keyword">if</span> v006,<span class="keyword">return</span>,<span class="keyword">end</span>,v007=struct(<span class="string">'identifier'</span>,<span class="keyword">...</span>
-v002,<span class="string">'message'</span>,v003,<span class="string">'stack'</span>,v004);<span class="keyword">if</span> v001.boolean.obj,v008=v003;<span class="keyword">while</span> v008(end)==10,v008(end)=<span class="keyword">...</span>
-<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> any(v008==10),v008=char2cellstr([<span class="string">'Error: '</span> v008]);<span class="keyword">else</span>,v008=[<span class="string">'Error: '</span> v008];<span class="keyword">end</span>,<span class="keyword">for</span> <span class="keyword">...</span>
-v009=v001.obj(:).',<span class="keyword">try</span> set(v009,<span class="string">'String'</span>,v008);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fid,v010=<span class="keyword">...</span>
-datestr(now,31);<span class="keyword">for</span> v011=v001.fid(:).',<span class="keyword">try</span> fprintf(v011,<span class="string">'[%s] Error: %s\n%s'</span>,v010,v003,v005);
-<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v001.boolean.fcn,<span class="keyword">if</span> ismember(v000,{v004.name}),error(<span class="string">'prevent recursion'</span>),<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">for</span> v012=v001.fcn(:).',<span class="keyword">if</span> isfield(v012,<span class="string">'data'</span>),<span class="keyword">try</span> feval(v012.h,<span class="string">'error'</span>,v007,v012.data);
-<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">try</span> feval(v012.h,<span class="string">'error'</span>,v007);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,rethrow(v007),<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=get_trace(v002,v001),<span class="keyword">if</span> nargin==0,v002=1;<span class="keyword">end</span>,<span class="keyword">if</span> nargin&lt;2, v001=dbstack;<span class="keyword">end</span>,<span class="keyword">...</span>
-v001(1:v002)=[];<span class="keyword">if</span> ~isfield(v001,<span class="string">'file'</span>),<span class="keyword">for</span> v003=1:numel(v001),v004=v001(v003).name;<span class="keyword">if</span> <span class="keyword">...</span>
-strcmp(v004(end),<span class="string">')'</span>),v005=strfind(v004,<span class="string">'('</span>);v006=v004( (v005(end)+1):(end-1) );v007=<span class="keyword">...</span>
-v004(1:(v005(end)-2));<span class="keyword">else</span>,v007=v004;[v008,v006]=fileparts(v004);<span class="keyword">end</span>,[v008,v001(v003).file]=<span class="keyword">...</span>
-fileparts(v007);v001(v003).name=v006;<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">persistent</span> v009,<span class="keyword">if</span> isempty(v009),v009=<span class="keyword">...</span>
-exist(<span class="string">'OCTAVE_VERSION'</span>,<span class="string">'builtin'</span>);<span class="keyword">end</span>,<span class="keyword">if</span> v009,<span class="keyword">for</span> v003=1:numel(v001),[v008,v001(v003).file]=<span class="keyword">...</span>
-fileparts(v001(v003).file);<span class="keyword">end</span>,<span class="keyword">end</span>,v010=v001;v011=<span class="string">'&gt;'</span>;v000=cell(1,numel(v010)-1);<span class="keyword">for</span> v003=<span class="keyword">...</span>
-1:numel(v010),[v012,v010(v003).file,v013]=fileparts(v010(v003).file);<span class="keyword">if</span> v003==numel(v010),<span class="keyword">...</span>
-v010(v003).file=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> strcmp(v010(v003).file,v010(v003).name),v010(v003).file=<span class="string">''</span>;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-~isempty(v010(v003).file),v010(v003).file=[v010(v003).file <span class="string">'&gt;'</span>];<span class="keyword">end</span>,v000{v003}=<span class="keyword">...</span>
-sprintf(<span class="string">'%c In %s%s (line %d)\n'</span>,v011,v010(v003).file,v010(v003).name,v010(v003).line);v011=<span class="string">' '</span>;
-<span class="keyword">end</span>,v000=horzcat(v000{:});<span class="keyword">end</span>
-<span class="keyword">function</span> v000=ifversion(v001,v002,v003,v004,v005),<span class="keyword">persistent</span> v006 v007 v008,<span class="keyword">if</span> isempty(v006),<span class="keyword">...</span>
-v008=exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>);v006 = [100, 1] * sscanf(version, <span class="string">'%d.%d'</span>, 2);v007={ <span class="keyword">...</span>
-<span class="string">'R13'</span> 605;<span class="string">'R13SP1'</span> 605;<span class="string">'R13SP2'</span> 605;<span class="string">'R14'</span> 700;<span class="string">'R14SP1'</span> 700;<span class="string">'R14SP2'</span> 700;<span class="string">'R14SP3'</span> 701;<span class="string">'R2006a'</span> <span class="keyword">...</span>
-702;<span class="string">'R2006b'</span> 703;<span class="string">'R2007a'</span> 704;<span class="string">'R2007b'</span> 705;<span class="string">'R2008a'</span> 706;<span class="string">'R2008b'</span> 707;<span class="string">'R2009a'</span> 708;<span class="string">'R2009b'</span> 709;
-<span class="string">'R2010a'</span> 710;<span class="string">'R2010b'</span> 711;<span class="string">'R2011a'</span> 712;<span class="string">'R2011b'</span> 713;<span class="string">'R2012a'</span> 714;<span class="string">'R2012b'</span> 800;<span class="string">'R2013a'</span> 801;
-<span class="string">'R2013b'</span> 802;<span class="string">'R2014a'</span> 803;<span class="string">'R2014b'</span> 804;<span class="string">'R2015a'</span> 805;<span class="string">'R2015b'</span> 806;<span class="string">'R2016a'</span> 900;<span class="string">'R2016b'</span> 901;
-<span class="string">'R2017a'</span> 902;<span class="string">'R2017b'</span> 903;<span class="string">'R2018a'</span> 904;<span class="string">'R2018b'</span> 905;<span class="string">'R2019a'</span> 906;<span class="string">'R2019b'</span> 907;<span class="string">'R2020a'</span> 908;
-<span class="string">'R2020b'</span> 909;<span class="string">'R2021a'</span> 910;<span class="string">'R2021b'</span> 911;<span class="string">'R2022a'</span> 912};<span class="keyword">end</span>,<span class="keyword">if</span> v008,<span class="keyword">if</span> nargin==2,<span class="keyword">...</span>
-warning(<span class="string">'HJW:ifversion:NoOctaveTest'</span>,[<span class="string">'No version test for Octave was provided.'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'This function might return an unexpected outcome.'</span>]),<span class="keyword">if</span> isnumeric(v002),v009=<span class="keyword">...</span>
-0.1*v002+0.9*fix(v002);v009=round(100*v009);<span class="keyword">else</span>,v010=ismember(v007(:,1),v002);<span class="keyword">if</span> sum(v010)~=1,<span class="keyword">...</span>
-warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>),v000=<span class="keyword">...</span>
-NaN;<span class="keyword">return</span>,<span class="keyword">else</span>,v009=v007{v010,2};<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> nargin==4,[v001,v009]=deal(v003,v004);v009=<span class="keyword">...</span>
-0.1*v009+0.9*fix(v009);v009=round(100*v009);<span class="keyword">else</span>,[v001,v009]=deal(v004,v005);v009=<span class="keyword">...</span>
-0.1*v009+0.9*fix(v009);v009=round(100*v009);<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">if</span> isnumeric(v002),v009=<span class="keyword">...</span>
-0.1*v002+0.9*fix(v002);v009=round(100*v009);<span class="keyword">else</span>,v010=ismember(v007(:,1),v002);<span class="keyword">if</span> sum(v010)~=1,<span class="keyword">...</span>
-warning(<span class="string">'HJW:ifversion:NotInDict'</span>,<span class="string">'The requested version is not in the hard-coded list.'</span>),v000=<span class="keyword">...</span>
-NaN;<span class="keyword">return</span>,<span class="keyword">else</span>,v009=v007{v010,2};<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">switch</span> v001,<span class="keyword">case</span> <span class="string">'=='</span>, v000= v006 == v009;<span class="keyword">case</span> <span class="keyword">...</span>
-<span class="string">'&lt;'</span> , v000= v006 &lt; v009;<span class="keyword">case</span> <span class="string">'&lt;='</span>, v000= v006 &lt;= v009;<span class="keyword">case</span> <span class="string">'&gt;'</span> , v000= v006 &gt; v009;<span class="keyword">case</span> <span class="string">'&gt;='</span>, <span class="keyword">...</span>
-v000= v006 &gt;= v009;<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v006=ifversion___skip_test,<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v001=isunix &amp;&amp; ~ismac &amp;&amp; <span class="keyword">...</span>
-ifversion(<span class="string">'&lt;'</span>,<span class="string">'R2013a'</span>,<span class="string">'Octave'</span>,<span class="string">'&lt;'</span>,0);v002=ifversion(<span class="string">'&lt;'</span>,0,<span class="string">'Octave'</span>,<span class="string">'&gt;'</span>,0) &amp;&amp; ismac;v003=<span class="keyword">...</span>
-v001||v002;<span class="keyword">if</span> ~v003,[v004,v005]=evalc(func2str(@test_figure_available));v003=~v005;<span class="keyword">if</span> v005,<span class="keyword">...</span>
-[v004,v005]=evalc(func2str(@test_waitbar_available));v003=~v005;<span class="keyword">end</span>,<span class="keyword">end</span>,v000=v003;<span class="keyword">end</span>,v006=v000;
-<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__cell(v000,v001),v002=size(v000).';v000=v000(:);<span class="keyword">for</span> v003=<span class="keyword">...</span>
-1:numel(v000),<span class="keyword">if</span> numel(v000{v003})==0,v004=double(class(v000{v003})');v000{v003}=uint16([0;v004;
-size(v000{v003})']);<span class="keyword">continue</span>,<span class="keyword">end</span>,<span class="keyword">switch</span> class(v000{v003}),<span class="keyword">case</span> {<span class="string">'double'</span>,<span class="string">'single'</span>},v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__floats(v000{v003});<span class="keyword">case</span> <span class="string">'logical'</span>,v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__logical(v000{v003});<span class="keyword">case</span> {<span class="string">'uint8'</span>,<span class="string">'uint16'</span>,<span class="string">'uint32'</span>,<span class="string">'uint64'</span>,<span class="string">'int8'</span>,<span class="keyword">...</span>
-<span class="string">'int16'</span>,<span class="string">'int32'</span>,<span class="string">'int64'</span>},v000{v003}=cast_to_uint16_vector__integer(v000{v003},v001);<span class="keyword">case</span> <span class="string">'char'</span>,<span class="keyword">...</span>
-v000{v003}=cast_to_uint16_vector__char(v000{v003},v001);<span class="keyword">case</span> <span class="string">'string'</span>,v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__string(v000{v003},v001);<span class="keyword">case</span> <span class="string">'cell'</span>,v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__cell(v000{v003},v001);<span class="keyword">case</span> <span class="string">'struct'</span>,v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__struct(v000{v003},v001);<span class="keyword">case</span> {<span class="string">'gpuArray'</span>,<span class="string">'tall'</span>},v000{v003}=<span class="keyword">...</span>
-cast_to_uint16_vector__cell({gather(v000{v003})},v001);<span class="keyword">otherwise</span>,error_(v001.print_to,<span class="keyword">...</span>
-<span class="string">'HJW:cast_to_uint16_vector:nosupport'</span>,<span class="string">'Unsupported data type in nested variable'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,v000=<span class="keyword">...</span>
-cell2mat(v000);v000=[v000;uint16(mod(v002,2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__floats(v000),v001=size(v000).';v002=class(v000);v000=<span class="keyword">...</span>
-reshape(v000,size(v000,1),[]);[v003,v004]=typecast_double_uint64(double(v000));v005=mod(v003,<span class="keyword">...</span>
-2^16);v003=v003-v005;v003=v003/2^16;v004=v004.';v006 =mod(v003,2^16);v003=v003-v006; v003=<span class="keyword">...</span>
-v003/2^16;v006=v006.';v007 =mod(v003,2^16);v003=v003-v007; v003=v003/2^16;v007=v007.';v008 =<span class="keyword">...</span>
-mod(v003,2^16); v008=v008.';v000=[v008;v007;v006;v004];v000=uint16(v000(:));v000=[v000;
-uint16(v002.');uint16(mod(v001,2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__logical(v000),v001=size(v000).';v000=v000(:);<span class="keyword">if</span> <span class="keyword">...</span>
-mod(numel(v000),16),v000(16*ceil(numel(v000)/16))=0;<span class="keyword">end</span>,v002=uint16(2.^(15:-1:0))';v000=<span class="keyword">...</span>
-uint16(reshape(v000,16,[]));<span class="keyword">try</span> v000=v000.*v002;<span class="keyword">catch</span>,v000=double(v000).*repmat(double(v002),[1 <span class="keyword">...</span>
-size(v000,2)]);v000=uint16(v000);<span class="keyword">end</span>,v000=uint16(sum(v000,1)).';v000=[v000;uint16(mod(v001,<span class="keyword">...</span>
-2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__integer(v000,v001),v002=size(v000).';v000=v000(:);
-<span class="keyword">persistent</span> v003,<span class="keyword">if</span> isempty(v003),v003=ifversion(<span class="string">'&gt;='</span>,<span class="string">'R2010b'</span>,<span class="string">'Octave'</span>,<span class="string">'&gt;'</span>,0);<span class="keyword">end</span>,v004=<span class="keyword">...</span>
-class(v000);v005=~v001.cast_int64_double &amp;&amp; v003 &amp;&amp; v004(end)==<span class="string">'4'</span>;<span class="keyword">if</span> ~v005,<span class="keyword">if</span> <span class="keyword">...</span>
-any(abs(double(v000(:)))&gt;2^52),warning_(v001,<span class="string">'HJW:ComputeNonCryptHash:int64rounding'</span>,<span class="keyword">...</span>
-[<span class="string">'int64 and uint64 will be rounded pre-R2010b, resulting in rounding.'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'This will result in a hash that is different from newer releases.'</span>]),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v005,<span class="keyword">if</span> <span class="keyword">...</span>
-v004(1)~=<span class="string">'u'</span>,v006=v000&gt;0;v007=-int64(-inf);v008=uint64(v000+v007+1);v008(v006)=<span class="keyword">...</span>
-uint64(v000(v006))+uint64(v007)+1;v000=v008;<span class="keyword">end</span>,<span class="keyword">elseif</span> v004(1)~=<span class="string">'u'</span>,v000=<span class="keyword">...</span>
-double(v000)-double(eval([v004 <span class="string">'(-inf)'</span>]));<span class="keyword">else</span>,v000=double(v000);<span class="keyword">end</span>,<span class="keyword">switch</span> v004(end),<span class="keyword">case</span> <span class="string">'8'</span>,<span class="keyword">...</span>
-<span class="keyword">if</span> mod(numel(v000),2),v000(end+1)=0;<span class="keyword">end</span>,v000=reshape(v000,[],2);v000=v000(:,1)*255+v000(:,2);
-v000=uint16(v000);<span class="keyword">case</span> <span class="string">'6'</span>,v000=uint16(v000);<span class="keyword">case</span> <span class="string">'2'</span>,v009=floor(v000/2^16);v009=v009.';v010=<span class="keyword">...</span>
-mod(v000,2^16); v010=v010.';v000=[v009;v010];v000=uint16(v000(:));<span class="keyword">case</span> <span class="string">'4'</span>,v011=v000;v012=<span class="keyword">...</span>
-mod(v011,2^16);v011=v011-v012;v011=v011/2^16;v012=v012.';v013=mod(v011,2^16);v011=v011-v013;
-v011=v011/2^16;v013=v013.';v010=mod(v011,2^16);v011=v011-v010;v011=v011/2^16;v010=v010.';v009=<span class="keyword">...</span>
-mod(v011,2^16); v009=v009.';v000=[v009;v010;v013;v012];v000=uint16(v000(:));<span class="keyword">end</span>,v000=[v000;
-uint16(v004.');uint16(mod(v002,2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=typecast_double_uint64(v002),[v003,v004]=log2(v002);v005 =<span class="keyword">...</span>
--floor(sign(v002)/2-0.5);v006=v004+1022;v007=abs(v003)*2-1;v000=zeros(size(v002));v000=<span class="keyword">...</span>
-v000+(v005*2^63);v000=v000+(v006*2^52);v000=v000+(v007*2^52);v001=mod(v007*2^52,2^16);v008=<span class="keyword">...</span>
-isinf(v002);v000(v002==0)=0;v000(isnan(v002))=18444492273895866368;v000(v008 &amp; v002&gt;0)=<span class="keyword">...</span>
-9218868437227405312;v000(v008 &amp; v002&lt;0)=18442240474082181120;v001(v002==0)=0;v001(isnan(v002))=<span class="keyword">...</span>
-0;v001(v008)=0;<span class="keyword">end</span>
-<span class="keyword">function</span> v000=unicode_to_UTF16(v001),<span class="keyword">if</span> v001&lt;65536,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,v002=double(v001)-65536;
-v002=dec2bin(v002,20);v000=bin2dec([<span class="string">'110110'</span> v002(1:10);<span class="string">'110111'</span> v002(11:20)]).';<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002]=UTF8_to_unicode_internal(v000,v003),v001=<span class="string">'success'</span>;v002=<span class="keyword">...</span>
-struct(<span class="string">'identifier'</span>,<span class="string">'HJW:UTF8_to_unicode:notUTF8'</span>,<span class="string">'message'</span>,<span class="string">'Input is not UTF-8.'</span>);<span class="keyword">persistent</span> <span class="keyword">...</span>
-v004,<span class="keyword">if</span> isempty(v004),v004 = exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> any(v000&gt;255),v001=<span class="keyword">...</span>
-<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">elseif</span> all(v000&lt;128),<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">for</span> v005=4:-1:2,v006=<span class="keyword">...</span>
-bin2dec([repmat(<span class="string">'1'</span>,1,v005) repmat(<span class="string">'0'</span>,1,8-v005)]);v007=v000&gt;=v006 &amp; v000&lt;256;<span class="keyword">if</span> any(v007),v007=<span class="keyword">...</span>
-find(v007);v007=v007(:).';<span class="keyword">if</span> numel(v000)&lt;(max(v007)+v005-1),v001=<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-v007( (v007+v005-1)&gt;numel(v000) )=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isempty(v007),v008=bsxfun_plus(v007 , <span class="keyword">...</span>
-(0:(v005-1)).' );v008=v008.';v007=v000(v008);<span class="keyword">end</span>,<span class="keyword">else</span>,v007=[];<span class="keyword">end</span>,v009=[repmat(<span class="string">'1'</span>,1,v005-1) <span class="keyword">...</span>
-repmat(<span class="string">'10'</span>,1,v005)];v010=unique([1:(v005+1) 1:8:(8*v005) 2:8:(8*v005)]);<span class="keyword">if</span> numel(v007)&gt;0,v007=<span class="keyword">...</span>
-unique(v007,<span class="string">'rows'</span>);v011=mat2cell(v007,ones(size(v007,1),1),v005);<span class="keyword">for</span> v012=1:numel(v011),v013=<span class="keyword">...</span>
-dec2bin(double(v011{v012}))';<span class="keyword">if</span> ~strcmp(v009,v013(v010)),v001=<span class="string">'error'</span>;<span class="keyword">if</span> v003,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-<span class="keyword">continue</span>,<span class="keyword">end</span>,v013(v010)=<span class="string">''</span>;<span class="keyword">if</span> ~v004,v014=uint32(bin2dec(v013 ));<span class="keyword">else</span>,v014=<span class="keyword">...</span>
-uint32(bin2dec(v013.'));<span class="keyword">end</span>,v000=PatternReplace(v000,v011{v012},v014);<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=unicode_to_UTF8(v001),<span class="keyword">if</span> numel(v001)&gt;1,<span class="keyword">...</span>
-error(<span class="string">'this should only be used for single characters'</span>),<span class="keyword">end</span>,<span class="keyword">if</span> v001&lt;128,v000=v001;<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002=struct;v002.limits.lower=hex2dec({<span class="string">'0000'</span>,<span class="string">'0080'</span>,<span class="string">'0800'</span>, <span class="keyword">...</span>
-<span class="string">'10000'</span>});v002.limits.upper=hex2dec({<span class="string">'007F'</span>,<span class="string">'07FF'</span>,<span class="string">'FFFF'</span>,<span class="string">'10FFFF'</span>});v002.scheme{2}=<span class="keyword">...</span>
-<span class="string">'110xxxxx10xxxxxx'</span>;v002.scheme{2}=reshape(v002.scheme{2}.',8,2);v002.scheme{3}=<span class="keyword">...</span>
-<span class="string">'1110xxxx10xxxxxx10xxxxxx'</span>;v002.scheme{3}=reshape(v002.scheme{3}.',8,3);v002.scheme{4}=<span class="keyword">...</span>
-<span class="string">'11110xxx10xxxxxx10xxxxxx10xxxxxx'</span>;v002.scheme{4}=reshape(v002.scheme{4}.',8,4);<span class="keyword">for</span> v003=2:4,<span class="keyword">...</span>
-v002.scheme_pos{v003}=find(v002.scheme{v003}==<span class="string">'x'</span>);v002.bits(v003)=numel(v002.scheme_pos{v003});
-<span class="keyword">end</span>,<span class="keyword">end</span>,v004=find(v002.limits.lower&lt;=v001 &amp; v001&lt;=v002.limits.upper);v000=v002.scheme{v004};
-v005=v002.scheme_pos{v004};v003=dec2bin(v001,v002.bits(v004));v000(v005)=v003;v000=<span class="keyword">...</span>
-bin2dec(v000.').';<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001,v002]=UTF8_to_unicode(v003,v004),<span class="keyword">if</span> nargin&lt;2,v004=[];<span class="keyword">end</span>,v005= nargout==1 ;
-v003=uint32(reshape(v003,1,[]));[v002,v006,v007]=UTF8_to_unicode_internal(v003,v005);<span class="keyword">if</span> <span class="keyword">...</span>
-strcmp(v006,<span class="string">'success'</span>),v001=true;v000=v002;<span class="keyword">elseif</span> strcmp(v006,<span class="string">'error'</span>),v001=false;<span class="keyword">if</span> v005,<span class="keyword">...</span>
-error_(v004,v007),<span class="keyword">end</span>,v000=v003;<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__char(v000,v001),<span class="keyword">persistent</span> v002,<span class="keyword">if</span> isempty(v002),v002 = <span class="keyword">...</span>
-exist(<span class="string">'OCTAVE_VERSION'</span>, <span class="string">'builtin'</span>) ~= 0;<span class="keyword">end</span>,<span class="keyword">if</span> v002 &amp;&amp; v001.re_encode_char,v003 = size(v000,1)==<span class="keyword">...</span>
-numel(v000);<span class="keyword">if</span> v003,v000=v000.';<span class="keyword">end</span>,v000=cellstr(v000);<span class="keyword">for</span> v004=1:numel(v000),v000{v004}=<span class="keyword">...</span>
-unicode_to_char(UTF8_to_unicode(v000{v004},v001.print_to),true);<span class="keyword">end</span>,v005=cellfun(<span class="string">'length'</span>,v000);
-v006=max(v005);<span class="keyword">for</span> v004=find(v005&lt;v006),v000{v004}( (numel(v000{v004})+1) : v006)=uint16(<span class="string">' '</span>);
-<span class="keyword">end</span>,v000=cell2mat(v000);<span class="keyword">if</span> v003,v000=v000.';<span class="keyword">end</span>,<span class="keyword">end</span>,v007=size(v000).';v000=v000(:);v000=<span class="keyword">...</span>
-uint16(v000);v000=[v000;uint16(mod(v007,2^16))];<span class="keyword">end</span>
-<span class="keyword">function</span> v000=cast_to_uint16_vector__string(v000,v001),<span class="keyword">if</span> v001.string_to_cellstr,v000=<span class="keyword">...</span>
-cellstr(v000);v000=cast_to_uint16_vector__cell(v000,v001);<span class="keyword">else</span>,v000=char(v000);v000=<span class="keyword">...</span>
-cast_to_uint16_vector__char(v000,v001);<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> [v000,v001]=validate_print_to__options(v002,v001),<span class="keyword">if</span> nargin&lt;2,v001=struct;<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-~isfield(v002,<span class="string">'print_to_con'</span>),v002.print_to_con=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v002,<span class="string">'print_to_fid'</span>),<span class="keyword">...</span>
-v002.print_to_fid=[];<span class="keyword">end</span>,<span class="keyword">if</span> ~isfield(v002,<span class="string">'print_to_obj'</span>),v002.print_to_obj=[];<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-~isfield(v002,<span class="string">'print_to_fcn'</span>),v002.print_to_fcn=[];<span class="keyword">end</span>,v003=true;v000=struct;v004=<span class="keyword">...</span>
-v002.print_to_fid;<span class="keyword">if</span> isempty(v004),v000.boolean.fid=false;v000.fid=[];<span class="keyword">else</span>,v003=false;
-v000.boolean.fid=true;v000.fid=v004;<span class="keyword">for</span> v005=1:numel(v004),<span class="keyword">try</span> v006=ftell(v004(v005));<span class="keyword">catch</span>,<span class="keyword">...</span>
-v006=-1;<span class="keyword">end</span>,<span class="keyword">if</span> v004(v005)~=1 &amp;&amp; v006==-1,v001.message=[<span class="string">'Invalid print_to_fid parameter:'</span>,<span class="keyword">...</span>
-char(10),<span class="string">'should be a valid file identifier or 1.'</span>];v001.identifier=<span class="keyword">...</span>
-<span class="string">'HJW:print_to:ValidationFailed'</span>;v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v004=v002.print_to_obj;<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v004),v000.boolean.obj=false;v000.obj=[];<span class="keyword">else</span>,v003=false;v000.boolean.obj=true;v000.obj=<span class="keyword">...</span>
-v004;<span class="keyword">for</span> v005=1:numel(v004),<span class="keyword">try</span> v007=get(v004(v005),<span class="string">'String'</span> );set( v004(v005),<span class="string">'String'</span>,<span class="string">''</span> );
-set( v004(v005),<span class="string">'String'</span>,v007);<span class="keyword">catch</span>,v001.message=[<span class="string">'Invalid print_to_obj parameter:'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'should be a handle to an object with a writeable String property.'</span>];v001.identifier=<span class="keyword">...</span>
-<span class="string">'HJW:print_to:ValidationFailed'</span>;v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v004=v002.print_to_fcn;<span class="keyword">if</span> <span class="keyword">...</span>
-isempty(v004),v000.boolean.fcn=false;v000.fcn=[];<span class="keyword">else</span>,v003=false;<span class="keyword">try</span> <span class="keyword">for</span> v005=1:numel(v004),<span class="keyword">if</span> <span class="keyword">...</span>
-~ismember(class(v004(v005).h),{<span class="string">'function_handle'</span>,<span class="string">'inline'</span>}) || numel(v004(v005).h)~=1,<span class="keyword">...</span>
-error(<span class="string">'trigger error'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">catch</span>,v001.message=[<span class="string">'Invalid print_to_fcn parameter:'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'should be a struct with the h field containing a function handle,'</span>,char(10),<span class="keyword">...</span>
-<span class="string">'anonymous function or inline function.'</span>];v001.identifier=<span class="string">'HJW:print_to:ValidationFailed'</span>;v000=<span class="keyword">...</span>
-[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,v004=v002.print_to_con;<span class="keyword">if</span> isempty(v004),v000.boolean.con=v003;<span class="keyword">else</span>,[v008,<span class="keyword">...</span>
-v000.boolean.con]=test_if_scalar_logical(v004);<span class="keyword">if</span> ~v008,v001.message=<span class="keyword">...</span>
-[<span class="string">'Invalid print_to_con parameter:'</span>,char(10),<span class="string">'should be a scalar logical.'</span>];v001.identifier=<span class="keyword">...</span>
-<span class="string">'HJW:print_to:ValidationFailed'</span>;v000=[];<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> varargout=var2str(varargin),v000= nargin~=max(1,nargout) ;<span class="keyword">if</span> ~v000,varargout=<span class="keyword">...</span>
-cell(nargin,1);<span class="keyword">for</span> v001=1:nargin,<span class="keyword">try</span> varargout{v001}=inputname(v001);<span class="keyword">catch</span>,varargout{v001}=<span class="string">''</span>;
-<span class="keyword">end</span>,<span class="keyword">if</span> isempty(varargout{v001}),v000=true;<span class="keyword">break</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v000,<span class="keyword">...</span>
-error(<span class="string">'Invalid input and/or output.'</span>),<span class="keyword">end</span>,<span class="keyword">end</span>
-<span class="keyword">function</span> warning_(v007,varargin),<span class="keyword">persistent</span> v000,<span class="keyword">if</span> isempty(v000),v000=func2str(@warning_);<span class="keyword">end</span>,<span class="keyword">...</span>
-[v001,v002,v003,v004,v005]=parse_warning_error_redirect_inputs( varargin{:});<span class="keyword">if</span> v005,<span class="keyword">return</span>,<span class="keyword">end</span>,<span class="keyword">...</span>
-v006=struct(<span class="string">'identifier'</span>,v001,<span class="string">'message'</span>,v002,<span class="string">'stack'</span>,v003);<span class="keyword">if</span> isempty(v007),v007=<span class="keyword">...</span>
-validate_print_to__options(struct);<span class="keyword">end</span>,v007 =parse_warning_error_redirect_options( v007 );v008=<span class="keyword">...</span>
-warning;<span class="keyword">if</span> any(ismember({v008(ismember({v008.identifier},{v001,<span class="string">'all'</span>})).state},<span class="string">'off'</span>)),<span class="keyword">return</span>,<span class="keyword">...</span>
-<span class="keyword">end</span>,<span class="keyword">if</span> v007.boolean.con,<span class="keyword">if</span> ~isempty(v001),warning(v001,<span class="string">'%s'</span>,v002),<span class="keyword">else</span>,warning(v002), <span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">...</span>
-<span class="keyword">if</span> ~isempty(v001),lastwarn(v002,v001); <span class="keyword">else</span>,lastwarn(v002),<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v007.boolean.obj,v009=<span class="keyword">...</span>
-v002;<span class="keyword">while</span> v009(end)==10,v009(end)=[];<span class="keyword">end</span>,<span class="keyword">if</span> any(v009==10),v009=char2cellstr([<span class="string">'Warning: '</span> <span class="keyword">...</span>
-v009]);<span class="keyword">else</span>,v009=[<span class="string">'Warning: '</span> v009];<span class="keyword">end</span>,set(v007.obj,<span class="string">'String'</span>,v009),<span class="keyword">for</span> v010=v007.obj(:).',<span class="keyword">try</span> <span class="keyword">...</span>
-set(v010,<span class="string">'String'</span>,v009);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> v007.boolean.fid,v011=datestr(now,31);<span class="keyword">for</span> v012=<span class="keyword">...</span>
-v007.fid(:).',<span class="keyword">try</span> fprintf(v012,<span class="string">'[%s] Warning: %s\n%s'</span>,v011,v002,v004);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">if</span> <span class="keyword">...</span>
-v007.boolean.fcn,<span class="keyword">if</span> ismember(v000,{v003.name}),error(<span class="string">'prevent recursion'</span>),<span class="keyword">end</span>,<span class="keyword">for</span> v013=<span class="keyword">...</span>
-v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">'data'</span>),<span class="keyword">try</span> feval(v013.h,<span class="string">'warning'</span>,v006,v013.data);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">else</span>,<span class="keyword">...</span>
-<span class="keyword">try</span> feval(v013.h,<span class="string">'warning'</span>,v006);<span class="keyword">catch</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>,<span class="keyword">end</span>
-</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021b</a><br></p></div><!--
+</p><h2 id="13">Test suite</h2><p>This tester is included so you can test if your own modifications would introduce any bugs. These tests form the basis for the compatibility table above. Note that functions may be different between the tester version and the normal function. Make sure to apply any modifications to both. The full tester function (including all comments) can be found <a href="https://web.archive.org/web/20230217154605/https://cdn-151.anonfiles.com/4dC4B0Y4y2/170d432e-1676649359/aaa___RegGrow___test.m">here</a>.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% RegGrow
 %
@@ -1051,12 +568,14 @@ v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">
 % <tr><td>
 % result
 % </td><td>
-% The result of the region growing. This will be a logical array of the same size as the input image.
+% The result of the region growing. This will be a logical array of the same size as the input
+% image.
 % </td></tr>
 % <tr><td>
 % OverflowFlag
 % </td><td>
-% A flag in case of overflow. See below for how to enable checking for an overflow. Normally this output should be false.
+% A flag in case of overflow. See below for how to enable checking for an overflow. Normally this
+% output should be false.
 % </td></tr>
 % </table>
 % </html>
@@ -1082,7 +601,8 @@ v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">
 % seed
 % </td><td>
 % The initial starting point of the algorithm. If omitted, the default value is the first pixel
-% (linear index 1).
+% (linear index 1). If you want to use multiple seeds, you can use the ResumeSegmentation
+% parameter. If the ResumeSegmentation is provided, this parameter is ignored.
 % </td></tr>
 % <tr><td>
 % Name,Value
@@ -1104,13 +624,6 @@ v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">
 % <html>
 % <table border=1>
 % <tr><td>
-% nHood
-% </td><td>
-% The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
-% 2D images and 6-neighborhood for 3D images).
-% <br>This setting is ignored if the kernel input is provided.
-% </td></tr>
-% <tr><td>
 % kernel
 % </td><td>
 % The kernel input allows more flexibility in the direction of growth. This parameter must be a
@@ -1120,14 +633,37 @@ v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">
 % convolution kernel (i.e. it is flipped along all directions).
 % </td></tr>
 % <tr><td>
+% nHood
+% </td><td>
+% The neighborhood that is checked. By default the minimal neighborhood is used (4-neighborhood for
+% 2D images and 6-neighborhood for 3D images).
+% <br>This setting is ignored if the kernel input is provided.
+% </td></tr>
+% <tr><td>
 % overflow
 % </td><td>
-% This parameter allows the detection of a segmentation leak. This allows the process to exit
-% before it is complete if too many pixels are being segmented. A leak can cause the segmentation
-% to take a very long time to complete, especially for 3D images.
-% <br>If the segmented area or volume exceeds this value (counted as number of pixels or voxels),
-% the second output is set to true and the function halts. No error or warning is triggered.
-% <br><code>default=false;</code>
+% This parameter is the maximum number of voxels/pixels included in the region. This allows the
+% process to exit before it is complete if too many pixels are being segmented, indicating a
+% segmentation leak. A leak can cause the segmentation to take a very long time to complete,
+% especially for 3D images. If the segmented area or volume exceeds this value (counted as number
+% of pixels or voxels), the second output is set to true and the function halts. No error or
+% warning is triggered. This value must be either false, or a positive integer, or a value between
+% 0 and 1, in which case it is treated as a fraction of the total number of elements.
+% </td></tr>
+% <tr><td>
+% ResumeSegmentation
+% </td><td>
+% This parameter allows resuming the region growing from a previous aborted result (e.g. closing
+% the waitbar or exceeding the overflow parameter). This also allows growing from multiple seed
+% points. If this parameter is provided the seed parameter is ignored.
+% <code>ResumeSegmentation</code> needs to be a logical of the same size as the image with at least
+% 1&nbsp;element set to <code>true</code>.
+% </td></tr>
+% <tr><td>
+% silent
+% </td><td>
+% This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
+% provided to improve code readability.
 % </td></tr>
 % <tr><td>
 % waitbar
@@ -1136,12 +672,6 @@ v007.fcn(:).',<span class="keyword">if</span> isfield(v013,<span class="string">
 % overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but does
 % provide a visual indication of progress. The default is false for 2D input and true for higher
 % dimensional input.
-% </td></tr>
-% <tr><td>
-% silent
-% </td><td>
-% This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
-% provided to improve code readability.
 % </td></tr>
 % <tr><td>
 % WaitbarClosingBehavior
@@ -1175,7 +705,7 @@ end
 % Call RegGrow without input to segment the background in the example image.
 mask=RegGrow;
 
-%Fuse image and mask.
+% Fuse image and mask.
 r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(mask)=r_factor+R(mask)*(1-r_factor);G(mask)=G(mask)/2;B(mask)=B(mask)/2;fused=cat(3,R,G,B);
 subplot(1,2,1),imshow(IM),title('original example image')
 subplot(1,2,2),imshow(fused),title('segmented background')
@@ -1196,7 +726,7 @@ tic,r{3}=RegGrow(IM,opts);t3=toc;
 
 IM_=cell(1,3);
 for n=1:3
-    %Fuse image and mask.
+    % Fuse image and mask.
     r_factor=0.5;[R,G,B]=deal(IM,IM,IM);R(r{n})=r_factor+R(r{n})*(1-r_factor);G(r{n})=G(r{n})/2;B(r{n})=B(r{n})/2;fused=cat(3,R,G,B);
     IM_{n}=fused;
 end
@@ -1229,9 +759,21 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <td style="border:2px solid black;"> MacOS </td>
 % </tr>
 % <tr>
+% <td style="border:2px solid black;"> Matlab R2022b </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
+% <td> <it>Monterey : Pass</it> </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;"> Matlab R2022a </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
 % <td style="border:2px solid black;"> Matlab R2021b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it>Monterey : Pass</it> </td>
 % </tr>
 % <tr>
@@ -1243,7 +785,7 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2020b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it>Monterey : Pass</it> </td>
 % </tr>
 % <tr>
@@ -1255,7 +797,7 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2019b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it>Monterey : Pass</it> </td>
 % </tr>
 % <tr>
@@ -1267,54 +809,30 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2018a </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it></it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2017b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it>Monterey : Pass</it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2016b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it>Monterey : Pass</it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2015a </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it>ubuntu_22.04 : Pass</it> </td>
 % <td> <it></it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Matlab R2013b </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it></it> </td>
-% <td> <it></it> </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;"> Matlab R2012a </td>
-% <td> <it></it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
-% <td> <it></it> </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;"> Matlab R2011a </td>
-% <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
-% <td> <it></it> </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;"> Matlab R2010b </td>
-% <td> <it></it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
-% <td> <it></it> </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;"> Matlab R2010a </td>
-% <td> <it>W7 : Pass</it> </td>
 % <td> <it></it> </td>
 % <td> <it></it> </td>
 % </tr>
@@ -1337,28 +855,34 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <td> <it></it> </td>
 % </tr>
 % <tr>
+% <td style="border:2px solid black;"> Octave 7.2.0 </td>
+% <td> <it>W10 : Pass</it> </td>
+% <td> <it></it> </td>
+% <td> <it></it> </td>
+% </tr>
+% <tr>
 % <td style="border:2px solid black;"> Octave 6.2.0 </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>raspbian_11 : Pass</it> </td>
-% <td> <it>Catalina : Pass</it> </td>
+% <td> <it>raspbian_11 : Partial</it> </td>
+% <td> <it>Catalina : Partial</it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Octave 5.2.0 </td>
 % <td> <it>W10 : Pass</it> </td>
-% <td> <it>ubuntu_20.04 : Pass</it> </td>
+% <td> <it></it> </td>
 % <td> <it></it> </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;"> Octave 4.4.1 </td>
 % <td> <it>W10 : Pass</it> </td>
 % <td> <it></it> </td>
-% <td> <it>Catalina : Pass</it> </td>
+% <td> <it>Catalina : Partial</it> </td>
 % </tr>
 % </table>
 % </html>
 %
-%  Version: 1.2.0
-%  Date:    2022-03-18
+%  Version: 1.3.0
+%  Date:    2023-02-17
 %  Author:  H.J. Wisselink
 %  Licence: CC by-nc-sa 4.0 ( https://creativecommons.org/licenses/by-nc-sa/4.0 )
 %  Email = 'h_j_wisselink*alumnus_utwente_nl';
@@ -1367,7 +891,7 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 %% Performance
 % <html>
 % The benchmarking function used to generate the results below can be found
-% <a href=https://web.archive.org/web/20220318112126/https://cdn-102.anonfiles.com/v9F2c1P9x1/6aae3e41-1647603036/aaa___RegGrow___performance_test.m>here</a>.
+% <a href=https://web.archive.org/web/20230217154437/https://cdn-141.anonfiles.com/z1B1B5Y8y6/51828150-1676649273/aaa___RegGrow___performance_test.m>here</a>.
 % <br>The test results shown in the tables below are normalized to the results of the newest
 % Matlab release, since the performace is strongly dependent on the specific
 % computer running the test. To allow absolute comparisons as well the results in that cell
@@ -1388,628 +912,135 @@ title({sprintf('better maxDiff: %.2f',opts.maxDiff),sprintf('(t=%.1fms)',1000*t3
 % <td style="border:2px solid black;"> MacOS </td>
 % </tr>
 % <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2022b </td>
+% <td> (W10) <br> 0.086&nbsp;s <br> 0.204&nbsp;s </td>
+% <td> (ubuntu_22.04) <br> 0.122&nbsp;s <br> 0.216&nbsp;s </td>
+% <td> (Monterey) <br> 0.365&nbsp;s <br> 0.766&nbsp;s </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Matlab R2022a </td>
+% <td> (W10) <br> 116&nbsp;% <br> 105&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2021b </td>
-% <td> (W10) <br> 0.137&nbsp;s <br> 0.304&nbsp;s </td>
-% <td> (ubuntu_20.04) <br> 0.168&nbsp;s <br> 0.366&nbsp;s </td>
-% <td> (Monterey) <br> 0.270&nbsp;s <br> 0.594&nbsp;s </td>
+% <td> (W10) <br> 99&nbsp;% <br> 107&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 109&nbsp;% <br> 110&nbsp;% </td>
+% <td> (Monterey) <br> 100&nbsp;% <br> 101&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2021a </td>
-% <td> (W10) <br> 96&nbsp;% <br> 98&nbsp;% </td>
+% <td> (W10) <br> 101&nbsp;% <br> 102&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2020b </td>
-% <td> (W10) <br> 98&nbsp;% <br> 102&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 100&nbsp;% <br> 102&nbsp;% </td>
-% <td> (Monterey) <br> 155&nbsp;% <br> 131&nbsp;% </td>
+% <td> (W10) <br> 102&nbsp;% <br> 104&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 95&nbsp;% <br> 110&nbsp;% </td>
+% <td> (Monterey) <br> 120&nbsp;% <br> 99&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2020a </td>
-% <td> (W10) <br> 136&nbsp;% <br> 102&nbsp;% </td>
+% <td> (W10) <br> 144&nbsp;% <br> 118&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2019b </td>
-% <td> (W10) <br> 136&nbsp;% <br> 100&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 117&nbsp;% <br> 96&nbsp;% </td>
-% <td> (Monterey) <br> 117&nbsp;% <br> 104&nbsp;% </td>
+% <td> (W10) <br> 141&nbsp;% <br> 116&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 119&nbsp;% <br> 113&nbsp;% </td>
+% <td> (Monterey) <br> 120&nbsp;% <br> 102&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2019a </td>
-% <td> (W10) <br> 155&nbsp;% <br> 114&nbsp;% </td>
+% <td> (W10) <br> 170&nbsp;% <br> 125&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2018a </td>
-% <td> (W10) <br> 165&nbsp;% <br> 113&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 125&nbsp;% <br> 81&nbsp;% </td>
+% <td> (W10) <br> 219&nbsp;% <br> 132&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 128&nbsp;% <br> 98&nbsp;% </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2017b </td>
-% <td> (W10) <br> 182&nbsp;% <br> 110&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 108&nbsp;% <br> 77&nbsp;% </td>
-% <td> (Monterey) <br> 123&nbsp;% <br> 93&nbsp;% </td>
+% <td> (W10) <br> 219&nbsp;% <br> 152&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 121&nbsp;% <br> 121&nbsp;% </td>
+% <td> (Monterey) <br> 117&nbsp;% <br> 90&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2016b </td>
-% <td> (W10) <br> 207&nbsp;% <br> 201&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 117&nbsp;% <br> 118&nbsp;% </td>
-% <td> (Monterey) <br> 132&nbsp;% <br> 154&nbsp;% </td>
+% <td> (W10) <br> 242&nbsp;% <br> 324&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 113&nbsp;% <br> 189&nbsp;% </td>
+% <td> (Monterey) <br> 124&nbsp;% <br> 145&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2015a </td>
-% <td> (W10) <br> 201&nbsp;% <br> 208&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 127&nbsp;% <br> 136&nbsp;% </td>
+% <td> (W10) <br> 248&nbsp;% <br> 328&nbsp;% </td>
+% <td> (ubuntu_22.04) <br> 168&nbsp;% <br> 227&nbsp;% </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2013b </td>
-% <td> (W10) <br> 156&nbsp;% <br> 194&nbsp;% </td>
-% <td>  </td>
-% <td>  </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;vertical-align:middle"> Matlab R2012a </td>
-% <td>  </td>
-% <td> (ubuntu_20.04) <br> 142&nbsp;% <br> 165&nbsp;% </td>
-% <td>  </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;vertical-align:middle"> Matlab R2011a </td>
-% <td> (W10) <br> 205&nbsp;% <br> 216&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 136&nbsp;% <br> 133&nbsp;% </td>
-% <td>  </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;vertical-align:middle"> Matlab R2010b </td>
-% <td>  </td>
-% <td> (ubuntu_20.04) <br> 150&nbsp;% <br> 140&nbsp;% </td>
-% <td>  </td>
-% </tr>
-% <tr>
-% <td style="border:2px solid black;vertical-align:middle"> Matlab R2010a </td>
-% <td> (W7) <br> 217&nbsp;% <br> 350&nbsp;% </td>
+% <td> (W10) <br> 237&nbsp;% <br> 349&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab R2007b </td>
-% <td> (W10) <br> 844&nbsp;% <br> 1&thinsp;505&nbsp;% </td>
+% <td> (W10) <br> 1&thinsp;281&nbsp;% <br> 2&thinsp;588&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab 7.1 (R14SP3) </td>
-% <td> (XP) <br> 1&thinsp;096&nbsp;% <br> 1&thinsp;911&nbsp;% </td>
+% <td> (XP) <br> 1&thinsp;957&nbsp;% <br> 2&thinsp;838&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Matlab 6.5 (R13) </td>
-% <td> (W10) <br> 1&thinsp;318&nbsp;% <br> 1&thinsp;918&nbsp;% </td>
+% <td> (W10) <br> 2&thinsp;242&nbsp;% <br> 2&thinsp;743&nbsp;% </td>
+% <td>  </td>
+% <td>  </td>
+% </tr>
+% <tr>
+% <td style="border:2px solid black;vertical-align:middle"> Octave 7.2.0 </td>
+% <td> (W10) <br> 214&nbsp;% <br> 213&nbsp;% </td>
 % <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Octave 6.2.0 </td>
-% <td> (W10) <br> 141&nbsp;% <br> 148&nbsp;% </td>
-% <td> (raspbian_11) <br> 1&thinsp;090&nbsp;% <br> 1&thinsp;401&nbsp;% </td>
-% <td> (Catalina) <br> 100&nbsp;% <br> 70&nbsp;% </td>
+% <td> (W10) <br> 185&nbsp;% <br> 190&nbsp;% </td>
+% <td> (raspbian_11) <br> 1&thinsp;413&nbsp;% <br> 2&thinsp;465&nbsp;% </td>
+% <td> (Catalina) <br> 66&nbsp;% <br> 47&nbsp;% </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Octave 5.2.0 </td>
-% <td> (W10) <br> 285&nbsp;% <br> 175&nbsp;% </td>
-% <td> (ubuntu_20.04) <br> 118&nbsp;% <br> 80&nbsp;% </td>
+% <td> (W10) <br> 310&nbsp;% <br> 253&nbsp;% </td>
+% <td>  </td>
 % <td>  </td>
 % </tr>
 % <tr>
 % <td style="border:2px solid black;vertical-align:middle"> Octave 4.4.1 </td>
-% <td> (W10) <br> 166&nbsp;% <br> 150&nbsp;% </td>
+% <td> (W10) <br> 234&nbsp;% <br> 207&nbsp;% </td>
 % <td>  </td>
-% <td> (Catalina) <br> 124&nbsp;% <br> 76&nbsp;% </td>
+% <td> (Catalina) <br> 75&nbsp;% <br> 47&nbsp;% </td>
 % </tr>
 % </table>
 % </html>
 
 %% Test suite
 %
-% This tester is included so you can test if your own modifications would introduce any bugs. These
-% tests form the basis for the compatibility table above.
-% 
-% Note that some of the functions in this tester might be different from the functions included in
-% the actual function. Usually this is done to allow triggering of certain errors.
-% 
-% To save space, the tester function below was minified. The full tester function (including all comments) can be found <https://web.archive.org/web/20220318112344/https://cdn-127.anonfiles.com/b5H4ceP7x6/a6f9599e-1647603195/aaa___RegGrow___test.m here>.
-
-% Run a test suite
-% 
-% these syntaxes test basic availability of functionalities and test cases
-% that caused issues after writing the initial version of this function
-% 
-% Pass:    passes all tests
-% Partial: [no partial passing condition]
-% Fail:    fails any test
-%
-function v000=aaa___RegGrow___test(varargin),v000='pass';if nargin==0,v001=false;else,v001=true;
-end,if ifversion('<',0,'Octave','>',0),v002 = get(0,'DefaultImageCData');v002 = ...
-v002/max(v002(:));v003='5053C653355FA8A8B0F97C920CAF9A260F31E3CAAB728A07DC40AEB76C275363';
-disp('NOTE: different example image, performance can''t be compared with Matlab'),else,v004 = ...
-pow2(get(0,'DefaultImageCData'),47);v002 = bitshift(v004,-37);v002 = fix(v002);v002 = ...
-bitand(v002,31);v002 = v002/max(v002(:));v003=...
-'EFB571891EFFD822D3049FF72F2299BDCE757D63539D4C740E21DC62F30C6C0B';end,clc,try [v005,v006]=...
-speedtest;fprintf('speedtest finished\n\n'),v007=...
-{sprintf('The waitbar for test 07 should close at %.0f%%\n',v006)};v007{2}=...
-sprintf('No waitbar should appear for test 08\n');if ~v001,try uiwait(msgbox(v007)),catch,end,...
-end,catch,v005=[50 50];fprintf('speedtest failed\n\n'),end,v008=0;tic,try test01(v003);
-fprintf('test 01: pass (%.1fs)\n',toc),catch,disp('test 01: fail'),v008=v008+1;end,drawnow;
-pause(0.01);tic,try test02(v002);fprintf('test 02: pass (%.1fs)\n',toc),catch ME,...
-disp('test 02: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test03(v002);
-fprintf('test 03: pass (%.1fs)\n',toc),catch,disp('test 03: fail'),v008=v008+1;end,drawnow;
-pause(0.01);tic,try test04(v002);fprintf('test 04: pass (%.1fs)\n',toc),catch,...
-disp('test 04: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test05(v002);
-fprintf('test 05: pass (%.1fs)\n',toc),catch,disp('test 05: fail'),v008=v008+1;end,drawnow;
-pause(0.01);tic,try test06(v002);fprintf('test 06: pass (%.1fs)\n',toc),catch,...
-disp('test 06: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test07(v005),...
-fprintf('test 07: pass (%.1fs)\n',toc),catch,disp('test 07: fail'),v008=v008+1;end,drawnow;
-pause(0.01);tic,try test08(v005,v006);fprintf('test 08: pass (%.1fs)\n',toc),catch,...
-disp('test 08: fail'),v008=v008+1;end,drawnow;pause(0.01);tic,try test09(v002);
-fprintf('test 09: pass (%.1fs)\n',toc),catch,disp('test 09: fail'),v008=v008+1;end,drawnow;
-pause(0.01);tic,try test10(v002);fprintf('test 10: pass (%.1fs)\n',toc),catch,...
-disp('test 10: fail'),v008=v008+1;end,if v008>0,if nargout>0,v000='fail';else,...
-error('There were %d failed tests',v008),end,end,disp(['tester function ' mfilename ...
-' finished ']),if nargout==0,clear,end,end
-function v002=test_figure_available,try [v000,v001]=lastwarn('BLANK','BLANK:BLANK');
-delete(figure);[v000,v001]=lastwarn(v000,v001);if strcmp(v001,'BLANK:BLANK') && strcmp(v000,...
-'BLANK'),v002=true;else,clc,error('trigger'),end,catch,v002=false;end,end
-function v000=test_waitbar_available,try delete(waitbar(0,'test if GUI is available'));v000=...
-true;catch,v000=false;end,end
-function [v000,v001]=parse_NameValue(v002,varargin),switch numel(v002),case 0,...
-error('parse_NameValue:MixedOrBadSyntax',...
-'Optional inputs must be entered as Name,Value pairs or as a scalar struct.'),case 1,otherwise,...
-v002=v002(1);end,v000=v002;v001={};if nargin==1,return,end,try v003=numel(varargin)==1 && ...
-isa(varargin{1},'struct');v004=mod(numel(varargin),2)==0 && all( cellfun('isclass',...
-varargin(1:2:end),'char' ) | cellfun('isclass',varargin(1:2:end),'string') );if ~( v003 || v004 ...
-),error('trigger'),end,if nargin==2,v005=fieldnames(varargin{1});v006=struct2cell(varargin{1});
-else,v005=cellstr(varargin(1:2:end));v006=varargin(2:2:end);end,if ~iscellstr(v005),...
-error('trigger');end,catch,error('parse_NameValue:MixedOrBadSyntax',...
-'Optional inputs must be entered as Name,Value pairs or as a scalar struct.'),end,v007=...
-fieldnames(v002);v008=cell(1,3);v009{1}=v007;v009{2}=lower(v009{1});v009{3}=strrep(v009{2},'_',...
-'');v001=false(size(v007));for v010=1:numel(v005),v011=v005{v010};[v012,v008{1}]=...
-parse_NameValue__find_match(v008{1},v009{1},v011);if numel(v012)~=1,v011=lower(v011);[v012,...
-v008{2}]=parse_NameValue__find_match(v008{2},v009{2},v011);end,if numel(v012)~=1,v011=...
-strrep(v011,'_','');[v012,v008{3}]=parse_NameValue__find_match(v008{3},v009{3},v011);end,if ...
-numel(v012)~=1,error('parse_NameValue:NonUniqueMatch',v005{v010}),end,v000.(v007{v012})=...
-v006{v010};v001(v012)=true;end,v001=v007(v001);end
-function [v000,v001]=parse_NameValue__find_match(v001,v002,v003),v000=find(ismember(v002,v003));
-if numel(v000)==1,return,end,if isempty(v001),v001=parse_NameValue__name2char(v002);end,v004=...
-v001(:,1:min(end,numel(v003)));v005=numel(v003)-sum(cumprod(double(v004==repmat(v003,size(v004,...
-1),1)),2),2);v000=find(v005==0);end
-function v000=parse_NameValue__name2char(v000),v001=cellfun('prodofsize',v000);v002=max(v001);
-for v003=find(v001<v002).',v000{v003}((end+1):v002)=' ';end,v000=vertcat(v000{:});end
-function [v000,v001,v002,v003,v004]=parse_warning_error_redirect_inputs(varargin),v004=false;if ...
-nargin==1,if isa(varargin{1},'struct') || isa(varargin{1},'MException'),v005=varargin{1};if ...
-numel(v005)==0,v004=true;[v000,v001,v002,v003]=deal('');return,end,try v002=v005.stack;v003=...
-get_trace(0,v002);catch,[v003,v002]=get_trace(3);end,v000=v005.identifier;v001=v005.message;
-v006='Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback(';if ...
-isa(v005,'struct') && numel(v001)>numel(v006) && strcmp(v006,v001(1:numel(v006))),...
-v001(1:find(v001==10,1))='';end,else,[v003,v002]=get_trace(3);[v000,v001]=deal('',varargin{1});
-end,else,[v003,v002]=get_trace(3);if ~isempty(strfind(varargin{1},'%')),v000='';v007=...
-varargin(2:end);v001=sprintf(varargin{1},v007{:});else,v000=varargin{1};v001=varargin{2};if ...
-nargin>2,v007=varargin(3:end);v001=sprintf(v001,v007{:});end,end,end,end
-function v000=parse_warning_error_redirect_options(v000),if ~isfield(v000,'boolean'),...
-v000.boolean=struct;end,if ~isfield(v000.boolean,'con') || isempty(v000.boolean.con),...
-v000.boolean.con=false;end,if ~isfield(v000.boolean,'fid') || isempty(v000.boolean.fid),...
-v000.boolean.fid=isfield(v000,'fid');end,if ~isfield(v000.boolean,'obj') || ...
-isempty(v000.boolean.obj),v000.boolean.obj=isfield(v000,'obj');end,if ~isfield(v000.boolean,...
-'fcn') || isempty(v000.boolean.fcn),v000.boolean.fcn=isfield(v000,'fcn');end,end
-function v000=PatternReplace(v001,v002,v003),v000=v001(:)';if numel(v002)==0,v004=...
-false(size(v001));elseif numel(v003)>numel(v002),error('not implemented (padding required)'),...
-else,v004=true(size(v001));for v005=1:numel(v002),v006=find(v001==v002(v005));v006=v006-v005+1;
-v006(v006<1)=[];v007=false(size(v004));v007(v006)=true;v004= v004 & v007;if ~any(v004),break,...
-end,end,end,v006=find(v004);if ~isempty(v006),for v005=1:numel(v003),v000(v006+v005-1)=...
-v003(v005);end,if numel(v003)==0,v005=0;end,if numel(v002)>v005,v006=v006(:);v008=...
-(v005+1):numel(v002);v009=bsxfun_plus(v006,v008-1);v000(v009(:))=[];end,end,end
-function [v000,v001] = RegGrow(varargin),if nargout>2,error('HJW:RegGrow:nargout',...
-'Incorrect number of output arguments.'),end,[v002,v003,v004]=RegGrow_ParseInputs(varargin{:});
-if ~v002,rethrow(v004),else,[v005,v006,v007,v008,v009,v010]=deal( v003.I,v003.maxDiff,v003.seed,...
-v003.kernel,v003.overflow,v003.waitbar);end,if v010.bar,v010.h=waitbar(0,'processing...');
-v010.count=0;v011=0;end,v001=false;v000=logical(zeros(size(v005)));v007=num2cell(v007);
-v000(v007{:})=true;v012=true;while v012,if v009.check,if sum(v000(:))>v009.volume,v001=true;
-break,end,end,if v010.bar,v010.count=v010.count+1;if mod(v010.count,5)==0,try v011=mod(v011+1,...
-3);v013=repmat('.',1,1+v011);v014=sprintf('processing%s',v013);waitbar(sum(v000(:))/v010.max,...
-v010.h,v014),drawnow,catch,v004=lasterror;if strcmp(v004.identifier,...
-'MATLAB:waitbar:InvalidSecondInput'),switch v003.WaitbarClosingBehavior,case 'warning',...
-warning('HJW:RegGrow:WaitbarClosedWarning','The waitbar was closed, continuing...'),v010.bar=...
-false;case 'error',error('HJW:RegGrow:WaitbarClosedError','The waitbar was closed.'),case ...
-'return',if nargout==0,clear(var2str(v000)),end,return,case 'ignore',v010.bar=false;end,end,end,...
-end,end,v015= ~v000 & convn(v000,v008,'same')>0.5;v016=abs(v005-mean(v005(v000)))>=v006;
-v015(v016)=false;if any(v015(:)),v000(v015)=true;else,v012=false;end,end,if v010.bar,...
-delete(v010.h),end,if nargout==0,clear(var2str(v000)),end,end
-function [v000,v001,v002]=RegGrow_ParseInputs(varargin),v000=false;v001=struct;v002=...
-struct('identifier','','message','');persistent v003,if isempty(v003),if ifversion('<',0,...
-'Octave','>',0),v004 = get(0,'DefaultImageCData');v004 = v004/max(v004(:));else,v005 = ...
-pow2(get(0,'DefaultImageCData'),47);v004 = bitshift(v005,-37);v004 = fix(v004);v004 = ...
-bitand(v004,31);v004 = v004/max(v004(:));end,v003.I=v004;v003.maxDiff=[];v003.seed=[];
-v003.nHood=[];v003.kernel=[];v003.shifts=[];v003.overflow=[];v003.KeepShellVoxelsOnly=false;
-v003.waitbar=[];v003.silent=[];v003.ErrorOnWaitbarClosing=false;end,if nargin==0,v001=...
-RegGrow_check_dynamic_defaults(v003);v001.seed=[2 2];v000=true;return,end,v006=0;v007={'I',...
-'maxDiff','seed'};while numel(varargin)>0 && ~(isa(varargin{1},'char') || isa(varargin{1},...
-'struct')),v006=v006+1;v001.(v007{v006})=varargin{1};varargin(1)=[];end,try v008=[];[v001,v009]=...
-parse_NameValue(v003,v001);catch v008;if isempty(v008),v008=lasterror;end,v002=v008;return,end,...
-if numel(varargin)>0,try v008=[];[v001,v010]=parse_NameValue(v001,varargin{:});catch v008;if ...
-isempty(v008),v008=lasterror;end,v002=v008;return,end,v009=unique([v009;v010]);end,[v011,v012]=...
-sort(lower(v009));v009=v009(v012);for v013=1:numel(v009),v014=v009{v013};v015=v001.(v014);
-v002.identifier=['HJW:RegGrow:incorrect_input_opt_' lower(v014)];switch lower(v014),case 'i',...
-try v015=double(v015);catch,v002.message='The image input must be convertible to a double.';
-return,end,v001.I=v015;case 'kernel',try v004=v001.I;v015=logical(v015);if ndims(v015)~=...
-ndims(v004) || ~all(mod(size(v015),2)==1),disp(v015(-1)),end,v016=v015;v017=(size(v016)+1)/2;
-v017=num2cell(v017);v016(v017{:})=false;v015(v017{:})=true;if sum(v016(:))==0,...
-warning('HJW:RegGrow:CentroidOnlyKernel',...
-['Only the centroid of the kernel is marked as true.\n',...
-'This will cause the result to only contain the seed position.']),end,catch,v002.message=...
-['The kernel input must a logical with ndims(IM) dimensions.',char(10),...
-'Each dimension must be an odd length.'];return,end,v001.kernel=v015;case 'maxdiff',try v015=...
-double(v015);catch,end,if ~isa(v015,'double') || numel(v015)~=1 || v015<0 || isnan(v015),...
-v002.message=['The maxDiff input must be a non-negative numeric scalar.',char(10),...
-'It must also be convertible to a double.'];return,end,v001.maxDiff=v015;case 'nhood',if ...
-any(ismember(lower(v009),{'kernel','shifts'})),continue,end,v004=v001.I;v018=...
-['The nHood parameter must be either the maximal or minimal value, ',char(10),...
-'so 4 or 8 for 2D images, 6 or 26 for 3D images, etc.',char(10),...
-'This parameter must be set if the kernel parameter is not set.'];try v019=ndims(v004);if ...
-numel(v015)>1,v015=0;end,v015=double(v015);if ~ismember(v015,[3^v019-1 2*v019]),v002.message=...
-v018;return,end,catch,v002.message=v018;return,end,v001.nHood=v015;case 'overflow',if ...
-~isempty(v015) && ( ~isnumeric(v015) || numel(v015)>1 || abs(v015-round(v015))>eps),...
-v002.message='The overflow volume must be empty, or a numeric scalar integer.';return,end,...
-v001.overflow=v015;case 'seed',v004=v001.I;v018=...
-'The seed must be a vector with a valid position.';try if numel(v015)~=ndims(v004),v002.message=...
-v018;return,end,v020=v015(:)';v021=num2cell(v020);v022=v004(v021{:});catch,v002.message=v018;
-return,end,v002.message='';v001.seed=v020;case {'waitbar','silent'},[v023,v015]=...
-test_if_scalar_logical(v015);if ~v023,v002.message='waitbar must be a logical scalar.';return,...
-end,if strcmpi(v014,'silent'),v015= ~v015;end,v001.waitbar=v015;case 'shifts',v001.shifts=v015;
-case 'waitbarclosingbehavior',v024=struct('warning',0,'error',0,'return',0,'ignore',0);[v011,...
-v015]=parse_NameValue(v024,{v015,true});if ~v023,v002.message=...
-['WaitbarClosingBehavior must be one of these:' char(10),...
-'''warning'', ''error'', ''return'', or ''ignore''.'];return,end,v001.WaitbarClosingBehavior=...
-v015;end,end,v000=true;v001=RegGrow_check_dynamic_defaults(v001);end
-function v000=RegGrow_check_dynamic_defaults(v000),if isempty(v000.seed),v001=...
-ones(ndims(v000.I),1);v000.seed=v001;end,if isempty(v000.maxDiff),v000.maxDiff=...
-2/3*std(v000.I(:));end,if ~isempty(v000.shifts),v002=v000.shifts;v003=max(abs(v002(:)));v004=...
-zeros( (1+2*v003)*ones(1,size(v002,2)) );v002=v002+v003+1;v002=mat2cell(v002,size(v002,1),...
-ones(1,size(v002,2)));v005=sub2ind(size(v004),v002{:});v004(v005)=1;v004=logical(v004);
-v000.kernel=v004;end,if isempty(v000.kernel),v006=v000.nHood;if isempty(v006),v006=...
-2*ndims(v000.I);end,v007=ndims(v000.I);if v006==(2*v007),v008=cell(v007,1);[v008{:}]=...
-ndgrid(-1:1);v008=cat(v007+1,v008{:});v008=sqrt(sum(v008.^2,v007+1));v004=v008<=1;elseif v006==...
-(3^v007-1),v004=logical(ones(3*ones(1,v007)));end,v000.kernel=v004;end,v009=v000.overflow;if ...
-isempty(v009) || isnan(v009) || isinf(v009),v000.overflow=struct('check',false,'volume',inf);
-else,v000.overflow=struct('check',true,'volume',v009);end,if isempty(v000.waitbar),v000.waitbar=...
- ndims(v000.I)>2 ;end,v000.waitbar=struct('bar',v000.waitbar,'max',min(numel(v000.I),...
-v000.overflow.volume));end
-function v000=cast_to_uint16_vector__struct(v000,v001),v002=size(v000).';v000=v000(:);v003=...
-fieldnames(v000);v004=cell(2,numel(v003));for v005=1:numel(v003),v004{1,v005}=v003{v005};v004{2,...
-v005}={v000.(v003{v005})};end,v000=cast_to_uint16_vector__cell(v004,v001);v000=[v000;
-uint16(mod(v002,2^16))];end
-function v000=char2cellstr(v001,v002),v003=isa(v001,'char');v001=int32(v001);if nargin<2,if ...
-any(v001==13),v001=PatternReplace(v001,int32([13 10]),int32(-10));v001(v001==13)=-10;end,...
-v001(v001==10)=-10;else,for v004=1:numel(v002),v001=PatternReplace(v001,int32(v002{v004}),...
-int32(-10));end,end,v005=[0 find(v001==-10) numel(v001)+1];v000=cell(numel(v005)-1,1);for v004=...
-1:numel(v000),v006=(v005(v004 )+1);v007=(v005(v004+1)-1);v000{v004}=v001(v006:v007);end,if v003,...
-for v004=1:numel(v000),v000{v004}= char(v000{v004});end,else,for v004=1:numel(v000),v000{v004}=...
-uint32(v000{v004});end,end,end
-function v000=CharIsUTF8,persistent v001,if isempty(v001),if exist('OCTAVE_VERSION','builtin')~=...
-0,v002=struct('w',warning('off','all'));[v002.msg,v002.ID]=lastwarn;v001=~isequal(8364,...
-double(char(8364)));warning(v002.w);lastwarn(v002.msg,v002.ID);else,v001=false;end,end,v000=...
-v001;end
-function v000=circshift_by_col(v000),persistent v001,v002=size(v000);if isempty(v001) || ...
-any(size(v001)<v002) || isempty(v001{v002(1),v002(2)}),[v003,v004]=meshgrid(1:size(v000,2),...
-1:size(v000,1));v005=mod(v003+v004-2,size(v000,1))+1;v006=sub2ind(size(v000),v005,v003);if ...
-prod(v002)<=1000,v001{v002(1),v002(2)}=v006;end,else,v006=v001{v002(1),v002(2)};end,v000=...
-v000(v006);end
-function v000=ComputeNonCryptHash_dec2hex(v001),persistent v002,if isempty(v002),v002=...
-upper(dec2hex(0:(-1+2^16),4));end,v001=double(v001)+1;v000=v002(v001,:);end
-function v000=ComputeNonCryptHash_add_salt(v000,v001),v002=16*numel(v000);v003=v001;
-v003.Version=1; v003.HashLength=v002;v003.SkipInputParse=1; v003.isSaltCall=1;v004=...
-ComputeNonCryptHash(v000,v003);v004=ComputeNonCryptHash_shuffle_uint16_inv(v004);if ...
-v001.Version>1,v004=v004(end:-1:1);end,v000=mod(double(v000).*double(v004),1+2^16);v000=...
-uint16(v000);end
-function [v000,varargout]=ComputeNonCryptHash(v001,varargin),if nargin<1,...
-error('HJW:ComputeNonCryptHash:InputIncorrect','At least 1 input required.'),end,if nargout>=2,...
-varargout=cell(nargout-1,1);end,if nargin==2 && isa(varargin{1},'struct') && ...
-varargin{1}.SkipInputParse,v002=varargin{1};else,[v003,v002,v004]=...
-ComputeNonCryptHash_parse_inputs(varargin{:});if v003,v002=...
-ComputeNonCryptHash_DefaultsByVersion(v002);if nargout>=2,v000='';v002.SkipInputParse=true;
-varargout{1}=v002;return,end,else,error_(v002.print_to,v004),end,end,v005=v002.HashLength;v006=...
-v002.Version;try v004=[];v001=cast_to_uint16_vector(v001,v002);catch v004;if isempty(v004),v004=...
-lasterror;end,if strcmp(v004.identifier,'MATLAB:nomem'),error_(v002.print_to,v004),else,if ...
-isfield(v002,'debug') && v002.debug,v007=sprintf('\n[original error: %s %s]',v004.identifier,...
-v004.message);else,v007='';end,error_(v002.print_to,'HJW:ComputeNonCryptHash:UnwindFailed',...
-['The nested input contains an unsupported data type.' v007]),end,end,if mod(numel(v001),...
-v005/16),v008=uint16(1:v005/16).'; v008(1:mod(numel(v001),v005/16))=[];v001=[v001;v008];end,if ...
-v006==1,v001=ComputeNonCryptHash_shuffle_uint16(v001);v001=...
-ComputeNonCryptHash_uint16_to_logical(v001);v001=xor(v001,reshape(v001,[],16).');else,v001=...
-ComputeNonCryptHash_shuffle_uint16(v001);v001=ComputeNonCryptHash_uint16_to_logical(v001);v001=...
-circshift_by_col(v001);end,v001=mod(sum(reshape(v001,v005,[]),2),2);v001=...
-ComputeNonCryptHash_logical_to_uint16(v001);if v002.isSaltCall,v000=v001;return,end,v001=...
-ComputeNonCryptHash_add_salt(v001,v002);v000=ComputeNonCryptHash_dec2hex(v001);v000=...
-reshape(v000.',1,[]);end
-function v000=ComputeNonCryptHash_logical_to_uint16(v000),if mod(numel(v000),16),...
-v000(16*ceil(numel(v000)/16))=0;end,v001=uint16(2.^(15:-1:0))';v000=uint16(reshape(v000,16,[]));
-try v000=v000.*v001;catch,v000=double(v000).*repmat(double(v001),[1 size(v000,2)]);v000=...
-uint16(v000);end,v000=uint16(sum(v000,1)).';end
-function v000=ComputeNonCryptHash_shuffle_uint16(v000),v001=65537;v002=479001600;v000 = ...
-uint16(mod(double(v000) * v002 , v001));end
-function v000=ComputeNonCryptHash_shuffle_uint16_inv(v000),v001=65537;v002=1919;v000=...
-uint16(mod(double(v000) * v002,v001));end
-function [v000,v010]=speedtest,v000=[300 300];v001=2;v002=0;v003=1.1;while true,v002=v002+1;
-fprintf('running speedtest (pass %d) ',v002),v004=prod(v000);v005=1:prod(v000);v005=...
-reshape(v005,v000);v005(:,2:2:end)=v005(end:-1:1,2:2:end);tic,v006=RegGrow(v005,'waitbar',...
-~ifversion___skip_test);v007=toc;if abs(v007-v001)/v001<(0.2+(v002-1)/100),...
-fprintf('(time=%.1f) ',v007),break,end,v008=round(prod(v000)*(v001/v007)^v003);v008=min(25*v004,...
-v008);v003=0.8;v000=round(sqrt(v008))*[1 1];v000=2*ceil(v000/2);v009=sprintf('%.1E to %.1E',...
-v004,prod(v000));v009=strrep(v009,'E+',' E');
-fprintf('(time=%.1f, elem count updated from %s)\n',v007,v009),end,v010=...
-100*sum(v006(:))/prod(v000);end
-function test01(Hash),try if ~strcmp(Hash,ComputeNonCryptHash(RegGrow,256,'-v2')),...
-error('hash doesn''t match (did the default image change?)'),end,catch,error('fail'),end,end
-function v000=ComputeNonCryptHash_uint16_to_logical(v000),persistent v001,if isempty(v001),v001=...
-dec2bin(0:(-1+2^16))=='1';v001=v001.';end,v000=double(v000)+1;v000=v001(:,v000);end
-function test03(IM),try v000=struct('seed',[3;2]);RegGrow(IM,v000);catch,error('fail'),end,end
-function test04(IM),try [v000,v001]=RegGrow(IM,0.3,[1 26],'overflow',1e2);catch,error('fail'),...
-end,end
-function test05(IM),try [v000,v001]=RegGrow(IM,'overflow',[]);if v001~=false,error('fail'),else,...
-end,catch,error('fail'),end,end
-function test09(IM),try v000=logical(zeros(3,3));v001=warning('off',...
-'HJW:RegGrow:CentroidOnlyKernel');v002=RegGrow(IM,'nHood',5,'kernel',v000);warning(v001);if ...
-sum(v002(:))~=1,error('fail'),end,catch,error('fail'),end,end
-function test10(IM),try v000=logical(zeros(3,3));v000(end)=true;v001=RegGrow(IM,'kernel',v000,...
-'maxdiff',1+max(IM(:))-min(IM(:)));if sum(v001(:))~=min(size(IM)),error('fail'),end,catch,...
-error('fail'),end,end
-function v000=bsxfun_plus(v001,v002),try v000=v001+v002;catch,try v000=bsxfun(@plus,v001,v002);
-catch,v003=size(v001); v004=size(v002);v001=repmat(v001,max(1,v004./v003)); v002=repmat(v002,...
-max(1,v003./v004));v000=v001+v002;end,end,end
-function test02(IM),try v000=[];v001=struct('seed',[6 4 2]);RegGrow(IM,v001);error('fail'),...
-catch v000;if isempty(v000),v000=lasterror;end,if strcmp(v000.identifier,...
-'HJW:RegGrow:incorrect_input_opt_seed'),else,error('fail'),end,end,end
-function test06(v000),if exist('OCTAVE_VERSION', 'builtin'),v000=repmat(v000,[1,1,5]);v001=20;
-else,v000=repmat(v000,[1,1,40]);v001=10;end,v001=1+rand(size(v000))/v001;v000=v000.*v001;try ...
-[v002,v003]=RegGrow(v000,'waitbar',false);catch,error('fail'),end,end
-function v000=cast_to_uint16_vector(v000,v001),if isa(v000,'uint16'),v002='uint16';v003=...
-size(v000).';v000=reshape(v000,[],1);v000=[v000;uint16(v002.');uint16(mod(v003,2^16))];return,...
-end,v000=cast_to_uint16_vector__cell({v000},v001);v000([end-1 end])=[];end
-function test07(sz),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,...
-2:2:end);try RegGrow(v000,'waitbar',~ifversion___skip_test);catch,error('fail'),end,end
-function test08(sz,p),v000=1:prod(sz);v000=reshape(v000,sz);v000(:,2:2:end)=v000(end:-1:1,...
-2:2:end);try v001=RegGrow(v000,'silent',ifversion___skip_test);v002=round(p*numel(v001)/100);if ...
-abs( sum(v001(:)) - v002 ) > 1,error('fail'),end,catch,error('fail'),end,end
-function v000=ComputeNonCryptHash_DefaultsByVersion(v000),v000.Version=...
-str2double(v000.VersionFlag(3:end));if ~isfield(v000,'re_encode_char_on_Octave'),...
-v000.re_encode_char=v000.Version>=2;end,if ~isfield(v000,'string_to_cellstr'),...
-v000.string_to_cellstr=v000.Version>=2;if ~isfield(v000,'cast_int64_double'),...
-v000.cast_int64_double=v000.Version==1;end,end,end
-function [v000,v001,v002]=ComputeNonCryptHash_parse_inputs(varargin),v000=false;v001=...
-ComputeNonCryptHash_parse_inputs_default;[v003,v002]=ParseArgs(varargin{:});if ~isempty(v002),...
-v001=default;return;end,try v004=[];[v001,v005]=parse_NameValue(v001,v003{:});catch v004;if ...
-isempty(v004),v004=lasterror;end,v002=v004;return,end,[v001.print_to,v002]=...
-validate_print_to__options(v001,v002);if isempty(v001.print_to),return,end,if numel(v005)==0,...
-v000=true;v002=[];return,end,for v006=1:numel(v005),if strcmp(v005{v006},'VersionFlag'),try ...
-v007=str2double(v001.VersionFlag(3:end));if isnan(v007) || round(v007)~=v007 || v007>2,...
-error('trigger');end,catch,v002.identifier='HJW:ComputeNonCryptHash:InputIncorrect';
-v002.message='VersionFlag input incorrect. Must be ''-v1'', ''-v2''.';return,end,elseif ...
-strcmp(v005{v006},'HashLength'),v008=v001.HashLength;if numel(v008)~=1 || ~isnumeric(v008) || ...
-mod(v008,16)~=0 || v008<16,v002.identifier='HJW:ComputeNonCryptHash:InputIncorrect';
-v002.message='HashLength input must be a multiple of 16.';return,end,end,end,v000=true;v002=[];
-end
-function [v000,v001]=ParseArgs(varargin),v001=[];v000=varargin;v002=[false false];for v003=...
-1:nargin,[v004,v005,v000]=ComputeNonCryptHash_parse_inputs__pop_queue(v000);switch v004,case 0,...
-break,case 1,v006=v005; v002(1)=true;case 2,v007=v005; v002(2)=true;case 3,v001.identifier=...
-'HJW:ComputeNonCryptHash:InputIncorrect';v001.message='Unable to determine a valid syntax.';
-return,end,end,if nargin==sum(v002),v008=struct;if v002(1),v008.VersionFlag=v006;end,if v002(2),...
-v008.HashLength =v007 ;end,v000={v008};else,if isa(v000{1},'stuct'),v008=v000{1};if v002(1),...
-v008.VersionFlag=v006;end,if v002(2),v008.HashLength =v007 ;end,v000{1}=v008;else,v009=cell(1,...
-0);if v002(1),v009=[v009 {'VersionFlag',v006}];end,if v002(2),v009=[v009 {'HashLength' ,v007 }];
-end,v000=[v009 v000];end,end,end
-function [v000,v001,v002]=ComputeNonCryptHash_parse_inputs__pop_queue(v003),v001=v003{1};if ...
-ismember(class(v001),{'char','string'}),if isa(v001,'char')&&numel(v001)>=1 && strcmp('-',...
-v001(1)),v000=1;else,v000=0;end,else,if isa(v001,'struct'),v000=0;else,v000=2;end,end,v002=v003;
-if v000~=0,v002(1)=[];end,end
-function [v000,v001]=test_if_scalar_logical(v001),persistent v002,if isempty(v002),v002={true,...
-false;1,0;'on','off';'enable','disable';'enabled','disabled'};if ifversion('>=','R2016b','<',0),...
-v002(end+1,:)={string('on'),string('off')};end,end,v000=true;try if isa(v001,'char') || ...
-isa(v001,'string'),try v001=lower(v001);catch,end,end,for v003=1:size(v002,1),for v004=1:2,if ...
-isequal(v001,v002{v003,v004}),v001=v002{1,v004};return,end,end,end,if isa(v001,...
-'matlab.lang.OnOffSwitchState'),v001=logical(v001);return,end,catch,end,v000=false;end
-function v000=unicode_to_char(v001,v002),persistent v003,if isempty(v003),v003 = ...
-exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if nargin==1,v002=~CharIsUTF8;end,if v002,if ...
-all(v001<65536),v000=uint16(v001);v000=reshape(v000,1,numel(v000));else,[v004,v005,v006]=...
-unique(v001);v000=cell(1,numel(v001));for v007=1:numel(v004),v008=unicode_to_UTF16(v004(v007));
-v008=uint16(v008);v000(v006==v007)={v008};end,v000=cell2mat(v000);end,if ~v003,v000=char(v000);
-end,else,if all(v001<128),v000=char(v001);v000=reshape(v000,1,numel(v000));else,[v004,v005,...
-v006]=unique(v001);v000=cell(1,numel(v001));for v007=1:numel(v004),v008=...
-unicode_to_UTF8(v004(v007));v008=uint8(v008);v000(v006==v007)={v008};end,v000=cell2mat(v000);
-v000=char(v000);end,end,end
-function v001=ComputeNonCryptHash_parse_inputs_default,persistent v000,if isempty(v000),v000=...
-struct;v000.HashLength=256;v000.VersionFlag='-v2';v000.SkipInputParse=false;v000.isSaltCall=...
-false;v000.print_to_con=[];v000.print_to_fid=[];v000.print_to_obj=[];v000.print_to_fcn=[];
-v000.print_to=validate_print_to__options(v000);end,v001=v000;end
-function error_(v001,varargin),persistent v000,if isempty(v000),v000=func2str(@error_);end,if ...
-isempty(v001),v001=validate_print_to__options(struct);end,v001 =...
-parse_warning_error_redirect_options( v001 );[v002,v003,v004,v005,v006]=...
-parse_warning_error_redirect_inputs( varargin{:});if v006,return,end,v007=struct('identifier',...
-v002,'message',v003,'stack',v004);if v001.boolean.obj,v008=v003;while v008(end)==10,v008(end)=...
-'';end,if any(v008==10),v008=char2cellstr(['Error: ' v008]);else,v008=['Error: ' v008];end,for ...
-v009=v001.obj(:).',try set(v009,'String',v008);catch,end,end,end,if v001.boolean.fid,v010=...
-datestr(now,31);for v011=v001.fid(:).',try fprintf(v011,'[%s] Error: %s\n%s',v010,v003,v005);
-catch,end,end,end,if v001.boolean.fcn,if ismember(v000,{v004.name}),error('prevent recursion'),...
-end,for v012=v001.fcn(:).',if isfield(v012,'data'),try feval(v012.h,'error',v007,v012.data);
-catch,end,else,try feval(v012.h,'error',v007);catch,end,end,end,end,rethrow(v007),end
-function [v000,v001]=get_trace(v002,v001),if nargin==0,v002=1;end,if nargin<2, v001=dbstack;end,...
-v001(1:v002)=[];if ~isfield(v001,'file'),for v003=1:numel(v001),v004=v001(v003).name;if ...
-strcmp(v004(end),')'),v005=strfind(v004,'(');v006=v004( (v005(end)+1):(end-1) );v007=...
-v004(1:(v005(end)-2));else,v007=v004;[v008,v006]=fileparts(v004);end,[v008,v001(v003).file]=...
-fileparts(v007);v001(v003).name=v006;end,end,persistent v009,if isempty(v009),v009=...
-exist('OCTAVE_VERSION','builtin');end,if v009,for v003=1:numel(v001),[v008,v001(v003).file]=...
-fileparts(v001(v003).file);end,end,v010=v001;v011='>';v000=cell(1,numel(v010)-1);for v003=...
-1:numel(v010),[v012,v010(v003).file,v013]=fileparts(v010(v003).file);if v003==numel(v010),...
-v010(v003).file='';end,if strcmp(v010(v003).file,v010(v003).name),v010(v003).file='';end,if ...
-~isempty(v010(v003).file),v010(v003).file=[v010(v003).file '>'];end,v000{v003}=...
-sprintf('%c In %s%s (line %d)\n',v011,v010(v003).file,v010(v003).name,v010(v003).line);v011=' ';
-end,v000=horzcat(v000{:});end
-function v000=ifversion(v001,v002,v003,v004,v005),persistent v006 v007 v008,if isempty(v006),...
-v008=exist('OCTAVE_VERSION', 'builtin');v006 = [100, 1] * sscanf(version, '%d.%d', 2);v007={ ...
-'R13' 605;'R13SP1' 605;'R13SP2' 605;'R14' 700;'R14SP1' 700;'R14SP2' 700;'R14SP3' 701;'R2006a' ...
-702;'R2006b' 703;'R2007a' 704;'R2007b' 705;'R2008a' 706;'R2008b' 707;'R2009a' 708;'R2009b' 709;
-'R2010a' 710;'R2010b' 711;'R2011a' 712;'R2011b' 713;'R2012a' 714;'R2012b' 800;'R2013a' 801;
-'R2013b' 802;'R2014a' 803;'R2014b' 804;'R2015a' 805;'R2015b' 806;'R2016a' 900;'R2016b' 901;
-'R2017a' 902;'R2017b' 903;'R2018a' 904;'R2018b' 905;'R2019a' 906;'R2019b' 907;'R2020a' 908;
-'R2020b' 909;'R2021a' 910;'R2021b' 911;'R2022a' 912};end,if v008,if nargin==2,...
-warning('HJW:ifversion:NoOctaveTest',['No version test for Octave was provided.',char(10),...
-'This function might return an unexpected outcome.']),if isnumeric(v002),v009=...
-0.1*v002+0.9*fix(v002);v009=round(100*v009);else,v010=ismember(v007(:,1),v002);if sum(v010)~=1,...
-warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.'),v000=...
-NaN;return,else,v009=v007{v010,2};end,end,elseif nargin==4,[v001,v009]=deal(v003,v004);v009=...
-0.1*v009+0.9*fix(v009);v009=round(100*v009);else,[v001,v009]=deal(v004,v005);v009=...
-0.1*v009+0.9*fix(v009);v009=round(100*v009);end,else,if isnumeric(v002),v009=...
-0.1*v002+0.9*fix(v002);v009=round(100*v009);else,v010=ismember(v007(:,1),v002);if sum(v010)~=1,...
-warning('HJW:ifversion:NotInDict','The requested version is not in the hard-coded list.'),v000=...
-NaN;return,else,v009=v007{v010,2};end,end,end,switch v001,case '==', v000= v006 == v009;case ...
-'<' , v000= v006 < v009;case '<=', v000= v006 <= v009;case '>' , v000= v006 > v009;case '>=', ...
-v000= v006 >= v009;end,end
-function v006=ifversion___skip_test,persistent v000,if isempty(v000),v001=isunix && ~ismac && ...
-ifversion('<','R2013a','Octave','<',0);v002=ifversion('<',0,'Octave','>',0) && ismac;v003=...
-v001||v002;if ~v003,[v004,v005]=evalc(func2str(@test_figure_available));v003=~v005;if v005,...
-[v004,v005]=evalc(func2str(@test_waitbar_available));v003=~v005;end,end,v000=v003;end,v006=v000;
-end
-function v000=cast_to_uint16_vector__cell(v000,v001),v002=size(v000).';v000=v000(:);for v003=...
-1:numel(v000),if numel(v000{v003})==0,v004=double(class(v000{v003})');v000{v003}=uint16([0;v004;
-size(v000{v003})']);continue,end,switch class(v000{v003}),case {'double','single'},v000{v003}=...
-cast_to_uint16_vector__floats(v000{v003});case 'logical',v000{v003}=...
-cast_to_uint16_vector__logical(v000{v003});case {'uint8','uint16','uint32','uint64','int8',...
-'int16','int32','int64'},v000{v003}=cast_to_uint16_vector__integer(v000{v003},v001);case 'char',...
-v000{v003}=cast_to_uint16_vector__char(v000{v003},v001);case 'string',v000{v003}=...
-cast_to_uint16_vector__string(v000{v003},v001);case 'cell',v000{v003}=...
-cast_to_uint16_vector__cell(v000{v003},v001);case 'struct',v000{v003}=...
-cast_to_uint16_vector__struct(v000{v003},v001);case {'gpuArray','tall'},v000{v003}=...
-cast_to_uint16_vector__cell({gather(v000{v003})},v001);otherwise,error_(v001.print_to,...
-'HJW:cast_to_uint16_vector:nosupport','Unsupported data type in nested variable'),end,end,v000=...
-cell2mat(v000);v000=[v000;uint16(mod(v002,2^16))];end
-function v000=cast_to_uint16_vector__floats(v000),v001=size(v000).';v002=class(v000);v000=...
-reshape(v000,size(v000,1),[]);[v003,v004]=typecast_double_uint64(double(v000));v005=mod(v003,...
-2^16);v003=v003-v005;v003=v003/2^16;v004=v004.';v006 =mod(v003,2^16);v003=v003-v006; v003=...
-v003/2^16;v006=v006.';v007 =mod(v003,2^16);v003=v003-v007; v003=v003/2^16;v007=v007.';v008 =...
-mod(v003,2^16); v008=v008.';v000=[v008;v007;v006;v004];v000=uint16(v000(:));v000=[v000;
-uint16(v002.');uint16(mod(v001,2^16))];end
-function v000=cast_to_uint16_vector__logical(v000),v001=size(v000).';v000=v000(:);if ...
-mod(numel(v000),16),v000(16*ceil(numel(v000)/16))=0;end,v002=uint16(2.^(15:-1:0))';v000=...
-uint16(reshape(v000,16,[]));try v000=v000.*v002;catch,v000=double(v000).*repmat(double(v002),[1 ...
-size(v000,2)]);v000=uint16(v000);end,v000=uint16(sum(v000,1)).';v000=[v000;uint16(mod(v001,...
-2^16))];end
-function v000=cast_to_uint16_vector__integer(v000,v001),v002=size(v000).';v000=v000(:);
-persistent v003,if isempty(v003),v003=ifversion('>=','R2010b','Octave','>',0);end,v004=...
-class(v000);v005=~v001.cast_int64_double && v003 && v004(end)=='4';if ~v005,if ...
-any(abs(double(v000(:)))>2^52),warning_(v001,'HJW:ComputeNonCryptHash:int64rounding',...
-['int64 and uint64 will be rounded pre-R2010b, resulting in rounding.',char(10),...
-'This will result in a hash that is different from newer releases.']),end,end,if v005,if ...
-v004(1)~='u',v006=v000>0;v007=-int64(-inf);v008=uint64(v000+v007+1);v008(v006)=...
-uint64(v000(v006))+uint64(v007)+1;v000=v008;end,elseif v004(1)~='u',v000=...
-double(v000)-double(eval([v004 '(-inf)']));else,v000=double(v000);end,switch v004(end),case '8',...
-if mod(numel(v000),2),v000(end+1)=0;end,v000=reshape(v000,[],2);v000=v000(:,1)*255+v000(:,2);
-v000=uint16(v000);case '6',v000=uint16(v000);case '2',v009=floor(v000/2^16);v009=v009.';v010=...
-mod(v000,2^16); v010=v010.';v000=[v009;v010];v000=uint16(v000(:));case '4',v011=v000;v012=...
-mod(v011,2^16);v011=v011-v012;v011=v011/2^16;v012=v012.';v013=mod(v011,2^16);v011=v011-v013;
-v011=v011/2^16;v013=v013.';v010=mod(v011,2^16);v011=v011-v010;v011=v011/2^16;v010=v010.';v009=...
-mod(v011,2^16); v009=v009.';v000=[v009;v010;v013;v012];v000=uint16(v000(:));end,v000=[v000;
-uint16(v004.');uint16(mod(v002,2^16))];end
-function [v000,v001]=typecast_double_uint64(v002),[v003,v004]=log2(v002);v005 =...
--floor(sign(v002)/2-0.5);v006=v004+1022;v007=abs(v003)*2-1;v000=zeros(size(v002));v000=...
-v000+(v005*2^63);v000=v000+(v006*2^52);v000=v000+(v007*2^52);v001=mod(v007*2^52,2^16);v008=...
-isinf(v002);v000(v002==0)=0;v000(isnan(v002))=18444492273895866368;v000(v008 & v002>0)=...
-9218868437227405312;v000(v008 & v002<0)=18442240474082181120;v001(v002==0)=0;v001(isnan(v002))=...
-0;v001(v008)=0;end
-function v000=unicode_to_UTF16(v001),if v001<65536,v000=v001;return,end,v002=double(v001)-65536;
-v002=dec2bin(v002,20);v000=bin2dec(['110110' v002(1:10);'110111' v002(11:20)]).';end
-function [v000,v001,v002]=UTF8_to_unicode_internal(v000,v003),v001='success';v002=...
-struct('identifier','HJW:UTF8_to_unicode:notUTF8','message','Input is not UTF-8.');persistent ...
-v004,if isempty(v004),v004 = exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if any(v000>255),v001=...
-'error';if v003,return,end,elseif all(v000<128),return,end,for v005=4:-1:2,v006=...
-bin2dec([repmat('1',1,v005) repmat('0',1,8-v005)]);v007=v000>=v006 & v000<256;if any(v007),v007=...
-find(v007);v007=v007(:).';if numel(v000)<(max(v007)+v005-1),v001='error';if v003,return,end,...
-v007( (v007+v005-1)>numel(v000) )=[];end,if ~isempty(v007),v008=bsxfun_plus(v007 , ...
-(0:(v005-1)).' );v008=v008.';v007=v000(v008);end,else,v007=[];end,v009=[repmat('1',1,v005-1) ...
-repmat('10',1,v005)];v010=unique([1:(v005+1) 1:8:(8*v005) 2:8:(8*v005)]);if numel(v007)>0,v007=...
-unique(v007,'rows');v011=mat2cell(v007,ones(size(v007,1),1),v005);for v012=1:numel(v011),v013=...
-dec2bin(double(v011{v012}))';if ~strcmp(v009,v013(v010)),v001='error';if v003,return,end,...
-continue,end,v013(v010)='';if ~v004,v014=uint32(bin2dec(v013 ));else,v014=...
-uint32(bin2dec(v013.'));end,v000=PatternReplace(v000,v011{v012},v014);end,end,end,end
-function v000=unicode_to_UTF8(v001),if numel(v001)>1,...
-error('this should only be used for single characters'),end,if v001<128,v000=v001;return,end,...
-persistent v002,if isempty(v002),v002=struct;v002.limits.lower=hex2dec({'0000','0080','0800', ...
-'10000'});v002.limits.upper=hex2dec({'007F','07FF','FFFF','10FFFF'});v002.scheme{2}=...
-'110xxxxx10xxxxxx';v002.scheme{2}=reshape(v002.scheme{2}.',8,2);v002.scheme{3}=...
-'1110xxxx10xxxxxx10xxxxxx';v002.scheme{3}=reshape(v002.scheme{3}.',8,3);v002.scheme{4}=...
-'11110xxx10xxxxxx10xxxxxx10xxxxxx';v002.scheme{4}=reshape(v002.scheme{4}.',8,4);for v003=2:4,...
-v002.scheme_pos{v003}=find(v002.scheme{v003}=='x');v002.bits(v003)=numel(v002.scheme_pos{v003});
-end,end,v004=find(v002.limits.lower<=v001 & v001<=v002.limits.upper);v000=v002.scheme{v004};
-v005=v002.scheme_pos{v004};v003=dec2bin(v001,v002.bits(v004));v000(v005)=v003;v000=...
-bin2dec(v000.').';end
-function [v000,v001,v002]=UTF8_to_unicode(v003,v004),if nargin<2,v004=[];end,v005= nargout==1 ;
-v003=uint32(reshape(v003,1,[]));[v002,v006,v007]=UTF8_to_unicode_internal(v003,v005);if ...
-strcmp(v006,'success'),v001=true;v000=v002;elseif strcmp(v006,'error'),v001=false;if v005,...
-error_(v004,v007),end,v000=v003;end,end
-function v000=cast_to_uint16_vector__char(v000,v001),persistent v002,if isempty(v002),v002 = ...
-exist('OCTAVE_VERSION', 'builtin') ~= 0;end,if v002 && v001.re_encode_char,v003 = size(v000,1)==...
-numel(v000);if v003,v000=v000.';end,v000=cellstr(v000);for v004=1:numel(v000),v000{v004}=...
-unicode_to_char(UTF8_to_unicode(v000{v004},v001.print_to),true);end,v005=cellfun('length',v000);
-v006=max(v005);for v004=find(v005<v006),v000{v004}( (numel(v000{v004})+1) : v006)=uint16(' ');
-end,v000=cell2mat(v000);if v003,v000=v000.';end,end,v007=size(v000).';v000=v000(:);v000=...
-uint16(v000);v000=[v000;uint16(mod(v007,2^16))];end
-function v000=cast_to_uint16_vector__string(v000,v001),if v001.string_to_cellstr,v000=...
-cellstr(v000);v000=cast_to_uint16_vector__cell(v000,v001);else,v000=char(v000);v000=...
-cast_to_uint16_vector__char(v000,v001);end,end
-function [v000,v001]=validate_print_to__options(v002,v001),if nargin<2,v001=struct;end,if ...
-~isfield(v002,'print_to_con'),v002.print_to_con=[];end,if ~isfield(v002,'print_to_fid'),...
-v002.print_to_fid=[];end,if ~isfield(v002,'print_to_obj'),v002.print_to_obj=[];end,if ...
-~isfield(v002,'print_to_fcn'),v002.print_to_fcn=[];end,v003=true;v000=struct;v004=...
-v002.print_to_fid;if isempty(v004),v000.boolean.fid=false;v000.fid=[];else,v003=false;
-v000.boolean.fid=true;v000.fid=v004;for v005=1:numel(v004),try v006=ftell(v004(v005));catch,...
-v006=-1;end,if v004(v005)~=1 && v006==-1,v001.message=['Invalid print_to_fid parameter:',...
-char(10),'should be a valid file identifier or 1.'];v001.identifier=...
-'HJW:print_to:ValidationFailed';v000=[];return,end,end,end,v004=v002.print_to_obj;if ...
-isempty(v004),v000.boolean.obj=false;v000.obj=[];else,v003=false;v000.boolean.obj=true;v000.obj=...
-v004;for v005=1:numel(v004),try v007=get(v004(v005),'String' );set( v004(v005),'String','' );
-set( v004(v005),'String',v007);catch,v001.message=['Invalid print_to_obj parameter:',char(10),...
-'should be a handle to an object with a writeable String property.'];v001.identifier=...
-'HJW:print_to:ValidationFailed';v000=[];return,end,end,end,v004=v002.print_to_fcn;if ...
-isempty(v004),v000.boolean.fcn=false;v000.fcn=[];else,v003=false;try for v005=1:numel(v004),if ...
-~ismember(class(v004(v005).h),{'function_handle','inline'}) || numel(v004(v005).h)~=1,...
-error('trigger error'),end,end,catch,v001.message=['Invalid print_to_fcn parameter:',char(10),...
-'should be a struct with the h field containing a function handle,',char(10),...
-'anonymous function or inline function.'];v001.identifier='HJW:print_to:ValidationFailed';v000=...
-[];return,end,end,v004=v002.print_to_con;if isempty(v004),v000.boolean.con=v003;else,[v008,...
-v000.boolean.con]=test_if_scalar_logical(v004);if ~v008,v001.message=...
-['Invalid print_to_con parameter:',char(10),'should be a scalar logical.'];v001.identifier=...
-'HJW:print_to:ValidationFailed';v000=[];return,end,end,end
-function varargout=var2str(varargin),v000= nargin~=max(1,nargout) ;if ~v000,varargout=...
-cell(nargin,1);for v001=1:nargin,try varargout{v001}=inputname(v001);catch,varargout{v001}='';
-end,if isempty(varargout{v001}),v000=true;break,end,end,end,if v000,...
-error('Invalid input and/or output.'),end,end
-function warning_(v007,varargin),persistent v000,if isempty(v000),v000=func2str(@warning_);end,...
-[v001,v002,v003,v004,v005]=parse_warning_error_redirect_inputs( varargin{:});if v005,return,end,...
-v006=struct('identifier',v001,'message',v002,'stack',v003);if isempty(v007),v007=...
-validate_print_to__options(struct);end,v007 =parse_warning_error_redirect_options( v007 );v008=...
-warning;if any(ismember({v008(ismember({v008.identifier},{v001,'all'})).state},'off')),return,...
-end,if v007.boolean.con,if ~isempty(v001),warning(v001,'%s',v002),else,warning(v002), end,else,...
-if ~isempty(v001),lastwarn(v002,v001); else,lastwarn(v002),end,end,if v007.boolean.obj,v009=...
-v002;while v009(end)==10,v009(end)=[];end,if any(v009==10),v009=char2cellstr(['Warning: ' ...
-v009]);else,v009=['Warning: ' v009];end,set(v007.obj,'String',v009),for v010=v007.obj(:).',try ...
-set(v010,'String',v009);catch,end,end,end,if v007.boolean.fid,v011=datestr(now,31);for v012=...
-v007.fid(:).',try fprintf(v012,'[%s] Warning: %s\n%s',v011,v002,v004);catch,end,end,end,if ...
-v007.boolean.fcn,if ismember(v000,{v003.name}),error('prevent recursion'),end,for v013=...
-v007.fcn(:).',if isfield(v013,'data'),try feval(v013.h,'warning',v006,v013.data);catch,end,else,...
-try feval(v013.h,'warning',v006);catch,end,end,end,end,end
+% This tester is included so you can test if your own modifications would introduce
+% any bugs. These tests form the basis for the compatibility table above. Note that
+% functions may be different between the tester version and the normal function. Make
+% sure to apply any modifications to both. The full tester function (including all
+% comments) can be found <https://web.archive.org/web/20230217154605/https://cdn-151.anonfiles.com/4dC4B0Y4y2/170d432e-1676649359/aaa___RegGrow___test.m here>.
 
 ##### SOURCE END #####
 --></body></html>

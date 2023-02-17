@@ -1,6 +1,6 @@
 {
     "_schemaVersion": "1.0.0",
-    "_v_RegGrow":"1.2.0",
+    "_v_RegGrow":"1.3.0",
     "RegGrow":
     {
         "inputs":
@@ -25,10 +25,12 @@
                      {"name":"seed", "kind":"positional", "type":["numeric"],
                       "purpose":"Initial starting pixel (index or sub)"},
 
-                     {"name":"nHood","kind":"namevalue", "type":["double","scalar"],
-                      "purpose":"Neighborhood being checked every iteration"},
                      {"name":"kernel","kind":"namevalue", "type":["logical"],
                       "purpose":"The flipped convolution kernel"},
+                     {"name":"nHood","kind":"namevalue", "type":["double","scalar"],
+                      "purpose":"Neighborhood being checked every iteration"},
+                     {"name":"ResumeSegmentation","kind":"namevalue", "type":["logical"],
+                      "purpose":"Treat a previous result as the seed"},
                      {"name":"overflow","kind":"namevalue", "type":["numeric","scalar","positive"],
                       "purpose":"Maximum number of pixels before abort"},
                      {"name":"waitbar","kind":"namevalue", "type":["logical","scalar","choices={true,false}"],
@@ -43,3 +45,4 @@
         ]
     }
 }
+

@@ -37,36 +37,45 @@ function [result,OverflowFlag] = RegGrow(varargin)
 %   This parameter must be a scalar double, or be convertible to one.
 % seed:
 %   The initial starting point of the algorithm. If omitted, the default value is the first pixel
-%   (linear index 1).
+%   (linear index 1). If you want to use multiple seeds, you can use the ResumeSegmentation
+%   parameter. If the ResumeSegmentation is provided, this parameter is ignored.
 % options:
 %   A struct with Name,Value parameters. Missing parameters are filled with the defaults listed
 %   below. Using incomplete parameter names or incorrect capitalization is allowed, as long as
 %   there is a unique match.
 %
 % Name,Value parameters:
-%   nHood:
-%      The neighborhood that is checked. By default the minimal neighborhood is used
-%      (4-neighborhood for 2D images and 6-neighborhood for 3D images).
-%      This setting is ignored if the kernel input is provided.
 %   kernel:
 %      The kernel input allows more flexibility in the direction of growth. This parameter must be
 %      a logical array or be convertible to one. Each dimension must have an odd length. The center
 %      pixel is set to true. Note that is parameter describes the direction of growth and is
 %      therefore dissimilar to a convolution kernel (i.e. it is flipped along all directions).
+%   nHood:
+%      The neighborhood that is checked. By default the minimal neighborhood is used
+%      (4-neighborhood for 2D images and 6-neighborhood for 3D images).
+%      This setting is ignored if the kernel input is provided.
 %   overflow:
-%      This parameter allows the detection of a segmentation leak. This allows the process to exit
-%      before it is complete if too many pixels are being segmented. A leak can cause the
-%      segmentation to take a very long time to complete, especially for 3D images.
-%      If the segmented area or volume exceeds this value (counted as number of pixels or voxels),
-%      the second output is set to true and the function halts. No error or warning is triggered.
+%      This parameter is the maximum number of voxels/pixels included in the region. This allows
+%      the process to exit before it is complete if too many pixels are being segmented, indicating
+%      a segmentation leak. A leak can cause the segmentation to take a very long time to complete,
+%      especially for 3D images. If the segmented area or volume exceeds this value (counted as
+%      number of pixels or voxels), the second output is set to true and the function halts. No
+%      error or warning is triggered. This value must be either false, or a positive integer, or a
+%      value between 0 and 1, in which case it is treated as a fraction of the total number of
+%      elements.
+%   ResumeSegmentation:
+%      This parameter allows resuming the region growing from a previous aborted result (e.g.
+%      closing the waitbar or exceeding the overflow parameter). This also allows growing from
+%      multiple seed points. If this parameter is provided the seed parameter is ignored. It needs
+%      to be a logical of the same size as the image with at least 1 element set to true.
+%   silent:
+%      This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
+%      provided to improve code readability.
 %   waitbar:
 %      Use a waitbar to show the progress of the region growing. The maximum value is either the
 %      overflow, or the total number of voxels. This means the waitbar shouldn't reach 100%, but
 %      does provide a visual indication of progress. The default is false for 2D input and true for
 %      higher dimensional input.
-%   silent:
-%      This is the inverse of the waitbar switch, but it is ignored if wairbar is specified. It is
-%      provided to improve code readability.
 %   WaitbarClosingBehavior:
 %      This parameter must be 'warning', 'error', 'return', or 'ignore'. The default is 'ignore'.
 %      If set to warn or error, closing the waitbar will cause a warning/error to be triggered.
@@ -74,8 +83,8 @@ function [result,OverflowFlag] = RegGrow(varargin)
 %
 %/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%
 %|                                                                         |%
-%|  Version: 1.2.0                                                         |%
-%|  Date:    2022-03-18                                                    |%
+%|  Version: 1.3.0                                                         |%
+%|  Date:    2023-02-17                                                    |%
 %|  Author:  H.J. Wisselink                                                |%
 %|  Licence: CC by-nc-sa 4.0 ( creativecommons.org/licenses/by-nc-sa/4.0 ) |%
 %|  Email = 'h_j_wisselink*alumnus_utwente_nl';                            |%
@@ -84,9 +93,38 @@ function [result,OverflowFlag] = RegGrow(varargin)
 %/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%
 %
 % Tested on several versions of Matlab (ML 6.5 and onward) and Octave (4.4.1 and onward), and on
-% multiple operating systems (Windows/Ubuntu/MacOS). For the full test matrix, see the HTML doc.
+% multiple operating systems (Windows/Ubuntu/MacOS). You can see the full test matrix below.
 % Compatibility considerations:
 % - This is expected to work on all releases.
+%
+% /=========================================================================================\
+% ||                     | Windows             | Linux               | MacOS               ||
+% ||---------------------------------------------------------------------------------------||
+% || Matlab R2022b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2022a       | W10: Pass           |                     |                     ||
+% || Matlab R2021b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2021a       | W10: Pass           |                     |                     ||
+% || Matlab R2020b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2020a       | W10: Pass           |                     |                     ||
+% || Matlab R2019b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2019a       | W10: Pass           |                     |                     ||
+% || Matlab R2018a       | W10: Pass           | Ubuntu 22.04: Pass  |                     ||
+% || Matlab R2017b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2016b       | W10: Pass           | Ubuntu 22.04: Pass  | Monterey: Pass      ||
+% || Matlab R2015a       | W10: Pass           | Ubuntu 22.04: Pass  |                     ||
+% || Matlab R2013b       | W10: Pass           |                     |                     ||
+% || Matlab R2007b       | W10: Pass           |                     |                     ||
+% || Matlab 7.1 (R14SP3) | XP: Pass            |                     |                     ||
+% || Matlab 6.5 (R13)    | W10: Pass           |                     |                     ||
+% || Octave 7.2.0        | W10: Pass           |                     |                     ||
+% || Octave 6.2.0        | W10: Pass           | Raspbian 11: Fail*  | Catalina: Fail*     ||
+% || Octave 5.2.0        | W10: Pass           |                     |                     ||
+% || Octave 4.4.1        | W10: Pass           |                     | Catalina: Fail*     ||
+% \=========================================================================================/
+%     * See the compatibility considerations. Anything not mentioned there can still be
+%       expected to work. Run the included tester function to verify these results for
+%       your system and release.
+%       Tests involving graphics that were skipped are encoded as fail in this table.
 
 
 % Setting the shift array is also possible, but is undocumented and will not be checked when
@@ -95,61 +133,66 @@ if nargout>2
     error('HJW:RegGrow:nargout','Incorrect number of output arguments.')
 end
 
-[success,parsed,ME]=RegGrow_ParseInputs(varargin{:});
+[success,parsed,ME] = RegGrow_ParseInputs(varargin{:});
 if ~success
     % The throwAsCaller function was introduced in R2007b, hence the rethrow here.
     rethrow(ME)
 else
-    [I,maxDiff,seed,SE,overflow,wait]=deal(...
+    [I,maxDiff,seed,SE,overflow,wait] = deal(...
         parsed.I,parsed.maxDiff,parsed.seed,parsed.kernel,parsed.overflow,parsed.waitbar);
 end
 
 if wait.bar
-    wait.h=waitbar(0,'processing...');
-    wait.count=0;%Initialize.
-    n_extra_dots=0;
+    wait.h = waitbar(0,'processing...');
+    wait.count = 0; % Initialize.
+    n_extra_dots = 0;
 end
 
-OverflowFlag=false; % Initialize overflow parameter.
-result=logical(zeros(size(I))); %#ok<LOGL>
-seed=num2cell(seed);result(seed{:})=true; % Pre-allocate the result.
-newpoints=true; % Initialize to start loop.
+if isempty(parsed.ResumeSegmentation)
+    result = logical(zeros(size(I))); %#ok<LOGL>
+    seed = num2cell(seed);result(seed{:}) = true; % Pre-allocate the result.
+else
+    % Resume from a prior state or from multiple seeds.
+    result = parsed.ResumeSegmentation;
+end
+OverflowFlag = false; % Initialize overflow parameter.
+newpoints = true; % Initialize to start loop.
 while newpoints
     if overflow.check
         if sum(result(:))>overflow.volume
-            OverflowFlag=true;
+            OverflowFlag = true;
             break
         end
     end
     
     if wait.bar
-        wait.count=wait.count+1;
+        wait.count = wait.count+1;
         if mod(wait.count,5)==0
             try
-                n_extra_dots=mod(n_extra_dots+1,3);
-                dots=repmat('.',1,1+n_extra_dots);
-                txt=sprintf('processing%s',dots);
+                n_extra_dots = mod(n_extra_dots+1,3);
+                dots = repmat('.',1,1+n_extra_dots);
+                txt = sprintf('processing%s',dots);
                 waitbar(sum(result(:))/wait.max,wait.h,txt),drawnow
             catch
-                ME=lasterror; %#ok<LERR>
+                ME = lasterror; %#ok<LERR>
                 if strcmp(ME.identifier,'MATLAB:waitbar:InvalidSecondInput')
                     % The waitbar was closed.
                     switch parsed.WaitbarClosingBehavior
                         case 'warning'
                             warning('HJW:RegGrow:WaitbarClosedWarning',...
                                 'The waitbar was closed, continuing...')
-                            wait.bar=false;
+                            wait.bar = false;
                         case 'error'
                             error('HJW:RegGrow:WaitbarClosedError',...
                                 'The waitbar was closed.')
                         case 'return'
                             if nargout==0
-                                %Prevent cluttering of the command window / workspace.
+                                % Prevent cluttering of the command window / workspace.
                                 clear(var2str(result))
                             end
                             return
                         case 'ignore'
-                            wait.bar=false;
+                            wait.bar = false;
                     end
                 end
             end
@@ -162,20 +205,20 @@ while newpoints
     % to or(candidates,reject). Calculating the full reject matrix is probably more efficient than
     % calculating it only for the candidates and then having to index into it.
     
-    candidates= ~result & convn(result,SE,'same')>0.5;%shell
-    reject=abs(I-mean(I(result)))>=maxDiff;
-    candidates(reject)=false;
+    candidates = ~result & convn(result,SE,'same')>0.5; % This is the shell.
+    reject = abs(I-mean(I(result)))>=maxDiff;
+    candidates(reject) = false;
     if any(candidates(:))
-        result(candidates)=true;
+        result(candidates) = true;
     else
-        newpoints=false;
+        newpoints = false;
     end
 end
 if wait.bar
     delete(wait.h)
 end
 if nargout==0
-    %Prevent cluttering of the command window / workspace.
+    % Prevent cluttering of the command window / workspace.
     clear(var2str(result))
 end
 end
@@ -186,8 +229,8 @@ function tf=ifversion(test,Rxxxxab,Oct_flag,Oct_test,Oct_ver)
 % name is used that is not in the dictionary.
 %
 % Syntax:
-%   tf=ifversion(test,Rxxxxab)
-%   tf=ifversion(test,Rxxxxab,'Octave',test_for_Octave,v_Octave)
+%   tf = ifversion(test,Rxxxxab)
+%   tf = ifversion(test,Rxxxxab,'Octave',test_for_Octave,v_Octave)
 %
 % Input/output arguments:
 % tf:
@@ -213,8 +256,8 @@ function tf=ifversion(test,Rxxxxab,Oct_flag,Oct_test,Oct_ver)
 %
 %/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%/%
 %|                                                                         |%
-%|  Version: 1.1.1                                                         |%
-%|  Date:    2022-03-14                                                    |%
+%|  Version: 1.1.2                                                         |%
+%|  Date:    2022-09-16                                                    |%
 %|  Author:  H.J. Wisselink                                                |%
 %|  Licence: CC by-nc-sa 4.0 ( creativecommons.org/licenses/by-nc-sa/4.0 ) |%
 %|  Email = 'h_j_wisselink*alumnus_utwente_nl';                            |%
@@ -235,14 +278,14 @@ function tf=ifversion(test,Rxxxxab,Oct_flag,Oct_test,Oct_ver)
 persistent  v_num v_dict octave
 if isempty(v_num)
     % Test if Octave is used instead of Matlab.
-    octave=exist('OCTAVE_VERSION', 'builtin');
+    octave = exist('OCTAVE_VERSION', 'builtin');
     
     % Get current version number. This code was suggested by Jan on this thread:
     % https://mathworks.com/matlabcentral/answers/1671199#comment_2040389
     v_num = [100, 1] * sscanf(version, '%d.%d', 2);
     
     % Get dictionary to use for ismember.
-    v_dict={...
+    v_dict = {...
         'R13' 605;'R13SP1' 605;'R13SP2' 605;'R14' 700;'R14SP1' 700;'R14SP2' 700;
         'R14SP3' 701;'R2006a' 702;'R2006b' 703;'R2007a' 704;'R2007b' 705;
         'R2008a' 706;'R2008b' 707;'R2009a' 708;'R2009b' 709;'R2010a' 710;
@@ -250,7 +293,7 @@ if isempty(v_num)
         'R2013a' 801;'R2013b' 802;'R2014a' 803;'R2014b' 804;'R2015a' 805;
         'R2015b' 806;'R2016a' 900;'R2016b' 901;'R2017a' 902;'R2017b' 903;
         'R2018a' 904;'R2018b' 905;'R2019a' 906;'R2019b' 907;'R2020a' 908;
-        'R2020b' 909;'R2021a' 910;'R2021b' 911;'R2022a' 912};
+        'R2020b' 909;'R2021a' 910;'R2021b' 911;'R2022a' 912;'R2022b' 913};
 end
 
 if octave
@@ -259,52 +302,55 @@ if octave
             ['No version test for Octave was provided.',char(10),...
             'This function might return an unexpected outcome.']) %#ok<CHARTEN>
         if isnumeric(Rxxxxab)
-            v=0.1*Rxxxxab+0.9*fix(Rxxxxab);v=round(100*v);
+            v = 0.1*Rxxxxab+0.9*fix(Rxxxxab);v = round(100*v);
         else
-            L=ismember(v_dict(:,1),Rxxxxab);
+            L = ismember(v_dict(:,1),Rxxxxab);
             if sum(L)~=1
                 warning('HJW:ifversion:NotInDict',...
                     'The requested version is not in the hard-coded list.')
-                tf=NaN;return
+                tf = NaN;return
             else
-                v=v_dict{L,2};
+                v = v_dict{L,2};
             end
         end
     elseif nargin==4
         % Undocumented shorthand syntax: skip the 'Octave' argument.
-        [test,v]=deal(Oct_flag,Oct_test);
+        [test,v] = deal(Oct_flag,Oct_test);
         % Convert 4.1 to 401.
-        v=0.1*v+0.9*fix(v);v=round(100*v);
+        v = 0.1*v+0.9*fix(v);v = round(100*v);
     else
-        [test,v]=deal(Oct_test,Oct_ver);
+        [test,v] = deal(Oct_test,Oct_ver);
         % Convert 4.1 to 401.
-        v=0.1*v+0.9*fix(v);v=round(100*v);
+        v = 0.1*v+0.9*fix(v);v = round(100*v);
     end
 else
     % Convert R notation to numeric and convert 9.1 to 901.
     if isnumeric(Rxxxxab)
-        v=0.1*Rxxxxab+0.9*fix(Rxxxxab);v=round(100*v);
+        v = 0.1*Rxxxxab+0.9*fix(Rxxxxab);v = round(100*v);
     else
-        L=ismember(v_dict(:,1),Rxxxxab);
+        L = ismember(v_dict(:,1),Rxxxxab);
         if sum(L)~=1
             warning('HJW:ifversion:NotInDict',...
                 'The requested version is not in the hard-coded list.')
-            tf=NaN;return
+            tf = NaN;return
         else
-            v=v_dict{L,2};
+            v = v_dict{L,2};
         end
     end
 end
 switch test
-    case '==', tf= v_num == v;
-    case '<' , tf= v_num <  v;
-    case '<=', tf= v_num <= v;
-    case '>' , tf= v_num >  v;
-    case '>=', tf= v_num >= v;
+    case '==', tf = v_num == v;
+    case '<' , tf = v_num <  v;
+    case '<=', tf = v_num <= v;
+    case '>' , tf = v_num >  v;
+    case '>=', tf = v_num >= v;
 end
 end
 function [opts,replaced]=parse_NameValue(default,varargin)
-%Match the Name,Value pairs to the default option, ignoring incomplete names, case, and underscores
+%Match the Name,Value pairs to the default option, attempting to autocomplete
+%
+% The autocomplete ignores incomplete names, case, underscores, and dashes, as long as a unique
+% match can be found.
 %
 % The first output is a struct with the same fields as the first input, with field contents
 % replaced according to the supplied options struct or Name,Value pairs.
@@ -312,7 +358,7 @@ function [opts,replaced]=parse_NameValue(default,varargin)
 %
 % If this fails to find a match, this will throw an error with the offending name as the message.
 %
-% If there are multiple occurences of a Name, only the last Value will be returned. This is the
+% If there are multiple occurrences of a Name, only the last Value will be returned. This is the
 % same as Matlab internal functions like plot. GNU Octave also has this behavior.
 %
 % If a struct array is provided, only the first element will be used. An empty struct array will
@@ -330,25 +376,25 @@ switch numel(default)
 end
 
 % Create default output and return if no other inputs exist.
-opts=default;replaced={};
+opts = default;replaced = {};
 if nargin==1,return,end
 
 % Unwind an input struct to Name,Value pairs.
 try
-    struct_input=numel(varargin)==1 && isa(varargin{1},'struct');
-    NameValue_input=mod(numel(varargin),2)==0 && all(...
+    struct_input = numel(varargin)==1 && isa(varargin{1},'struct');
+    NameValue_input = mod(numel(varargin),2)==0 && all(...
         cellfun('isclass',varargin(1:2:end),'char'  ) | ...
         cellfun('isclass',varargin(1:2:end),'string')   );
     if ~( struct_input || NameValue_input )
         error('trigger')
     end
     if nargin==2
-        Names=fieldnames(varargin{1});
-        Values=struct2cell(varargin{1});
+        Names = fieldnames(varargin{1});
+        Values = struct2cell(varargin{1});
     else
         % Wrap in cellstr to account for strings (this also deals with the fun(Name=Value) syntax).
-        Names=cellstr(varargin(1:2:end));
-        Values=varargin(2:2:end);
+        Names = cellstr(varargin(1:2:end));
+        Values = varargin(2:2:end);
     end
     if ~iscellstr(Names),error('trigger');end %#ok<ISCLSTR>
 catch
@@ -361,69 +407,82 @@ end
 
 % The fieldnames will be converted to char matrices in the section below. First an exact match is
 % tried, then a case-sensitive (partial) match, then ignoring case, followed by ignoring any
-% underscores.
-default_Names=fieldnames(default);
-Names_char=cell(1,3);
-Names_cell{1}=default_Names;
-Names_cell{2}=lower(Names_cell{1});
-Names_cell{3}=strrep(Names_cell{2},'_','');
+% underscores, and lastly ignoring dashes.
+default_Names = fieldnames(default);
+Names_char    = cell(1,4);
+Names_cell{1} = default_Names;
+Names_cell{2} = lower(Names_cell{1});
+Names_cell{3} = strrep(Names_cell{2},'_','');
+Names_cell{4} = strrep(Names_cell{3},'-','');
+
+% Allow spaces by replacing them with underscores.
+Names = strrep(Names,' ','_');
 
 % Attempt to match the names.
-replaced=false(size(default_Names));
+replaced = false(size(default_Names));
 for n=1:numel(Names)
-    name=Names{n};
+    name = Names{n};
     
     % Try a case-sensitive match.
-    [match_idx,Names_char{1}]=parse_NameValue__find_match(Names_char{1},Names_cell{1},name);
+    [match_idx,Names_char{1}] = parse_NameValue__find_match(Names_char{1},Names_cell{1},name);
     
     % Try a case-insensitive match.
     if numel(match_idx)~=1
-        name=lower(name);
-        [match_idx,Names_char{2}]=parse_NameValue__find_match(Names_char{2},Names_cell{2},name);
+        name = lower(name);
+        [match_idx,Names_char{2}] = parse_NameValue__find_match(Names_char{2},Names_cell{2},name);
     end
     
     % Try a case-insensitive match ignoring underscores.
     if numel(match_idx)~=1
-        name=strrep(name,'_','');
-        [match_idx,Names_char{3}]=parse_NameValue__find_match(Names_char{3},Names_cell{3},name);
+        name = strrep(name,'_','');
+        [match_idx,Names_char{3}] = parse_NameValue__find_match(Names_char{3},Names_cell{3},name);
+    end
+    
+    % Try a case-insensitive match ignoring underscores and dashes.
+    if numel(match_idx)~=1
+        name = strrep(name,'-','');
+        [match_idx,Names_char{4}] = parse_NameValue__find_match(Names_char{4},Names_cell{4},name);
     end
     
     if numel(match_idx)~=1
         error('parse_NameValue:NonUniqueMatch',Names{n})
     end
     
-    %Store the Value in the output struct and mark it as replaced.
-    opts.(default_Names{match_idx})=Values{n};
+    % Store the Value in the output struct and mark it as replaced.
+    opts.(default_Names{match_idx}) = Values{n};
     replaced(match_idx)=true;
 end
-replaced=default_Names(replaced);
+replaced = default_Names(replaced);
 end
 function [match_idx,Names_char]=parse_NameValue__find_match(Names_char,Names_cell,name)
 % Try to match the input field to the fields of the struct.
 
 % First attempt an exact match.
-match_idx=find(ismember(Names_cell,name));
+match_idx = find(ismember(Names_cell,name));
 if numel(match_idx)==1,return,end
 
 % Only spend time building the char array if this point is reached.
-if isempty(Names_char),Names_char=parse_NameValue__name2char(Names_cell);end
+if isempty(Names_char),Names_char = parse_NameValue__name2char(Names_cell);end
 
 % Since the exact match did not return a unique match, attempt to match the start of each array.
 % Select the first part of the array. Since Names is provided by the user it might be too long.
-tmp=Names_char(:,1:min(end,numel(name)));
+tmp = Names_char(:,1:min(end,numel(name)));
+if size(tmp,2)<numel(name)
+    tmp = [tmp repmat(' ', size(tmp,1) , numel(name)-size(tmp,2) )];
+end
 
 % Find the number of non-matching characters on every row. The cumprod on the logical array is
 % to make sure that only the starting match is considered.
-non_matching=numel(name)-sum(cumprod(double(tmp==repmat(name,size(tmp,1),1)),2),2);
-match_idx=find(non_matching==0);
+non_matching = numel(name)-sum(cumprod(double(tmp==repmat(name,size(tmp,1),1)),2),2);
+match_idx = find(non_matching==0);
 end
 function Names_char=parse_NameValue__name2char(Names_char)
 % Convert a cellstr to a padded char matrix.
-len=cellfun('prodofsize',Names_char);maxlen=max(len);
+len = cellfun('prodofsize',Names_char);maxlen = max(len);
 for n=find(len<maxlen).' % Pad with spaces where needed
-    Names_char{n}((end+1):maxlen)=' ';
+    Names_char{n}((end+1):maxlen) = ' ';
 end
-Names_char=vertcat(Names_char{:});
+Names_char = vertcat(Names_char{:});
 end
 function [success,options,ME]=RegGrow_ParseInputs(varargin)
 % Parse the inputs. See top function for syntax options and defaults.
@@ -431,9 +490,9 @@ function [success,options,ME]=RegGrow_ParseInputs(varargin)
 % parameters).
 
 % Pre-assign outputs
-success=false;
-options=struct;
-ME=struct('identifier','','message','');
+success = false;
+options = struct;
+ME = struct('identifier','','message','');
 
 persistent default
 if isempty(default)
@@ -456,74 +515,76 @@ if isempty(default)
         IM = IM/max(IM(:));
     end
     
-    default.I=IM;
-    default.maxDiff=[];%dynamic default: std(I(:))
-    default.seed=[];%dynamic default: first position
-    default.nHood=[];%4 neighborhood for 2D, 6 for 3D
-    default.kernel=[];
-    default.shifts=[];%dynamic default: based on image and nHood, or kernel
-    default.overflow=[];%dynamic default: struct with .check and .volume
-    default.KeepShellVoxelsOnly=false;
-    default.waitbar=[];%dynamic default: struct with .bar (false for 2D)
-    default.silent=[];%merged into waitbar
-    default.ErrorOnWaitbarClosing=false;
+    default.I = IM;
+    default.maxDiff = [];%dynamic default: std(I(:))
+    default.seed = [];%dynamic default: first position
+    default.nHood = [];%4 neighborhood for 2D, 6 for 3D
+    default.kernel = [];
+    default.shifts = [];%dynamic default: based on image and nHood, or kernel
+    default.overflow = [];%dynamic default: struct with .check and .volume
+    default.KeepShellVoxelsOnly = false;
+    default.waitbar = [];%dynamic default: struct with .bar (false for 2D)
+    default.silent = [];%merged into waitbar
+    default.WaitbarClosingBehavior = 'ignore';
+    default.ResumeSegmentation = [];
 end
 
 if nargin==0
-    options=RegGrow_check_dynamic_defaults(default);
-    options.seed=[2 2]; % The example image on Matlab has a border.
-    success=true;
+    options = RegGrow_check_dynamic_defaults(default);
+    options.seed = [2 2]; % The example image on Matlab has a border.
+    success = true;
     return
 end
 
 % Parse the first inputs (I, maxDiff, and seed).
-counter=0;names={'I','maxDiff','seed'};
+counter = 0;names = {'I','maxDiff','seed'};
 while numel(varargin)>0 && ~(isa(varargin{1},'char') || isa(varargin{1},'struct'))
-    counter=counter+1;
-    options.(names{counter})=varargin{1};
+    counter = counter+1;
+    options.(names{counter}) = varargin{1};
     % Remove the current entry for next loop, or for parsing of the options struct or the
     % Name,Value pairs.
-    varargin(1)=[];
+    varargin(1) = [];
 end
-try ME_=[];[options,replaced]=parse_NameValue(default,options); %#ok<NASGU>
-catch ME_;if isempty(ME_),ME_=lasterror;end,ME=ME_;return,end %#ok<LERR>
+try ME_ = [];[options,replaced] = parse_NameValue(default,options); %#ok<NASGU>
+catch ME_;if isempty(ME_),ME_ = lasterror;end,ME = ME_;return,end %#ok<LERR>
 
 % Now only the Name,Value pairs or the options struct remain.
 if numel(varargin)>0
-    try ME_=[];[options,replaced2]=parse_NameValue(options,varargin{:}); %#ok<NASGU>
-    catch ME_;if isempty(ME_),ME_=lasterror;end,ME=ME_;return,end %#ok<LERR>
+    try ME_ = [];[options,replaced2] = parse_NameValue(options,varargin{:}); %#ok<NASGU>
+    catch ME_;if isempty(ME_),ME_ = lasterror;end,ME = ME_;return,end %#ok<LERR>
     
     % The Name,Value pairs or option struct might specify I, maxDiff, or seed.
-    replaced=unique([replaced;replaced2]);
+    replaced = unique([replaced;replaced2]);
 end
 
 % Loop through the replaced options in alphabetical order.
-[ignore,order]=sort(lower(replaced));replaced=replaced(order); %#ok<ASGLU>
+[ignore,order] = sort(lower(replaced));replaced = replaced(order); %#ok<ASGLU>
 for k=1:numel(replaced)
-    curr_option=replaced{k};
-    item=options.(curr_option);
-    ME.identifier=['HJW:RegGrow:incorrect_input_opt_' lower(curr_option)];
+    curr_option = replaced{k};
+    item = options.(curr_option);
+    ME.identifier = ['HJW:RegGrow:incorrect_input_opt_' lower(curr_option)];
     switch lower(curr_option)
-        %NB: If a new parameter is alphabetically before the image parameter, it can't rely on IM
-        %already being a double, so special attention is necessary for user-defined classes.
+        % NB: If a new parameter is alphabetically before the image parameter, it can't rely on IM
+        % already being a double, so special attention is necessary for user-defined classes.
         case 'i'
             try
-                item=double(item);
+                item = double(item);
             catch
-                ME.message='The image input must be convertible to a double.';
+                ME.message = 'The image input must be convertible to a double.';
                 return
             end
-            options.I=item;
+            options.I = item;
         case 'kernel'
             try
                 % If the image provided as an input, it is already loaded to the options struct.
-                IM=options.I;
-                item=logical(item);
+                IM = options.I;
+                item = logical(item);
                 if ndims(item)~=ndims(IM) || ~all(mod(size(item),2)==1)
                     disp(item(-1)) % Trigger error.
                 end
-                tmp=item;center=(size(tmp)+1)/2;center=num2cell(center);tmp(center{:})=false;
-                item(center{:})=true; % The center doesn't really affect calculation.
+                tmp = item;center = (size(tmp)+1)/2;
+                center = num2cell(center);tmp(center{:}) = false;
+                item(center{:}) = true; % The center doesn't really affect calculation.
                 if sum(tmp(:))==0
                     warning('HJW:RegGrow:CentroidOnlyKernel',...
                         ['Only the centroid of the kernel is marked as true.\n',...
@@ -534,191 +595,221 @@ for k=1:numel(replaced)
                     % is omitted.
                 end
             catch
-                ME.message=['The kernel input must a logical with ndims(IM) dimensions.',...
+                ME.message = ['The kernel input must a logical with ndims(IM) dimensions.',...
                     char(10),'Each dimension must be an odd length.']; %#ok<CHARTEN>
                 return
             end
-            options.kernel=item;
+            options.kernel = item;
         case 'maxdiff'
-            try item=double(item);catch,end % An error here will trigger an error on the next line.
+            try item = double(item);catch,end % An error here will trigger an error on the next line.
             if ~isa(item,'double') || numel(item)~=1 || item<0 || isnan(item)
-                ME.message=['The maxDiff input must be a non-negative numeric scalar.',char(10),...
+                ME.message = ['The maxDiff input must be a non-negative numeric scalar.',char(10),...
                     'It must also be convertible to a double.']; %#ok<CHARTEN>
                 return
             end
-            options.maxDiff=item;
+            options.maxDiff = item;
         case 'nhood'
             % Skip if kernel or shifts is set.
             if any(ismember(lower(replaced),{'kernel','shifts'}))
                 continue
             end
             % If the image provided as an input, it is already loaded to the options struct.
-            IM=options.I;
+            IM = options.I;
             
-            msg=['The nHood parameter must be either the maximal or minimal value, ',...
+            msg = ['The nHood parameter must be either the maximal or minimal value, ',...
                 char(10),'so 4 or 8 for 2D images, 6 or 26 for 3D images, etc.',char(10),...
                 'This parameter must be set if the kernel parameter is not set.']; %#ok<CHARTEN>
             % These tests will not trigger an error if this parameter is set to an empty array.
             try
-                dims=ndims(IM);
-                if numel(item)>1,item=0;end
-                item=double(item);
+                dims = ndims(IM);
+                if numel(item)>1,item = 0;end
+                item = double(item);
                 if ~ismember(item,[3^dims-1 2*dims]) % Maximal and minimal.
-                    ME.message=msg;
+                    ME.message = msg;
                     return
                 end
             catch
-                ME.message=msg;
+                ME.message = msg;
                 return
             end
-            options.nHood=item;
+            options.nHood = item;
         case 'overflow'
-            if ~isempty(item) && ( ~isnumeric(item) || numel(item)>1 || abs(item-round(item))>eps)
-                ME.message='The overflow volume must be empty, or a numeric scalar integer.';
+            if isequal([],item),item = inf;end
+            trigger = false;
+            if ~isempty(item) && ( ~isnumeric(item) || numel(item)~=1 )
+                trigger = true;
+            elseif item<=1 && item>0
+                % If the image provided as an input, it is already loaded to the options struct.
+                IM = options.I;
+                item = ceil(item*numel(IM));
+            end
+            if ~trigger && ~isempty(item) && abs(item-round(item))>eps
+                % Only check if the overflow is an integer if the test didn't fail yet.
+                trigger = true;
+            end
+            if trigger
+                ME.message = 'The overflow parameter must be a numeric scalar integer or 0-1.';
                 return
             end
-            options.overflow=item;
+            options.overflow = item;
+        case 'resumesegmentation'
+            % If the image provided as an input, it is already loaded to the options struct.
+            if ~isa(item,'logical') || ~isequal(size(options.I),size(item)) || nnz(item)<1
+                ME.message = [...
+                    'ResumeSegmentation should be a logical of the same size as the image.' ...
+                    char(10) 'Additionally, at least 1 element should be true.']; %#ok<CHARTEN>
+                return
+            end
+            options.ResumeSegmentation = item;
         case 'seed'
             % If the image provided as an input, it is already loaded to the options struct.
-            IM=options.I;
-            msg='The seed must be a vector with a valid position.';
+            IM = options.I;
+            msg = 'The seed must be a vector with a valid position.';
             try
                 if numel(item)~=ndims(IM)
-                    ME.message=msg;
+                    ME.message = msg;
                     return
                 end
-                seed=item(:)';
-                seed_=num2cell(seed);
-                val=IM(seed_{:});%#ok<NASGU>
+                seed = item(:)';seed = num2cell(seed);val = IM(seed{:});%#ok<NASGU>
                 % If this worked the seed must be a valid vector.
             catch
-                ME.message=msg;
+                ME.message = msg;
                 return
             end
-            ME.message='';
-            options.seed=seed;
+            ME.message = '';
+            options.seed = item;
         case {'waitbar','silent'} % Same parameter, two names.
-            [passed,item]=test_if_scalar_logical(item);
+            [passed,item] = test_if_scalar_logical(item);
             if ~passed
-                ME.message='waitbar must be a logical scalar.';
+                ME.message = 'waitbar must be a logical scalar.';
                 return
             end
             % Invert if 'silent' was entered.
-            if strcmpi(curr_option,'silent'),item= ~item;end
-            options.waitbar=item;
+            if strcmpi(curr_option,'silent'),item = ~item;end
+            options.waitbar = item;
         case 'shifts'
-            options.shifts=item; % Undocumented, don't do any checks.
+            options.shifts = item; % Undocumented, don't do any checks.
         case 'waitbarclosingbehavior'
-            s=struct('warning',0,'error',0,'return',0,'ignore',0);
-            [ignore,item]=parse_NameValue(s,{item,true}); %#ok<ASGLU> 
-            if ~passed
-                ME.message=['WaitbarClosingBehavior must be one of these:' char(10),...
-                    '''warning'', ''error'', ''return'', or ''ignore''.']; %#ok<CHARTEN> 
+            AllowedChoices = {'warning','error','return','ignore'};
+            item = parse_NameValue_option(AllowedChoices,item);
+            if isempty(item)
+                ME.message = ['WaitbarClosingBehavior must be one of these:' char(10),...
+                    '''warning'', ''error'', ''return'', or ''ignore''.']; %#ok<CHARTEN>
                 return
             end
-            options.WaitbarClosingBehavior=item;
+            options.WaitbarClosingBehavior = item;
     end
 end
 
 % Set the success flag and check the dynamic defaults before returning.
-success=true;
-options=RegGrow_check_dynamic_defaults(options);
+success = true;
+options = RegGrow_check_dynamic_defaults(options);
 end
 function options=RegGrow_check_dynamic_defaults(options)
 % Set the dynamic defaults if the options were not set.
 if isempty(options.seed)
     % Create a vector of ones.
-    s=ones(ndims(options.I),1);
-    options.seed=s;
+    s = ones(ndims(options.I),1);
+    options.seed = s;
 end
 if isempty(options.maxDiff)
-    options.maxDiff=2/3*std(options.I(:));
+    options.maxDiff = 2/3*std(options.I(:));
 end
 
 if ~isempty(options.shifts) % Override both kernel and nHood inputs.
     % Construct the kernel from the shifts variable.
-    shifts=options.shifts;
-    sz=max(abs(shifts(:)));
-    SE=zeros( (1+2*sz)*ones(1,size(shifts,2)) );
-    shifts=shifts+sz+1;
-    shifts=mat2cell(shifts,size(shifts,1),ones(1,size(shifts,2)));
-    ind=sub2ind(size(SE),shifts{:});
-    SE(ind)=1;SE=logical(SE);
-    options.kernel=SE;
+    shifts = options.shifts;
+    sz = max(abs(shifts(:)));
+    SE = zeros( (1+2*sz)*ones(1,size(shifts,2)) );
+    shifts = shifts+sz+1;
+    shifts = mat2cell(shifts,size(shifts,1),ones(1,size(shifts,2)));
+    ind = sub2ind(size(SE),shifts{:});
+    SE(ind) = 1;SE = logical(SE);
+    options.kernel = SE;
 end
 if isempty(options.kernel)
-    nHood=options.nHood;
+    nHood = options.nHood;
     % Set default if missing (minimal connectivity).
     if isempty(nHood)
-        nHood=2*ndims(options.I);
+        nHood = 2*ndims(options.I);
     end
-    dims=ndims(options.I);
+    dims = ndims(options.I);
     if nHood==(2*dims) %Minimal
         % Create a sphere with r=1.
-        XYZ=cell(dims,1);
-        [XYZ{:}]=ndgrid(-1:1);
-        XYZ=cat(dims+1,XYZ{:});
-        XYZ=sqrt(sum(XYZ.^2,dims+1));
-        SE=XYZ<=1;
+        XYZ = cell(dims,1);
+        [XYZ{:}] = ndgrid(-1:1);
+        XYZ = cat(dims+1,XYZ{:});
+        XYZ = sqrt(sum(XYZ.^2,dims+1));
+        SE = XYZ<=1;
     elseif nHood==(3^dims-1) %Maximal
-        SE=logical(ones(3*ones(1,dims))); %#ok<LOGL>
+        SE = logical(ones(3*ones(1,dims))); %#ok<LOGL>
         % The doc for conndef describes this as ones(repmat(3,1,NUM_DIMS)).
     end
-    options.kernel=SE;
+    options.kernel = SE;
 end
-val=options.overflow;
-if isempty(val) || isnan(val) || isinf(val)
-    options.overflow=struct('check',false,'volume',inf);
+val = options.overflow;
+if isempty(val) || isnan(val) || isinf(val) || isequal(val,false)
+    options.overflow = struct('check',false,'volume',inf);
 else
-    options.overflow=struct('check',true,'volume',val);
+    options.overflow = struct('check',true,'volume',val);
 end
 if isempty(options.waitbar)
-    options.waitbar= ndims(options.I)>2 ; %#ok<ISMAT>
+    options.waitbar =  ndims(options.I)>2 ; %#ok<ISMAT>
 end
-options.waitbar=struct('bar',options.waitbar,'max',min(numel(options.I),options.overflow.volume));
+options.waitbar = struct('bar',options.waitbar,'max',min(numel(options.I),options.overflow.volume));
 end
 function [isLogical,val]=test_if_scalar_logical(val)
 %Test if the input is a scalar logical or convertible to it.
-%The char and string test are not case sensitive.
-%(use the first output to trigger an input error, use the second as the parsed input)
+% The char and string test are not case sensitive.
+% (use the first output to trigger an input error, use the second as the parsed input)
 %
-% Allowed values:
-%- true or false
-%- 1 or 0
-%- 'on' or 'off'
-%- "on" or "off"
-%- matlab.lang.OnOffSwitchState.on or matlab.lang.OnOffSwitchState.off
-%- 'enable' or 'disable'
-%- 'enabled' or 'disabled'
+%  Allowed values:
+% - true or false
+% - 1 or 0
+% - 'on' or 'off'
+% - "on" or "off"
+% - matlab.lang.OnOffSwitchState.on or matlab.lang.OnOffSwitchState.off
+% - 'enable' or 'disable'
+% - 'enabled' or 'disabled'
 persistent states
 if isempty(states)
-    states={true,false;...
+    states = {...
+        true,false;...
         1,0;...
         'on','off';...
         'enable','disable';...
         'enabled','disabled'};
-    if ifversion('>=','R2016b','<',0)
-        states(end+1,:)={string('on'),string('off')}; %#ok<STRQUOT>
+    % We don't need string here, as that will be converted to char.
+end
+
+% Treat this special case.
+if isa(val,'matlab.lang.OnOffSwitchState')
+    isLogical = true;val = logical(val);return
+end
+
+% Convert a scalar string to char and return an error state for non-scalar strings.
+if isa(val,'string')
+    if numel(val)~=1,isLogical = false;return
+    else            ,val = char(val);
     end
 end
-isLogical=true;
-try
-    if isa(val,'char') || isa(val,'string')
-        try val=lower(val);catch,end
-    end
-    for n=1:size(states,1)
-        for m=1:2
-            if isequal(val,states{n,m})
-                val=states{1,m};return
-            end
+
+% Convert char/string to lower case.
+if isa(val,'char'),val = lower(val);end
+
+% Loop through all possible options.
+for n=1:size(states,1)
+    for m=1:2
+        if isequal(val,states{n,m})
+            isLogical = true;
+            val = states{1,m};
+            return
         end
     end
-    if isa(val,'matlab.lang.OnOffSwitchState')
-        val=logical(val);return
-    end
-catch
 end
-isLogical=false;
+
+% Apparently there wasn't any match, so return the error state.
+isLogical = false;
 end
 function varargout=var2str(varargin)
 %Analogous to func2str, return the variable names as char arrays, as detected by inputname
@@ -730,15 +821,16 @@ function varargout=var2str(varargin)
 %   [out{:}]=var2str(foo,bar);
 
 % One-line alternative: function out=var2str(varargin),out=inputname(1);end
-err_flag= nargin~=max(1,nargout) ;
+err_flag = nargin~=max(1,nargout) ;
 if ~err_flag
-    varargout=cell(nargin,1);
+    varargout = cell(nargin,1);
     for n=1:nargin
-        try varargout{n}=inputname(n);catch,varargout{n}='';end
-        if isempty(varargout{n}),err_flag=true;break,end
+        try varargout{n} = inputname(n);catch,varargout{n} = '';end
+        if isempty(varargout{n}),err_flag = true;break,end
     end
 end
 if err_flag
     error('Invalid input and/or output.')
 end
 end
+

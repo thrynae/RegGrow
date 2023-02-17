@@ -8,3 +8,5 @@ This is slower than a mex implementation would be, but this should be compatible
 An HTML doc with examples is included. A tester function is also included.
 
 Licence: CC by-nc-sa 4.0
+
+[![Example](https://github.com/thrynae/RegGrow/raw/master/html/RegGrow_show_default.png)]
